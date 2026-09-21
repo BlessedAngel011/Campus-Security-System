@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="theme-color"
+        content="#062d63">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}">
+
+    <title>Login | UFH Campus Security</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            background: #f4f7fb;
+        }
+
+        .login-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+        }
+
+
+        /* =============================================
+           LEFT SIDE
+        ============================================== */
+
+        .visual-side {
+            position: relative;
+
+            min-height: 100vh;
+
+            background-image:
+                linear-gradient(
+                    135deg,
+                    rgba(2,29,66,0.97),
+                    rgba(4,51,110,0.88),
+                    rgba(5,72,145,0.65)
+                ),
+                url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+            background-size: cover;
+            background-position: center;
+
+            padding: 45px 55px;
+
+            display: flex;
+            flex-direction: column;
+
+            color: white;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-box {
+            background: white;
+
+            padding: 9px 13px;
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-box img {
+            width: 105px;
+            display: block;
+        }
+
+        .brand-divider {
+            width: 1px;
+            height: 55px;
+
+            background:
+                rgba(255,255,255,.35);
+        }
+
+        .brand-text h2 {
+            font-size: 20px;
+            line-height: 1.3;
+        }
+
+        .brand-text p {
+            margin-top: 5px;
+
+            color: #dce9f8;
+
+            font-size: 14px;
+        }
+
+        .hero-content {
+            margin-top: auto;
+            margin-bottom: auto;
+
+            max-width: 620px;
+        }
+
+        .campus-label {
+            display: inline-block;
+
+            padding: 8px 14px;
+
+            margin-bottom: 20px;
+
+            border-radius: 30px;
+
+            background:
+                rgba(255,255,255,.13);
+
+            border:
+                1px solid
+                rgba(255,255,255,.20);
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            letter-spacing: .6px;
+        }
+
+        .hero-content h1 {
+            font-size: 54px;
+
+            line-height: 1.08;
+
+            letter-spacing: -1px;
+        }
+
+        .hero-content h1 span {
+            color: #f6c62d;
+        }
+
+        .hero-content > p {
+            margin-top: 20px;
+
+            color: #e3edf9;
+
+            font-size: 17px;
+
+            line-height: 1.7;
+
+            max-width: 570px;
+        }
+
+        .role-tags {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-top: 30px;
+        }
+
+        .role-tag {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 10px 14px;
+
+            border-radius: 9px;
+
+            background:
+                rgba(255,255,255,.12);
+
+            border:
+                1px solid
+                rgba(255,255,255,.18);
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+        .role-dot {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #f6c62d;
+        }
+
+        .left-footer {
+            color: #d4e2f2;
+            font-size: 12px;
+        }
+
+
+        /* =============================================
+           RIGHT SIDE
+        ============================================== */
+
+        .form-side {
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 50px;
+
+            background: white;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .mobile-logo {
+            display: none;
+
+            margin-bottom: 30px;
+        }
+
+        .mobile-logo img {
+            width: 115px;
+        }
+
+        .small-heading {
+            color: #0751a8;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+        }
+
+        .login-container h1 {
+            margin-top: 10px;
+
+            color: #062d63;
+
+            font-size: 38px;
+
+            letter-spacing: -.5px;
+        }
+
+        .subtitle {
+            margin-top: 10px;
+
+            margin-bottom: 30px;
+
+            color: #718096;
+
+            font-size: 15px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =============================================
+           MESSAGES
+        ============================================== */
+
+        .message {
+            margin-bottom: 20px;
+
+            padding: 13px 15px;
+
+            border-radius: 8px;
+
+            background: #fff1f2;
+
+            border: 1px solid #fecdd3;
+
+            color: #b42318;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        .success-message {
+            display: flex;
+
+            align-items: flex-start;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+            padding: 13px 15px;
+
+            border-radius: 8px;
+
+            background: #ecfdf3;
+
+            border: 1px solid #b7ebc6;
+
+            color: #157540;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        .success-message svg {
+            width: 19px;
+            height: 19px;
+
+            flex-shrink: 0;
+
+            margin-top: 1px;
+        }
+
+
+        /* =============================================
+           FORM
+        ============================================== */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #19385f;
+
+            font-size: 14px;
+
+            font-weight: bold;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+
+            left: 15px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            width: 20px;
+
+            height: 20px;
+
+            color: #718096;
+
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+
+            height: 52px;
+
+            padding:
+                0 15px 0 48px;
+
+            border:
+                1px solid #ccd7e4;
+
+            border-radius: 9px;
+
+            background: white;
+
+            color: #10284f;
+
+            font-size: 15px;
+
+            transition: .2s;
+        }
+
+        .form-control::placeholder {
+            color: #9aa8b8;
+        }
+
+        .form-control:focus {
+            outline: none;
+
+            border-color: #0751a8;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(7,81,168,.10);
+        }
+
+        .password-input {
+            padding-right: 50px;
+        }
+
+        .password-toggle {
+            position: absolute;
+
+            right: 13px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            cursor: pointer;
+
+            color: #718096;
+
+            padding: 6px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+
+        /* =============================================
+           LOGIN BUTTON
+        ============================================== */
+
+        .login-btn {
+            width: 100%;
+
+            height: 52px;
+
+            margin-top: 7px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0751a8,
+                    #062d63
+                );
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 8px 18px
+                rgba(6,45,99,.18);
+
+            transition: .2s;
+        }
+
+        .login-btn:hover {
+            transform:
+                translateY(-1px);
+
+            box-shadow:
+                0 11px 24px
+                rgba(6,45,99,.25);
+        }
+
+        .login-btn:active {
+            transform:
+                translateY(0);
+        }
+
+
+        /* =============================================
+           CREATE ACCOUNT
+        ============================================== */
+
+        .create-account {
+            margin-top: 23px;
+
+            padding: 18px;
+
+            background: #f7faff;
+
+            border:
+                1px solid #dce7f4;
+
+            border-radius: 11px;
+
+            text-align: center;
+        }
+
+        .create-account p {
+            margin-bottom: 11px;
+
+            color: #687b91;
+
+            font-size: 13px;
+        }
+
+        .create-account-btn {
+            width: 100%;
+
+            min-height: 48px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 9px;
+
+            border:
+                1px solid #0751a8;
+
+            border-radius: 9px;
+
+            background: white;
+
+            color: #0751a8;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            transition: .2s;
+        }
+
+        .create-account-btn svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .create-account-btn:hover {
+            background: #0751a8;
+
+            color: white;
+
+            transform:
+                translateY(-1px);
+
+            box-shadow:
+                0 7px 16px
+                rgba(7,81,168,.15);
+        }
+
+
+        /* =============================================
+           BOTTOM
+        ============================================== */
+
+        .back-home {
+            margin-top: 22px;
+
+            text-align: center;
+        }
+
+        .back-home a {
+            color: #0751a8;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            text-decoration: none;
+        }
+
+        .back-home a:hover {
+            text-decoration: underline;
+        }
+
+        .security-note {
+            margin-top: 30px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid #e6ebf1;
+
+            color: #8795a8;
+
+            text-align: center;
+
+            font-size: 12px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =============================================
+           RESPONSIVE
+        ============================================== */
+
+        @media(max-width: 950px) {
+
+            .login-page {
+                grid-template-columns: 1fr;
+            }
+
+            .visual-side {
+                display: none;
+            }
+
+            .form-side {
+                min-height: 100vh;
+
+                padding: 35px 25px;
+            }
+
+            .mobile-logo {
+                display: block;
+            }
+
+        }
+
+        @media(max-width: 500px) {
+
+            .form-side {
+                padding: 30px 20px;
+            }
+
+            .login-container h1 {
+                font-size: 32px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="login-page">
+
+
+    <!-- =============================================
+         LEFT SIDE
+    ============================================== -->
+
+    <section class="visual-side">
+
+        <div class="brand">
+
+            <div class="logo-box">
+
+                <img
+                    src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                    alt="University of Fort Hare Logo">
+
+            </div>
+
+
+            <div class="brand-divider"></div>
+
+
+            <div class="brand-text">
+
+                <h2>
+                    Campus Security<br>
+                    Management System
+                </h2>
+
+                <p>
+                    Alice Campus
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-content">
+
+            <div class="campus-label">
+                UNIVERSITY OF FORT HARE • ALICE CAMPUS
+            </div>
+
+
+            <h1>
+                Campus Safety.<br>
+
+                <span>
+                    One Secure System.
+                </span>
+            </h1>
+
+
+            <p>
+                Secure access for students,
+                security personnel and administrators.
+
+                Sign in to access the services
+                available for your system role.
+            </p>
+
+
+            <div class="role-tags">
+
+                <div class="role-tag">
+
+                    <span class="role-dot"></span>
+
+                    Student
+
+                </div>
+
+
+                <div class="role-tag">
+
+                    <span class="role-dot"></span>
+
+                    Security Officer
+
+                </div>
+
+
+                <div class="role-tag">
+
+                    <span class="role-dot"></span>
+
+                    Administrator
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="left-footer">
+            University of Fort Hare
+            • Campus Security Management System
+        </div>
+
+    </section>
+
+
+
+    <!-- =============================================
+         RIGHT SIDE
+    ============================================== -->
+
+    <section class="form-side">
+
+        <div class="login-container">
+
+
+            <div class="mobile-logo">
+
+                <img
+                    src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                    alt="University of Fort Hare Logo">
+
+            </div>
+
+
+            <div class="small-heading">
+                Secure System Access
+            </div>
+
+
+            <h1>
+                Welcome Back
+            </h1>
+
+
+            <p class="subtitle">
+                Enter your account details to access the
+                UFH Campus Security Management System.
+            </p>
+
+
+
+            <!-- =========================================
+                 SUCCESSFUL REGISTRATION
+            ========================================== -->
+
+            {% if success %}
+
+                <div class="success-message">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="10">
+                        </circle>
+
+                        <path d="M8 12l3 3 5-6"></path>
+
+                    </svg>
+
+                    <div>
+                        {{ success }}
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+
+            <!-- =========================================
+                 LOGIN ERROR
+            ========================================== -->
+
+            {% if error %}
+
+                <div class="message">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+
+
+            <!-- =========================================
+                 LOGIN FORM
+            ========================================== -->
+
+            <form
+                method="POST"
+                action="{{ url_for('login') }}">
+
+
+                <!-- USERNAME -->
+
+                <div class="form-group">
+
+                    <label for="username">
+                        Username
+                    </label>
+
+
+                    <div class="input-wrapper">
+
+                        <svg
+                            class="input-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+
+                            <circle
+                                cx="12"
+                                cy="7"
+                                r="4">
+                            </circle>
+
+                            <path
+                                d="M20 21a8 8 0 0 0-16 0">
+                            </path>
+
+                        </svg>
+
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            class="form-control"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            required>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+
+                    <div class="input-wrapper">
+
+                        <svg
+                            class="input-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+
+                            <rect
+                                x="3"
+                                y="11"
+                                width="18"
+                                height="10"
+                                rx="2">
+                            </rect>
+
+                            <path
+                                d="M7 11V7a5 5 0 0 1 10 0v4">
+                            </path>
+
+                        </svg>
+
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-control password-input"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required>
+
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            onclick="togglePassword()"
+                            aria-label="Show or hide password">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+
+                                <path
+                                    d="M2 12s3.5-7 10-7
+                                    10 7 10 7
+                                    -3.5 7-10 7
+                                    S2 12 2 12">
+                                </path>
+
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="3">
+                                </circle>
+
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <div style="text-align:right; margin:-2px 0 18px;">
+                    <a
+                        href="{{ url_for('forgot_password') }}"
+                        style="color:#0751a8; font-size:13px; font-weight:700; text-decoration:none;"
+                    >
+                        Forgot Password?
+                    </a>
+                </div>
+
+
+                <!-- SIGN IN -->
+
+                <button
+                    type="submit"
+                    class="login-btn">
+
+                    Sign In
+
+                </button>
+
+            </form>
+
+
+
+            <!-- =========================================
+                 CREATE ACCOUNT
+            ========================================== -->
+
+            <div class="create-account">
+
+                <p>
+                    New student? Create an account to access
+                    campus security services.
+                </p>
+
+
+                <a
+                    href="{{ url_for('register') }}"
+                    class="create-account-btn">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+
+                        <path
+                            d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2">
+                        </path>
+
+                        <circle
+                            cx="9"
+                            cy="7"
+                            r="4">
+                        </circle>
+
+                        <path d="M19 8v6"></path>
+
+                        <path d="M22 11h-6"></path>
+
+                    </svg>
+
+                    Create Student Account
+
+                </a>
+
+            </div>
+
+
+
+            <!-- BACK HOME -->
+
+            <div class="back-home">
+
+                <a href="{{ url_for('home') }}">
+                    ← Back to Home
+                </a>
+
+            </div>
+
+
+
+            <!-- SECURITY NOTE -->
+
+            <div class="security-note">
+
+                Student accounts can be created through
+                self-registration.
+
+                <br>
+
+                Security Officer and Administrator accounts
+                are managed by authorised administrators.
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+
+<script>
+
+    /* ==========================================
+       SHOW / HIDE PASSWORD
+    ========================================== */
+
+    function togglePassword() {
+
+        const password =
+            document.getElementById("password");
+
+
+        if (password.type === "password") {
+
+            password.type = "text";
+
+        } else {
+
+            password.type = "password";
+
+        }
+
+    }
+
+
+    /* ==========================================
+       REGISTER PWA SERVICE WORKER
+    ========================================== */
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker
+                    .register("/static/service-worker.js")
+                    .then(function (registration) {
+
+                        console.log(
+                            "Service Worker registered successfully.",
+                            registration
+                        );
+
+                    })
+                    .catch(function (error) {
+
+                        console.error(
+                            "Service Worker registration failed:",
+                            error
+                        );
+
+                    });
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

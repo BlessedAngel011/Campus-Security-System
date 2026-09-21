@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#062d63">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UFH Security">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="{{ url_for('static_files', filename='icon-192.png') }}"
+    >
+
+    <title>Student Dashboard | UFH Security</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           DESKTOP
+        ===================================================== */
+
+        .desktop-app {
+            display: block;
+        }
+
+        .topbar {
+            min-height: 96px;
+            padding: 10px 50px;
+
+            background: white;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            border-bottom: 1px solid #e4eaf2;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ufh-logo {
+            width: 90px;
+            height: auto;
+        }
+
+        .divider {
+            width: 1px;
+            height: 55px;
+            background: #d8dee8;
+        }
+
+        .brand-text h1 {
+            color: #062d63;
+            font-size: 22px;
+        }
+
+        .brand-text p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .role-pill {
+            padding: 9px 14px;
+
+            background: #eef5ff;
+            color: #0751a8;
+
+            border-radius: 30px;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .logout {
+            padding: 13px 22px;
+
+            background: #062d63;
+            color: white;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* DESKTOP HERO */
+
+        .desktop-hero {
+            min-height: 500px;
+
+            background-image:
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98),
+                    rgba(4,45,98,0.92) 42%,
+                    rgba(4,57,120,0.55) 72%,
+                    rgba(3,46,98,0.30)
+                ),
+                url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+            background-size: cover;
+            background-position: center;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-hero-inner {
+            width: 100%;
+            max-width: 1450px;
+
+            margin: auto;
+            padding: 45px 55px;
+        }
+
+        .desktop-label {
+            display: inline-block;
+
+            padding: 8px 14px;
+
+            border-radius: 30px;
+
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.17);
+
+            color: white;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            margin-bottom: 20px;
+        }
+
+        .desktop-hero h2 {
+            color: white;
+
+            font-size: 48px;
+            line-height: 1.08;
+        }
+
+        .desktop-hero h2 span {
+            display: block;
+
+            margin-top: 5px;
+
+            color: #ffc928;
+        }
+
+        .desktop-description {
+            max-width: 700px;
+
+            margin-top: 20px;
+
+            color: #f0f5fb;
+
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .desktop-actions {
+            max-width: 740px;
+            margin-top: 30px;
+        }
+
+        .desktop-report {
+            width: 100%;
+
+            min-height: 60px;
+
+            padding: 16px 22px;
+
+            background: white;
+            color: #0751a8;
+
+            border-radius: 12px;
+
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: bold;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        .desktop-report svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .desktop-sos {
+            width: 100%;
+
+            min-height: 95px;
+
+            margin-top: 20px;
+            padding: 18px 24px;
+
+            border: 4px solid #ff7180;
+            border-radius: 16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3545,
+                    #e80d21
+                );
+
+            color: white;
+            text-decoration: none;
+
+            display: flex;
+            align-items: center;
+
+            box-shadow:
+                0 0 0 5px rgba(255,38,57,0.12),
+                0 0 25px rgba(255,38,57,0.40),
+                0 12px 28px rgba(0,0,0,0.20);
+        }
+
+        .desktop-sos-icon {
+            width: 65px;
+
+            margin-right: 20px;
+
+            border-right:
+                1px solid rgba(255,255,255,0.45);
+        }
+
+        .desktop-sos-icon svg {
+            width: 43px;
+            height: 43px;
+        }
+
+        .desktop-sos-text {
+            flex: 1;
+        }
+
+        .desktop-sos-text strong {
+            display: block;
+            font-size: 25px;
+        }
+
+        .desktop-sos-text span {
+            display: block;
+
+            margin-top: 5px;
+
+            color: #fff1f2;
+            font-size: 13px;
+        }
+
+
+        /* DESKTOP CONTENT */
+
+        .desktop-main {
+            max-width: 1450px;
+
+            margin: auto;
+            padding: 45px 55px;
+        }
+
+        .section-heading h2 {
+            color: #062d63;
+            font-size: 29px;
+        }
+
+        .section-heading p {
+            margin-top: 8px;
+
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        .quick-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 22px;
+
+            margin-top: 25px;
+        }
+
+        .quick-card {
+            padding: 27px;
+
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-radius: 15px;
+
+            text-decoration: none;
+            color: inherit;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.07);
+        }
+
+        .quick-icon {
+            width: 60px;
+            height: 60px;
+
+            margin-bottom: 18px;
+
+            border-radius: 15px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .quick-card h3 {
+            color: #092d61;
+            font-size: 19px;
+        }
+
+        .quick-card p {
+            margin-top: 9px;
+
+            color: #687b91;
+
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .recent-desktop {
+            margin-top: 45px;
+        }
+
+        .recent-card {
+            margin-top: 20px;
+            padding: 28px;
+
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-radius: 16px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.06);
+        }
+
+        .recent-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+        .recent-top h3 {
+            color: #092d61;
+        }
+
+        .recent-top a {
+            color: #0751a8;
+
+            font-size: 14px;
+            font-weight: bold;
+
+            text-decoration: none;
+        }
+
+        .report-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap: 15px;
+        }
+
+        .info-box {
+            padding: 15px;
+
+            background: #f7f9fc;
+
+            border-radius: 10px;
+        }
+
+        .info-label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #8795a8;
+
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: #17375e;
+
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+
+            padding: 6px 10px;
+
+            border-radius: 30px;
+
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .high {
+            background: #fde5e7;
+            color: #c71927;
+        }
+
+        .medium {
+            background: #fff2cb;
+            color: #a66b00;
+        }
+
+        .low {
+            background: #e6f4ff;
+            color: #0751a8;
+        }
+
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .progress {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .resolved {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .empty-report {
+            padding: 25px;
+
+            text-align: center;
+
+            color: #718096;
+        }
+
+        .desktop-footer {
+            padding: 22px 50px;
+
+            background: #05295d;
+
+            color: white;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+        .desktop-footer p {
+            margin-top: 5px;
+            color: #d6e0ed;
+        }
+
+
+        /* =====================================================
+           MOBILE APP
+        ===================================================== */
+
+        .mobile-app {
+            display: none;
+        }
+
+
+        @media(max-width: 750px) {
+
+            .desktop-app {
+                display: none;
+            }
+
+            body {
+                padding-bottom:
+                    calc(
+                        82px +
+                        env(safe-area-inset-bottom)
+                    );
+            }
+
+            .mobile-app {
+                display: block;
+                min-height: 100vh;
+            }
+
+
+            /* MOBILE HERO */
+
+            .mobile-hero {
+                position: relative;
+
+                min-height: 405px;
+
+                overflow: hidden;
+
+                border-radius:
+                    0 0 35px 35px;
+
+                background-image:
+                    linear-gradient(
+                        155deg,
+                        rgba(2,29,66,0.98),
+                        rgba(4,44,94,0.94) 52%,
+                        rgba(4,75,143,0.76)
+                    ),
+                    url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+                background-size: cover;
+                background-position: center;
+            }
+
+
+            /* APP HEADER */
+
+            .app-header {
+                padding:
+                    calc(
+                        15px +
+                        env(safe-area-inset-top)
+                    )
+                    20px
+                    10px;
+
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .app-brand {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .app-logo {
+                width: 53px;
+                height: 53px;
+
+                border-radius: 15px;
+
+                background: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 6px 20px rgba(0,0,0,0.16);
+            }
+
+            .app-logo img {
+                width: 44px;
+                height: 44px;
+                object-fit: contain;
+            }
+
+            .app-brand-text strong {
+                display: block;
+
+                color: white;
+
+                font-size: 17px;
+            }
+
+            .app-brand-text span {
+                display: block;
+
+                margin-top: 4px;
+
+                color: rgba(255,255,255,0.72);
+
+                font-size: 11px;
+            }
+
+
+            /* THIS IS THE FIXED ACCOUNT BUTTON */
+
+            .mobile-profile-button {
+                width: 44px;
+                height: 44px;
+
+                border-radius: 50%;
+
+                background:
+                    rgba(255,255,255,0.14);
+
+                border:
+                    1px solid
+                    rgba(255,255,255,0.22);
+
+                color: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                text-decoration: none;
+            }
+
+            .mobile-profile-button svg {
+                width: 22px;
+                height: 22px;
+            }
+
+
+            /* GREETING */
+
+            .mobile-greeting {
+                padding:
+                    25px
+                    20px
+                    20px;
+            }
+
+            .mobile-label {
+                color: #ffc928;
+
+                font-size: 11px;
+                font-weight: 800;
+
+                letter-spacing: 1px;
+            }
+
+            .mobile-greeting h1 {
+                margin-top: 8px;
+
+                color: white;
+
+                font-size: 31px;
+                line-height: 1.15;
+            }
+
+            .mobile-greeting p {
+                margin-top: 9px;
+
+                max-width: 330px;
+
+                color:
+                    rgba(255,255,255,0.80);
+
+                font-size: 12px;
+                line-height: 1.5;
+            }
+
+
+            /* MOBILE SOS */
+
+            .mobile-sos {
+                margin:
+                    17px
+                    17px
+                    0;
+
+                min-height: 92px;
+
+                padding: 15px;
+
+                border:
+                    3px solid #ff7180;
+
+                border-radius: 20px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #ff3545,
+                        #ed1c32 50%,
+                        #d90429
+                    );
+
+                color: white;
+
+                text-decoration: none;
+
+                display: flex;
+                align-items: center;
+                gap: 13px;
+
+                box-shadow:
+                    0 10px 25px
+                    rgba(217,4,41,0.28);
+            }
+
+            .mobile-sos-icon {
+                width: 56px;
+                height: 56px;
+
+                min-width: 56px;
+
+                border-radius: 16px;
+
+                background:
+                    rgba(255,255,255,0.14);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-sos-icon svg {
+                width: 31px;
+                height: 31px;
+            }
+
+            .mobile-sos-text {
+                flex: 1;
+            }
+
+            .mobile-sos-text strong {
+                display: block;
+
+                font-size: 14px;
+            }
+
+            .mobile-sos-text span {
+                display: block;
+
+                margin-top: 4px;
+
+                color: #fff0f2;
+
+                font-size: 9px;
+            }
+
+            .mobile-sos-arrow {
+                width: 20px;
+                height: 20px;
+            }
+
+
+            /* MOBILE CONTENT */
+
+            .mobile-content {
+                padding:
+                    23px
+                    17px
+                    30px;
+            }
+
+            .mobile-section-title {
+                margin:
+                    0
+                    3px
+                    12px;
+            }
+
+            .mobile-section-title h2 {
+                color: #062d63;
+
+                font-size: 18px;
+            }
+
+            .mobile-section-title p {
+                margin-top: 4px;
+
+                color: #8190a2;
+
+                font-size: 10px;
+            }
+
+
+            /* QUICK ACTIONS */
+
+            .mobile-grid {
+                display: grid;
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+                gap: 11px;
+            }
+
+            .mobile-action {
+                min-height: 132px;
+
+                padding: 16px;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 19px;
+
+                background: white;
+
+                color: inherit;
+
+                text-decoration: none;
+
+                box-shadow:
+                    0 6px 18px
+                    rgba(20,45,80,0.06);
+            }
+
+            .mobile-action:last-child {
+                grid-column: 1 / -1;
+                min-height: 105px;
+            }
+
+            .mobile-action-icon {
+                width: 45px;
+                height: 45px;
+
+                margin-bottom: 12px;
+
+                border-radius: 13px;
+
+                background: #eaf3ff;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-action-icon svg {
+                width: 23px;
+                height: 23px;
+            }
+
+            .mobile-action h3 {
+                color: #062d63;
+
+                font-size: 12px;
+            }
+
+            .mobile-action p {
+                margin-top: 5px;
+
+                color: #8391a2;
+
+                font-size: 9px;
+                line-height: 1.45;
+            }
+
+
+            /* MOBILE RECENT */
+
+            .mobile-recent-section {
+                margin-top: 25px;
+            }
+
+            .mobile-recent {
+                padding: 17px;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 20px;
+
+                background: white;
+
+                box-shadow:
+                    0 6px 18px
+                    rgba(20,45,80,0.06);
+            }
+
+            .mobile-recent-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                margin-bottom: 15px;
+            }
+
+            .mobile-recent-header strong {
+                color: #062d63;
+
+                font-size: 13px;
+            }
+
+            .mobile-recent-header a {
+                color: #0751a8;
+
+                font-size: 9px;
+                font-weight: bold;
+
+                text-decoration: none;
+            }
+
+            .mobile-report-number {
+                color: #8795a8;
+
+                font-size: 9px;
+                font-weight: bold;
+            }
+
+            .mobile-report-title {
+                margin-top: 5px;
+
+                color: #062d63;
+
+                font-size: 15px;
+                font-weight: bold;
+            }
+
+            .mobile-report-location {
+                margin-top: 7px;
+
+                color: #718096;
+
+                font-size: 10px;
+            }
+
+            .mobile-report-meta {
+                margin-top: 14px;
+
+                display: flex;
+                gap: 7px;
+                flex-wrap: wrap;
+            }
+
+            .mobile-empty {
+                padding: 15px 5px;
+
+                color: #8190a2;
+
+                font-size: 10px;
+                line-height: 1.5;
+            }
+
+
+            /* BOTTOM NAV */
+
+            .bottom-nav {
+                position: fixed;
+
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                z-index: 100;
+
+                min-height: 72px;
+
+                padding:
+                    8px
+                    8px
+                    calc(
+                        8px +
+                        env(safe-area-inset-bottom)
+                    );
+
+                background:
+                    rgba(255,255,255,0.98);
+
+                border-top:
+                    1px solid #e4eaf2;
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+
+                box-shadow:
+                    0 -8px 25px
+                    rgba(20,40,70,0.07);
+            }
+
+            .bottom-nav a {
+                min-height: 53px;
+
+                color: #8390a1;
+
+                text-decoration: none;
+
+                font-size: 10px;
+                font-weight: 600;
+
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                gap: 4px;
+            }
+
+            .bottom-nav svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .bottom-nav .active {
+                color: #0751a8;
+
+                font-weight: 800;
+            }
+
+            .bottom-nav .nav-sos {
+                color: #d90429;
+
+                font-weight: 800;
+            }
+
+            .nav-sos-circle {
+                width: 45px;
+                height: 45px;
+
+                margin-top: -25px;
+                margin-bottom: -4px;
+
+                border-radius: 50%;
+
+                background: #d90429;
+                color: white;
+
+                border: 4px solid white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 5px 16px
+                    rgba(217,4,41,0.30);
+            }
+        }
+
+
+        @media(min-width: 751px) {
+
+            .mobile-app {
+                display: none !important;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     DESKTOP VERSION
+===================================================== -->
+
+<div class="desktop-app">
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <img
+                src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                class="ufh-logo"
+                alt="University of Fort Hare Logo"
+            >
+
+            <div class="divider"></div>
+
+            <div class="brand-text">
+
+                <h1>
+                    Campus Security Management System
+                </h1>
+
+                <p>
+                    Alice Campus
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <div class="role-pill">
+                Student • {{ username }}
+            </div>
+
+            <a
+                href="/logout"
+                class="logout"
+            >
+                Log Out
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <section class="desktop-hero">
+
+        <div class="desktop-hero-inner">
+
+            <div class="desktop-label">
+                UNIVERSITY OF FORT HARE • ALICE CAMPUS
+            </div>
+
+            <h2>
+                Your Safety.
+
+                <span>
+                    Our Priority.
+                </span>
+            </h2>
+
+            <p class="desktop-description">
+                Stay informed. Report incidents. Get assistance
+                when you need it. Together we keep our campus safe.
+            </p>
+
+
+            <div class="desktop-actions">
+
+                <a
+                    href="/report"
+                    class="desktop-report"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M12 12v6"></path>
+                        <path d="M9 15h6"></path>
+                    </svg>
+
+                    Report an Incident
+
+                </a>
+
+
+                <a
+                    href="/sos"
+                    class="desktop-sos"
+                >
+
+                    <div class="desktop-sos-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        >
+                            <path d="M8 17h8"></path>
+                            <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                            <path d="M5 21h14"></path>
+                            <path d="M12 2v3"></path>
+                            <path d="M4.2 5.2l2.1 2.1"></path>
+                            <path d="M19.8 5.2l-2.1 2.1"></path>
+                        </svg>
+
+                    </div>
+
+                    <div class="desktop-sos-text">
+
+                        <strong>
+                            EMERGENCY SOS
+                        </strong>
+
+                        <span>
+                            Tap for immediate assistance
+                        </span>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <main class="desktop-main">
+
+        <section>
+
+            <div class="section-heading">
+
+                <h2>
+                    Quick Access
+                </h2>
+
+                <p>
+                    Access the most important campus safety
+                    services from your dashboard.
+                </p>
+
+            </div>
+
+
+            <div class="quick-grid">
+
+                <a
+                    href="/report"
+                    class="quick-card"
+                >
+
+                    <div class="quick-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <path d="M12 12v6"></path>
+                            <path d="M9 15h6"></path>
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Report an Incident
+                    </h3>
+
+                    <p>
+                        Submit details about a safety or
+                        security incident on campus.
+                    </p>
+
+                </a>
+
+
+                <a
+                    href="/my-reports"
+                    class="quick-card"
+                >
+
+                    <div class="quick-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M8 6h13"></path>
+                            <path d="M8 12h13"></path>
+                            <path d="M8 18h13"></path>
+                            <path d="M3 6h.01"></path>
+                            <path d="M3 12h.01"></path>
+                            <path d="M3 18h.01"></path>
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        My Reports
+                    </h3>
+
+                    <p>
+                        View your submitted incidents and
+                        track their current status.
+                    </p>
+
+                </a>
+
+
+                <a
+                    href="/emergency-contacts"
+                    class="quick-card"
+                >
+
+                    <div class="quick-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"></path>
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Emergency Contacts
+                    </h3>
+
+                    <p>
+                        Quickly access campus and national
+                        emergency numbers.
+                    </p>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <section class="recent-desktop">
+
+            <div class="section-heading">
+
+                <h2>
+                    Recent Activity
+                </h2>
+
+                <p>
+                    Your most recently submitted incident report.
+                </p>
+
+            </div>
+
+
+            <div class="recent-card">
+
+                <div class="recent-top">
+
+                    <h3>
+                        Latest Report
+                    </h3>
+
+                    <a href="/my-reports">
+                        View All Reports
+                    </a>
+
+                </div>
+
+
+                {% if recent_report %}
+
+                    <div class="report-info">
+
+                        <div class="info-box">
+
+                            <span class="info-label">
+                                REPORT
+                            </span>
+
+                            <span class="info-value">
+                                #{{ recent_report[0] }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-box">
+
+                            <span class="info-label">
+                                INCIDENT TYPE
+                            </span>
+
+                            <span class="info-value">
+                                {{ recent_report[1] }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-box">
+
+                            <span class="info-label">
+                                LOCATION
+                            </span>
+
+                            <span class="info-value">
+                                {{ recent_report[2] }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-box">
+
+                            <span class="info-label">
+                                PRIORITY
+                            </span>
+
+                            {% if recent_report[3] == "High" %}
+
+                                <span class="badge high">
+                                    High
+                                </span>
+
+                            {% elif recent_report[3] == "Medium" %}
+
+                                <span class="badge medium">
+                                    Medium
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge low">
+                                    Low
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="info-box">
+
+                            <span class="info-label">
+                                STATUS
+                            </span>
+
+                            {% if recent_report[4] == "Resolved" %}
+
+                                <span class="badge resolved">
+                                    Resolved
+                                </span>
+
+                            {% elif recent_report[4] == "In Progress" %}
+
+                                <span class="badge progress">
+                                    In Progress
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge pending">
+                                    Pending
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-report">
+                        You have not submitted any reports yet.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="desktop-footer">
+
+        <strong>
+            University of Fort Hare
+        </strong>
+
+        <p>
+            Campus Security Management System • Alice Campus
+        </p>
+
+    </footer>
+
+</div>
+
+
+
+<!-- =====================================================
+     MOBILE APP VERSION
+===================================================== -->
+
+<div class="mobile-app">
+
+    <section class="mobile-hero">
+
+
+        <!-- MOBILE HEADER -->
+
+        <header class="app-header">
+
+            <div class="app-brand">
+
+                <div class="app-logo">
+
+                    <img
+                        src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                        alt="UFH"
+                    >
+
+                </div>
+
+
+                <div class="app-brand-text">
+
+                    <strong>
+                        UFH Security
+                    </strong>
+
+                    <span>
+                        Alice Campus
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACCOUNT / PROFILE -->
+
+            <a
+                href="/account"
+                class="mobile-profile-button"
+                aria-label="Student account"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <circle
+                        cx="12"
+                        cy="8"
+                        r="4"
+                    ></circle>
+
+                    <path
+                        d="M4 21a8 8 0 0 1 16 0"
+                    ></path>
+                </svg>
+
+            </a>
+
+        </header>
+
+
+        <!-- GREETING -->
+
+        <div class="mobile-greeting">
+
+            <div class="mobile-label">
+                STUDENT DASHBOARD
+            </div>
+
+            <h1>
+                Hello, {{ username }}
+            </h1>
+
+            <p>
+                Stay connected to campus safety services
+                and get assistance when you need it.
+            </p>
+
+        </div>
+
+
+        <!-- SOS -->
+
+        <a
+            href="/sos"
+            class="mobile-sos"
+        >
+
+            <div class="mobile-sos-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M8 17h8"></path>
+
+                    <path
+                        d="M7 17v-5a5 5 0 0 1 10 0v5"
+                    ></path>
+
+                    <path d="M5 21h14"></path>
+
+                    <path d="M12 2v3"></path>
+
+                    <path d="M4.2 5.2l2.1 2.1"></path>
+
+                    <path d="M19.8 5.2l-2.1 2.1"></path>
+
+                </svg>
+
+            </div>
+
+
+            <div class="mobile-sos-text">
+
+                <strong>
+                    EMERGENCY SOS
+                </strong>
+
+                <span>
+                    Tap for immediate campus assistance
+                </span>
+
+            </div>
+
+
+            <svg
+                class="mobile-sos-arrow"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path d="M5 12h14"></path>
+                <path d="m13 6 6 6-6 6"></path>
+            </svg>
+
+        </a>
+
+    </section>
+
+
+
+    <!-- MOBILE CONTENT -->
+
+    <main class="mobile-content">
+
+
+        <!-- QUICK ACTIONS -->
+
+        <div class="mobile-section-title">
+
+            <h2>
+                Quick Actions
+            </h2>
+
+            <p>
+                Campus safety services
+            </p>
+
+        </div>
+
+
+        <div class="mobile-grid">
+
+
+            <!-- REPORT -->
+
+            <a
+                href="/report"
+                class="mobile-action"
+            >
+
+                <div class="mobile-action-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <path d="M12 12v6"></path>
+                        <path d="M9 15h6"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Report Incident
+                </h3>
+
+                <p>
+                    Report a campus safety or
+                    security incident.
+                </p>
+
+            </a>
+
+
+            <!-- MY REPORTS -->
+
+            <a
+                href="/my-reports"
+                class="mobile-action"
+            >
+
+                <div class="mobile-action-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M8 6h13"></path>
+                        <path d="M8 12h13"></path>
+                        <path d="M8 18h13"></path>
+                        <path d="M3 6h.01"></path>
+                        <path d="M3 12h.01"></path>
+                        <path d="M3 18h.01"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    My Reports
+                </h3>
+
+                <p>
+                    Track your submitted
+                    incident reports.
+                </p>
+
+            </a>
+
+
+            <!-- CONTACTS -->
+
+            <a
+                href="/emergency-contacts"
+                class="mobile-action"
+            >
+
+                <div class="mobile-action-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Emergency Contacts
+                </h3>
+
+                <p>
+                    Call Campus Control, SAPS and
+                    emergency services.
+                </p>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- LATEST REPORT -->
+
+        <section class="mobile-recent-section">
+
+            <div class="mobile-section-title">
+
+                <h2>
+                    Latest Report
+                </h2>
+
+                <p>
+                    Your most recent incident
+                </p>
+
+            </div>
+
+
+            <div class="mobile-recent">
+
+                <div class="mobile-recent-header">
+
+                    <strong>
+                        Recent Activity
+                    </strong>
+
+                    <a href="/my-reports">
+                        VIEW ALL
+                    </a>
+
+                </div>
+
+
+                {% if recent_report %}
+
+                    <div class="mobile-report-number">
+                        REPORT #{{ recent_report[0] }}
+                    </div>
+
+                    <div class="mobile-report-title">
+                        {{ recent_report[1] }}
+                    </div>
+
+                    <div class="mobile-report-location">
+                        {{ recent_report[2] }}
+                    </div>
+
+
+                    <div class="mobile-report-meta">
+
+                        {% if recent_report[3] == "High" %}
+
+                            <span class="badge high">
+                                High Priority
+                            </span>
+
+                        {% elif recent_report[3] == "Medium" %}
+
+                            <span class="badge medium">
+                                Medium Priority
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge low">
+                                Low Priority
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if recent_report[4] == "Resolved" %}
+
+                            <span class="badge resolved">
+                                Resolved
+                            </span>
+
+                        {% elif recent_report[4] == "In Progress" %}
+
+                            <span class="badge progress">
+                                In Progress
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge pending">
+                                Pending
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="mobile-empty">
+
+                        You have not submitted an incident
+                        report yet.
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =================================================
+         MOBILE BOTTOM NAVIGATION
+    ================================================== -->
+
+    <nav class="bottom-nav">
+
+
+        <!-- HOME -->
+
+        <a
+            href="/student-dashboard"
+            class="active"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M3 11l9-8 9 8"></path>
+
+                <path
+                    d="M5 10v10h14V10"
+                ></path>
+            </svg>
+
+            <span>
+                Home
+            </span>
+
+        </a>
+
+
+        <!-- REPORTS -->
+
+        <a href="/my-reports">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path
+                    d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7"
+                ></path>
+
+                <path d="M8 12h8"></path>
+
+                <path d="M8 16h6"></path>
+            </svg>
+
+            <span>
+                Reports
+            </span>
+
+        </a>
+
+
+        <!-- SOS -->
+
+        <a
+            href="/sos"
+            class="nav-sos"
+        >
+
+            <div class="nav-sos-circle">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M8 17h8"></path>
+
+                    <path
+                        d="M7 17v-5a5 5 0 0 1 10 0v5"
+                    ></path>
+
+                    <path d="M5 21h14"></path>
+                </svg>
+
+            </div>
+
+            <span>
+                SOS
+            </span>
+
+        </a>
+
+
+        <!-- ACCOUNT -->
+
+        <a href="/account">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <circle
+                    cx="12"
+                    cy="8"
+                    r="4"
+                ></circle>
+
+                <path
+                    d="M4 21a8 8 0 0 1 16 0"
+                ></path>
+            </svg>
+
+            <span>
+                Account
+            </span>
+
+        </a>
+
+    </nav>
+
+</div>
+
+
+
+<!-- =====================================================
+     SERVICE WORKER
+===================================================== -->
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker.register(
+                    "/static/service-worker.js"
+                );
+
+            }
+        );
+
+    }
+
+</script>
+
+
+<div style="position:fixed;right:18px;bottom:18px;z-index:9999;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a href="{{ url_for('notifications_page') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Notifications</a><a href="{{ url_for('edit_profile') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">My Profile</a><a href="{{ url_for('campus_map') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Campus Map</a></div></body>
+</html>

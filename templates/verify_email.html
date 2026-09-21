@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#062d63">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}"
+    >
+
+    <title>Verify Email | UFH Campus Security</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            min-height: 92px;
+            padding: 12px 42px;
+            background: white;
+            border-bottom: 1px solid #e4e9f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+        }
+
+        .brand-text strong {
+            display: block;
+            color: #062d63;
+            font-size: 21px;
+        }
+
+        .brand-text span {
+            display: block;
+            margin-top: 4px;
+            color: #718399;
+            font-size: 13px;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 45px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 560px;
+            background: white;
+            border: 1px solid #e0e7f0;
+            border-top: 5px solid #0751a8;
+            border-radius: 18px;
+            box-shadow: 0 14px 36px rgba(30,60,100,0.10);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 30px 30px 22px;
+            text-align: center;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: #e7f0ff;
+            color: #0751a8;
+        }
+
+        .icon svg {
+            width: 29px;
+            height: 29px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #062d63;
+            font-size: 25px;
+        }
+
+        .subtitle {
+            margin: 9px auto 0;
+            max-width: 420px;
+            color: #718399;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .email {
+            color: #0751a8;
+            font-weight: bold;
+        }
+
+        .body {
+            padding: 26px 30px 30px;
+        }
+
+        .message {
+            margin-bottom: 18px;
+            padding: 13px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .success {
+            background: #edf9f1;
+            border: 1px solid #bfe5cb;
+            color: #176a38;
+        }
+
+        .error {
+            background: #fff1f2;
+            border: 1px solid #f3c5ca;
+            color: #b4232d;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #213b5d;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .code-input {
+            width: 100%;
+            height: 58px;
+            padding: 0 15px;
+            border: 1px solid #cdd8e5;
+            border-radius: 11px;
+            outline: none;
+            text-align: center;
+            color: #062d63;
+            font-size: 25px;
+            font-weight: bold;
+            letter-spacing: 9px;
+        }
+
+        .code-input:focus {
+            border-color: #0751a8;
+            box-shadow: 0 0 0 3px rgba(7,81,168,0.10);
+        }
+
+        .helper {
+            display: block;
+            margin-top: 8px;
+            color: #7a8a9c;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .verify-btn {
+            width: 100%;
+            min-height: 55px;
+            margin-top: 22px;
+            border: none;
+            border-radius: 10px;
+            background: #0751a8;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .resend {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e8edf3;
+            text-align: center;
+        }
+
+        .resend p {
+            margin: 0 0 10px;
+            color: #718399;
+            font-size: 12px;
+        }
+
+        .resend button {
+            border: none;
+            background: transparent;
+            color: #0751a8;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .login-link {
+            display: block;
+            margin-top: 18px;
+            text-align: center;
+            color: #60758d;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: #05295d;
+            color: #d6e0ed;
+            font-size: 12px;
+        }
+
+        @media(max-width: 750px) {
+
+            .topbar {
+                min-height: 78px;
+                padding:
+                    calc(10px + env(safe-area-inset-top))
+                    16px
+                    10px;
+            }
+
+            .logo {
+                width: 70px;
+            }
+
+            .brand-text strong {
+                font-size: 14px;
+            }
+
+            .brand-text span {
+                font-size: 9px;
+            }
+
+            .main {
+                align-items: flex-start;
+                padding: 24px 14px 32px;
+            }
+
+            .card {
+                border-radius: 20px;
+            }
+
+            .card-header {
+                padding: 25px 18px 20px;
+            }
+
+            .body {
+                padding: 20px 16px 24px;
+            }
+
+            h1 {
+                font-size: 21px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+            }
+
+            .code-input {
+                height: 56px;
+                font-size: 22px;
+                letter-spacing: 7px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <img
+                src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                class="logo"
+                alt="University of Fort Hare"
+            >
+
+            <div class="brand-text">
+
+                <strong>
+                    UFH Campus Security
+                </strong>
+
+                <span>
+                    Alice Campus
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="main">
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div class="icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        <path d="M3 7l9 6 9-6"></path>
+                        <path d="M16 3l2 2 4-4"></path>
+                    </svg>
+
+                </div>
+
+                <h1>
+                    Verify Your Email
+                </h1>
+
+                <p class="subtitle">
+                    We sent a 6-digit verification code to
+                    <span class="email">{{ email }}</span>.
+                    Enter the code below to activate your Student account.
+                </p>
+
+            </div>
+
+
+            <div class="body">
+
+                {% if success %}
+
+                <div class="message success">
+                    {{ success }}
+                </div>
+
+                {% endif %}
+
+
+                {% if error %}
+
+                <div class="message error">
+                    {{ error }}
+                </div>
+
+                {% endif %}
+
+
+                {% if request.args.get('wait') %}
+
+                <div class="message error">
+                    Please wait {{ request.args.get('wait') }}
+                    seconds before requesting another code.
+                </div>
+
+                {% endif %}
+
+
+                <form
+                    method="POST"
+                    action="{{ url_for('verify_email') }}"
+                >
+
+                    <label for="code">
+                        Verification Code
+                    </label>
+
+                    <input
+                        id="code"
+                        class="code-input"
+                        type="text"
+                        name="code"
+                        inputmode="numeric"
+                        pattern="[0-9]{6}"
+                        maxlength="6"
+                        autocomplete="one-time-code"
+                        placeholder="000000"
+                        required
+                        autofocus
+                    >
+
+                    <span class="helper">
+                        The verification code expires after 10 minutes.
+                    </span>
+
+                    <button
+                        type="submit"
+                        class="verify-btn"
+                    >
+                        VERIFY EMAIL
+                    </button>
+
+                </form>
+
+
+                <div class="resend">
+
+                    <p>
+                        Didn't receive the email?
+                    </p>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('resend_verification') }}"
+                    >
+
+                        <button type="submit">
+                            RESEND CODE
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('login') }}"
+                    class="login-link"
+                >
+                    Return to Login
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="footer">
+        University of Fort Hare • Campus Security Management System
+    </footer>
+
+</div>
+
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker.register(
+                    "/service-worker.js"
+                );
+
+            }
+        );
+
+    }
+
+</script>
+
+</body>
+
+</html>

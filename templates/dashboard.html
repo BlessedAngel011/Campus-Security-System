@@ -1,0 +1,3250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#062d63">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default"
+    >
+
+    <title>Security Dashboard | UFH Campus Security</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+        }
+
+
+        /* =====================================================
+           DESKTOP HEADER
+        ===================================================== */
+
+        .desktop-header {
+            min-height: 96px;
+            padding: 10px 50px;
+
+            background: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom: 1px solid #e4e9f0;
+        }
+
+        .desktop-brand {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .desktop-logo {
+            width: 110px;
+            height: auto;
+        }
+
+        .desktop-divider {
+            width: 1px;
+            height: 56px;
+            background: #d6dde8;
+        }
+
+        .desktop-brand-text h1 {
+            margin: 0;
+            color: #072e68;
+            font-size: 24px;
+        }
+
+        .desktop-brand-text p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .desktop-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .role-pill {
+            background: #eaf2ff;
+            color: #07438d;
+
+            padding: 11px 17px;
+
+            border-radius: 30px;
+
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .logout-button {
+            background: #062d63;
+            color: white;
+
+            padding: 12px 20px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           DESKTOP HERO
+        ===================================================== */
+
+        .desktop-hero {
+
+            min-height: 250px;
+
+            display: flex;
+            align-items: center;
+
+            background-image:
+
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98) 0%,
+                    rgba(4,42,91,0.94) 40%,
+                    rgba(4,52,112,0.65) 70%,
+                    rgba(4,52,112,0.25) 100%
+                ),
+
+                url(
+                    "{{ url_for('static_files', filename='alice-campus.png') }}"
+                );
+
+            background-size: cover;
+            background-position: center;
+        }
+
+        .desktop-hero-inner {
+            width: 100%;
+            max-width: 1450px;
+
+            margin: auto;
+
+            padding: 42px 60px;
+        }
+
+        .desktop-hero-label {
+            display: inline-block;
+
+            background: rgba(255,255,255,0.14);
+            color: white;
+
+            padding: 7px 13px;
+
+            border-radius: 30px;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            margin-bottom: 15px;
+        }
+
+        .desktop-hero h2 {
+            margin: 0;
+            color: white;
+            font-size: 42px;
+        }
+
+        .desktop-hero h2 span {
+            color: #f6c62d;
+        }
+
+        .desktop-hero p {
+            margin: 12px 0 0;
+
+            max-width: 650px;
+
+            color: #eaf2fc;
+
+            line-height: 1.6;
+
+            font-size: 16px;
+        }
+
+
+        /* =====================================================
+           DESKTOP MAIN
+        ===================================================== */
+
+        .desktop-main {
+            max-width: 1450px;
+
+            margin: auto;
+
+            padding: 32px 50px 45px;
+        }
+
+
+        /* =====================================================
+           DESKTOP STATISTICS
+        ===================================================== */
+
+        .desktop-stats {
+            display: grid;
+
+            grid-template-columns: repeat(5, 1fr);
+
+            gap: 17px;
+
+            margin-top: -65px;
+
+            position: relative;
+            z-index: 10;
+        }
+
+        .desktop-stat {
+            background: white;
+
+            border: 1px solid #e1e8f1;
+
+            border-radius: 15px;
+
+            padding: 22px;
+
+            box-shadow:
+                0 8px 22px rgba(30,60,100,0.10);
+        }
+
+        .desktop-stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .desktop-stat-label {
+            color: #687b91;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .desktop-stat-icon {
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .desktop-stat-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .desktop-stat-number {
+            margin-top: 13px;
+
+            font-size: 31px;
+            font-weight: bold;
+
+            color: #092d61;
+        }
+
+        .blue {
+            background: #e4efff;
+            color: #0751a8;
+        }
+
+        .gold {
+            background: #fff2cb;
+            color: #b77c00;
+        }
+
+        .orange {
+            background: #ffeadb;
+            color: #d76a00;
+        }
+
+        .green {
+            background: #dff7e8;
+            color: #157540;
+        }
+
+        .red {
+            background: #fde5e7;
+            color: #d51e29;
+        }
+
+
+        /* =====================================================
+           DESKTOP INCIDENT MANAGEMENT
+        ===================================================== */
+
+        .desktop-section-title {
+            margin-top: 34px;
+        }
+
+        .desktop-section-title h2 {
+            margin: 0;
+
+            color: #092d61;
+
+            font-size: 27px;
+        }
+
+        .desktop-section-title p {
+            margin: 6px 0 0;
+
+            color: #687b91;
+        }
+
+
+        /* =====================================================
+           FILTERS
+        ===================================================== */
+
+        .desktop-filter-panel {
+            margin-top: 20px;
+
+            background: white;
+
+            border: 1px solid #e1e8f1;
+            border-radius: 14px;
+
+            padding: 20px;
+
+            box-shadow:
+                0 5px 16px rgba(30,60,100,0.05);
+        }
+
+        .desktop-filters {
+            display: grid;
+
+            grid-template-columns:
+                2fr 1fr 1fr 1fr auto auto;
+
+            gap: 12px;
+        }
+
+        .desktop-filters input,
+        .desktop-filters select {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #cfd9e6;
+
+            border-radius: 8px;
+
+            background: white;
+
+            font-size: 14px;
+        }
+
+        .filter-button {
+            border: none;
+
+            background: #0751a8;
+            color: white;
+
+            border-radius: 8px;
+
+            padding: 12px 20px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .clear-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 12px 18px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            background: #eef2f7;
+            color: #4e6178;
+
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           DESKTOP TABLE
+        ===================================================== */
+
+        .desktop-table-container {
+            margin-top: 20px;
+
+            background: white;
+
+            border: 1px solid #e1e8f1;
+
+            border-radius: 14px;
+
+            overflow-x: auto;
+
+            box-shadow:
+                0 5px 16px rgba(30,60,100,0.05);
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 1180px;
+        }
+
+        thead {
+            background: #062d63;
+            color: white;
+        }
+
+        th {
+            text-align: left;
+
+            padding: 15px 14px;
+
+            font-size: 13px;
+
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px 14px;
+
+            border-bottom: 1px solid #e8edf3;
+
+            vertical-align: top;
+
+            font-size: 13px;
+
+            color: #35485f;
+        }
+
+        tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .incident-id {
+            color: #0751a8;
+            font-weight: bold;
+        }
+
+        .reporter {
+            color: #092d61;
+            font-weight: bold;
+        }
+
+        .description {
+            max-width: 240px;
+            line-height: 1.45;
+        }
+
+
+        /* =====================================================
+           SHARED BADGES
+        ===================================================== */
+
+        .anonymous-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+
+            padding: 6px 10px;
+
+            border-radius: 20px;
+
+            background: #eaf2ff;
+            color: #0751a8;
+
+            border: 1px solid #c7dcf5;
+
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .anonymous-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .identity-hidden {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+
+            color: #718096;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+
+            padding: 6px 11px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+        .priority-high {
+            background: #fde1e4;
+            color: #c51b27;
+        }
+
+        .priority-medium {
+            background: #fff0cf;
+            color: #b06d00;
+        }
+
+        .priority-low {
+            background: #dff7e8;
+            color: #157540;
+        }
+
+        .status-pending {
+            background: #fff2bf;
+            color: #a56b00;
+        }
+
+        .status-progress {
+            background: #e3efff;
+            color: #075ab8;
+        }
+
+        .status-resolved {
+            background: #dff7e8;
+            color: #157540;
+        }
+
+
+        /* =====================================================
+           STATUS UPDATE
+        ===================================================== */
+
+        .status-form {
+            display: flex;
+            align-items: center;
+
+            gap: 7px;
+        }
+
+        .status-form select {
+            padding: 8px;
+
+            border: 1px solid #cad5e2;
+
+            border-radius: 7px;
+
+            background: white;
+
+            font-size: 12px;
+        }
+
+        .update-button {
+            border: none;
+
+            background: #0751a8;
+            color: white;
+
+            padding: 8px 11px;
+
+            border-radius: 7px;
+
+            font-size: 12px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        /* =====================================================
+           DESKTOP EMPTY
+        ===================================================== */
+
+        .empty-state {
+            padding: 45px;
+
+            text-align: center;
+
+            color: #687b91;
+        }
+
+
+        /* =====================================================
+           DESKTOP FOOTER
+        ===================================================== */
+
+        .desktop-footer {
+            background: #05295d;
+
+            color: white;
+
+            padding: 20px 50px;
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr 1fr;
+
+            align-items: center;
+
+            font-size: 13px;
+        }
+
+        .desktop-footer p {
+            margin: 5px 0 0;
+
+            color: #d6e0ed;
+        }
+
+        .desktop-footer-middle {
+            text-align: center;
+        }
+
+        .desktop-footer-right {
+            text-align: right;
+        }
+
+        .desktop-footer-right a {
+            color: #d6e0ed;
+
+            text-decoration: none;
+
+            margin-left: 15px;
+        }
+
+
+        /* =====================================================
+           MOBILE APP
+        ===================================================== */
+
+        .mobile-app {
+            display: none;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media(max-width: 750px) {
+
+            body {
+                background: #f3f6fa;
+
+                padding-bottom:
+                    calc(
+                        80px +
+                        env(safe-area-inset-bottom)
+                    );
+            }
+
+            .desktop-header,
+            .desktop-hero,
+            .desktop-main,
+            .desktop-footer {
+                display: none;
+            }
+
+            .mobile-app {
+                display: block;
+            }
+
+
+            /* MOBILE HERO */
+
+            .mobile-hero {
+
+                min-height: 245px;
+
+                border-radius:
+                    0 0 32px 32px;
+
+                background-image:
+
+                    linear-gradient(
+                        155deg,
+                        rgba(2,29,66,0.98),
+                        rgba(4,44,94,0.94) 52%,
+                        rgba(4,75,143,0.76)
+                    ),
+
+                    url(
+                        "{{ url_for('static_files', filename='alice-campus.png') }}"
+                    );
+
+                background-size: cover;
+                background-position: center;
+
+                overflow: hidden;
+            }
+
+            .mobile-header {
+                padding:
+                    calc(
+                        15px +
+                        env(safe-area-inset-top)
+                    )
+                    18px
+                    10px;
+
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+
+                gap: 11px;
+            }
+
+            .mobile-logo-box {
+                width: 50px;
+                height: 50px;
+
+                border-radius: 14px;
+
+                background: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 5px 18px rgba(0,0,0,0.15);
+            }
+
+            .mobile-logo-box img {
+                width: 42px;
+                height: 42px;
+
+                object-fit: contain;
+            }
+
+            .mobile-brand-text strong {
+                display: block;
+
+                color: white;
+
+                font-size: 16px;
+            }
+
+            .mobile-brand-text span {
+                display: block;
+
+                margin-top: 3px;
+
+                color: rgba(255,255,255,0.72);
+
+                font-size: 10px;
+            }
+
+            .mobile-logout {
+                width: 42px;
+                height: 42px;
+
+                border-radius: 50%;
+
+                background: rgba(255,255,255,0.14);
+
+                border:
+                    1px solid rgba(255,255,255,0.22);
+
+                color: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                text-decoration: none;
+            }
+
+            .mobile-logout svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .mobile-hero-content {
+                padding: 23px 18px 48px;
+            }
+
+            .mobile-label {
+                color: #ffc928;
+
+                font-size: 10px;
+                font-weight: 800;
+
+                letter-spacing: 1px;
+            }
+
+            .mobile-hero-content h1 {
+                margin: 7px 0 0;
+
+                color: white;
+
+                font-size: 28px;
+
+                line-height: 1.12;
+            }
+
+            .mobile-hero-content h1 span {
+                color: #ffc928;
+            }
+
+            .officer-line {
+                margin-top: 9px;
+
+                color: rgba(255,255,255,0.78);
+
+                font-size: 11px;
+            }
+
+
+            /* MOBILE MAIN */
+
+            .mobile-main {
+                position: relative;
+                z-index: 10;
+
+                margin-top: -31px;
+
+                padding: 0 15px 25px;
+            }
+
+
+            /* EMERGENCY SUMMARY */
+
+            .emergency-summary {
+                background:
+                    linear-gradient(
+                        135deg,
+                        #c91426,
+                        #e52b3d
+                    );
+
+                color: white;
+
+                border-radius: 20px;
+
+                padding: 17px;
+
+                box-shadow:
+                    0 10px 26px rgba(190,20,40,0.22);
+
+                display: flex;
+                align-items: center;
+
+                gap: 13px;
+            }
+
+            .emergency-icon {
+                width: 48px;
+                height: 48px;
+
+                min-width: 48px;
+
+                border-radius: 15px;
+
+                background: rgba(255,255,255,0.16);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .emergency-icon svg {
+                width: 25px;
+                height: 25px;
+            }
+
+            .emergency-content {
+                flex: 1;
+            }
+
+            .emergency-content span {
+                display: block;
+
+                font-size: 9px;
+                font-weight: 800;
+
+                letter-spacing: 0.7px;
+
+                opacity: 0.85;
+            }
+
+            .emergency-content strong {
+                display: block;
+
+                margin-top: 4px;
+
+                font-size: 15px;
+            }
+
+            .emergency-count {
+                min-width: 42px;
+                height: 42px;
+
+                padding: 0 10px;
+
+                border-radius: 13px;
+
+                background: white;
+                color: #c91426;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                font-size: 20px;
+                font-weight: 800;
+            }
+
+
+            /* MOBILE STATISTICS */
+
+            .mobile-section-title {
+                margin:
+                    23px
+                    3px
+                    11px;
+            }
+
+            .mobile-section-title h2 {
+                margin: 0;
+
+                color: #062d63;
+
+                font-size: 17px;
+            }
+
+            .mobile-section-title p {
+                margin: 4px 0 0;
+
+                color: #8492a4;
+
+                font-size: 9px;
+            }
+
+            .mobile-stats {
+                display: grid;
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+                gap: 10px;
+            }
+
+            .mobile-stat {
+                min-height: 112px;
+
+                background: white;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 17px;
+
+                padding: 14px;
+
+                box-shadow:
+                    0 5px 16px rgba(30,60,100,0.05);
+            }
+
+            .mobile-stat-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .mobile-stat-label {
+                color: #718096;
+
+                font-size: 9px;
+                font-weight: 800;
+
+                letter-spacing: 0.3px;
+            }
+
+            .mobile-stat-icon {
+                width: 34px;
+                height: 34px;
+
+                border-radius: 10px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-stat-icon svg {
+                width: 17px;
+                height: 17px;
+            }
+
+            .mobile-stat-number {
+                margin-top: 12px;
+
+                color: #062d63;
+
+                font-size: 27px;
+                font-weight: 800;
+            }
+
+            .mobile-stat.high {
+                border-color: #f2c6cc;
+            }
+
+
+            /* MOBILE FILTER */
+
+            .mobile-filter-card {
+                background: white;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 18px;
+
+                padding: 14px;
+
+                box-shadow:
+                    0 5px 16px rgba(30,60,100,0.05);
+            }
+
+            .mobile-search {
+                position: relative;
+            }
+
+            .mobile-search svg {
+                position: absolute;
+
+                left: 13px;
+                top: 50%;
+
+                transform: translateY(-50%);
+
+                width: 18px;
+                height: 18px;
+
+                color: #8795a6;
+            }
+
+            .mobile-search input {
+                width: 100%;
+
+                height: 45px;
+
+                padding:
+                    0
+                    12px
+                    0
+                    40px;
+
+                border:
+                    1px solid #d6e0eb;
+
+                border-radius: 12px;
+
+                outline: none;
+
+                font-size: 12px;
+
+                background: #f9fbfd;
+            }
+
+            .mobile-filter-grid {
+                display: grid;
+
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap: 8px;
+
+                margin-top: 9px;
+            }
+
+            .mobile-filter-grid select {
+                width: 100%;
+
+                height: 41px;
+
+                padding: 0 9px;
+
+                border:
+                    1px solid #d6e0eb;
+
+                border-radius: 10px;
+
+                background: white;
+
+                color: #42566e;
+
+                font-size: 10px;
+            }
+
+            .mobile-filter-actions {
+                display: grid;
+
+                grid-template-columns:
+                    1fr auto;
+
+                gap: 8px;
+
+                margin-top: 9px;
+            }
+
+            .mobile-filter-submit {
+                border: none;
+
+                border-radius: 11px;
+
+                background: #0751a8;
+                color: white;
+
+                height: 42px;
+
+                font-size: 11px;
+                font-weight: 800;
+            }
+
+            .mobile-filter-clear {
+                min-width: 72px;
+
+                height: 42px;
+
+                border-radius: 11px;
+
+                background: #eef2f7;
+                color: #596b80;
+
+                text-decoration: none;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                font-size: 10px;
+                font-weight: 700;
+            }
+
+
+            /* INCIDENT CARDS */
+
+            .incident-card {
+                background: white;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 19px;
+
+                padding: 15px;
+
+                margin-bottom: 11px;
+
+                box-shadow:
+                    0 5px 16px rgba(30,60,100,0.05);
+            }
+
+            .incident-card.high-priority {
+                border-left:
+                    5px solid #d90429;
+            }
+
+            .incident-card-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+
+                gap: 10px;
+            }
+
+            .incident-number {
+                color: #0751a8;
+
+                font-size: 10px;
+                font-weight: 800;
+            }
+
+            .incident-type {
+                margin-top: 4px;
+
+                color: #062d63;
+
+                font-size: 15px;
+                font-weight: 800;
+            }
+
+            .incident-badges {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+
+                gap: 5px;
+
+                justify-content: flex-end;
+            }
+
+            .mobile-reporter {
+                margin-top: 13px;
+
+                padding: 10px 11px;
+
+                border-radius: 12px;
+
+                background: #f6f9fc;
+            }
+
+            .mobile-reporter-label {
+                color: #8997a8;
+
+                font-size: 8px;
+                font-weight: 800;
+
+                letter-spacing: 0.4px;
+            }
+
+            .mobile-reporter-value {
+                margin-top: 4px;
+
+                color: #304760;
+
+                font-size: 11px;
+                font-weight: 700;
+            }
+
+            .incident-info-grid {
+                display: grid;
+
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap: 9px;
+
+                margin-top: 11px;
+            }
+
+            .incident-info {
+                padding: 10px;
+
+                border-radius: 12px;
+
+                background: #f8fafc;
+            }
+
+            .incident-info span {
+                display: block;
+
+                color: #8997a8;
+
+                font-size: 8px;
+                font-weight: 800;
+
+                text-transform: uppercase;
+            }
+
+            .incident-info strong {
+                display: block;
+
+                margin-top: 4px;
+
+                color: #304760;
+
+                font-size: 10px;
+
+                line-height: 1.35;
+            }
+
+            .mobile-description {
+                margin-top: 10px;
+
+                padding: 11px;
+
+                border-radius: 12px;
+
+                background: #f8fafc;
+            }
+
+            .mobile-description span {
+                display: block;
+
+                color: #8997a8;
+
+                font-size: 8px;
+                font-weight: 800;
+
+                text-transform: uppercase;
+            }
+
+            .mobile-description p {
+                margin: 5px 0 0;
+
+                color: #526579;
+
+                font-size: 10px;
+
+                line-height: 1.5;
+            }
+
+
+            /* MOBILE STATUS UPDATE */
+
+            .mobile-status-section {
+                margin-top: 12px;
+
+                padding-top: 12px;
+
+                border-top:
+                    1px solid #e8edf3;
+            }
+
+            .mobile-status-label {
+                display: block;
+
+                margin-bottom: 7px;
+
+                color: #6f8093;
+
+                font-size: 9px;
+                font-weight: 800;
+            }
+
+            .mobile-status-form {
+                display: grid;
+
+                grid-template-columns:
+                    1fr auto;
+
+                gap: 8px;
+            }
+
+            .mobile-status-form select {
+                height: 42px;
+
+                padding: 0 10px;
+
+                border:
+                    1px solid #d1dbe7;
+
+                border-radius: 11px;
+
+                background: white;
+
+                color: #354a62;
+
+                font-size: 11px;
+            }
+
+            .mobile-update-button {
+                min-width: 86px;
+
+                border: none;
+
+                border-radius: 11px;
+
+                background: #0751a8;
+                color: white;
+
+                padding: 0 13px;
+
+                font-size: 10px;
+                font-weight: 800;
+            }
+
+
+            /* MOBILE EMPTY */
+
+            .mobile-empty {
+                background: white;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 18px;
+
+                padding: 30px 20px;
+
+                text-align: center;
+            }
+
+            .mobile-empty h3 {
+                margin: 0;
+
+                color: #062d63;
+
+                font-size: 16px;
+            }
+
+            .mobile-empty p {
+                margin: 7px 0 0;
+
+                color: #8190a2;
+
+                font-size: 10px;
+            }
+
+
+            /* BOTTOM NAVIGATION */
+
+            .security-bottom-nav {
+                position: fixed;
+
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                z-index: 100;
+
+                min-height: 70px;
+
+                padding:
+                    7px
+                    8px
+                    calc(
+                        7px +
+                        env(safe-area-inset-bottom)
+                    );
+
+                background: rgba(255,255,255,0.98);
+
+                border-top:
+                    1px solid #e4eaf2;
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+
+                box-shadow:
+                    0 -8px 25px rgba(20,40,70,0.07);
+            }
+
+            .security-bottom-nav a {
+                color: #8390a1;
+
+                text-decoration: none;
+
+                font-size: 9px;
+                font-weight: 600;
+
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                gap: 4px;
+            }
+
+            .security-bottom-nav svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .security-bottom-nav .active {
+                color: #0751a8;
+                font-weight: 800;
+            }
+
+            .security-bottom-nav .emergency-nav {
+                color: #d90429;
+            }
+
+        }
+
+
+        /* =====================================================
+           TABLET / SMALL DESKTOP
+        ===================================================== */
+
+        @media(min-width: 751px) and (max-width: 1150px) {
+
+            .desktop-stats {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+            .desktop-filters {
+                grid-template-columns:
+                    1fr 1fr 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     DESKTOP VERSION
+========================================================= -->
+
+<header class="desktop-header">
+
+    <div class="desktop-brand">
+
+        <img
+            src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+            class="desktop-logo"
+            alt="University of Fort Hare"
+        >
+
+        <div class="desktop-divider"></div>
+
+        <div class="desktop-brand-text">
+
+            <h1>
+                Campus Security Management System
+            </h1>
+
+            <p>
+                Alice Campus
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="desktop-actions">
+
+        <div class="role-pill">
+            Security Officer • {{ username }}
+        </div>
+
+        <a
+            href="/logout"
+            class="logout-button"
+        >
+            Log Out
+        </a>
+
+    </div>
+
+</header>
+
+
+
+<section class="desktop-hero">
+
+    <div class="desktop-hero-inner">
+
+        <div class="desktop-hero-label">
+            UNIVERSITY OF FORT HARE • ALICE CAMPUS
+        </div>
+
+        <h2>
+            Security <span>Control Centre</span>
+        </h2>
+
+        <p>
+            Monitor campus incidents, identify urgent cases,
+            search reported events and update response status
+            from one central security dashboard.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<main class="desktop-main">
+
+
+    <!-- DESKTOP STATS -->
+
+    <div class="desktop-stats">
+
+
+        <div class="desktop-stat">
+
+            <div class="desktop-stat-top">
+
+                <span class="desktop-stat-label">
+                    TOTAL INCIDENTS
+                </span>
+
+                <div class="desktop-stat-icon blue">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M8 6h13"></path>
+                        <path d="M8 12h13"></path>
+                        <path d="M8 18h13"></path>
+
+                        <path d="M3 6h.01"></path>
+                        <path d="M3 12h.01"></path>
+                        <path d="M3 18h.01"></path>
+                    </svg>
+
+                </div>
+
+            </div>
+
+            <div class="desktop-stat-number">
+                {{ total_incidents }}
+            </div>
+
+        </div>
+
+
+
+        <div class="desktop-stat">
+
+            <div class="desktop-stat-top">
+
+                <span class="desktop-stat-label">
+                    PENDING
+                </span>
+
+                <div class="desktop-stat-icon gold">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 7v5l3 2"></path>
+                    </svg>
+
+                </div>
+
+            </div>
+
+            <div class="desktop-stat-number">
+                {{ pending_incidents }}
+            </div>
+
+        </div>
+
+
+
+        <div class="desktop-stat">
+
+            <div class="desktop-stat-top">
+
+                <span class="desktop-stat-label">
+                    IN PROGRESS
+                </span>
+
+                <div class="desktop-stat-icon orange">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M12 2v4"></path>
+                        <path d="M12 18v4"></path>
+                        <path d="M4.93 4.93l2.83 2.83"></path>
+                        <path d="M16.24 16.24l2.83 2.83"></path>
+                        <path d="M2 12h4"></path>
+                        <path d="M18 12h4"></path>
+                    </svg>
+
+                </div>
+
+            </div>
+
+            <div class="desktop-stat-number">
+                {{ in_progress_incidents }}
+            </div>
+
+        </div>
+
+
+
+        <div class="desktop-stat">
+
+            <div class="desktop-stat-top">
+
+                <span class="desktop-stat-label">
+                    RESOLVED
+                </span>
+
+                <div class="desktop-stat-icon green">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M8 12l3 3 5-6"></path>
+                    </svg>
+
+                </div>
+
+            </div>
+
+            <div class="desktop-stat-number">
+                {{ resolved_incidents }}
+            </div>
+
+        </div>
+
+
+
+        <div class="desktop-stat">
+
+            <div class="desktop-stat-top">
+
+                <span class="desktop-stat-label">
+                    HIGH PRIORITY
+                </span>
+
+                <div class="desktop-stat-icon red">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M10.29 3.86L1.82 18
+                            a2 2 0 0 0 1.71 3h16.94
+                            a2 2 0 0 0 1.71-3
+                            L13.71 3.86
+                            a2 2 0 0 0-3.42 0z">
+                        </path>
+
+                        <path d="M12 9v4"></path>
+                        <path d="M12 17h.01"></path>
+                    </svg>
+
+                </div>
+
+            </div>
+
+            <div class="desktop-stat-number">
+                {{ high_priority_incidents }}
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="desktop-section-title">
+
+        <h2>
+            Incident Management
+        </h2>
+
+        <p>
+            Review and manage incidents reported across Alice Campus.
+        </p>
+
+    </div>
+
+
+
+    <!-- DESKTOP FILTERS -->
+
+    <div class="desktop-filter-panel">
+
+        <form
+            method="GET"
+            action="/dashboard"
+            class="desktop-filters"
+        >
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search reporter, student number, location..."
+                value="{{ request.args.get('search', '') }}"
+            >
+
+
+            <select name="incident_type">
+
+                <option value="">
+                    All Incident Types
+                </option>
+
+                <option
+                    value="Theft"
+                    {% if request.args.get('incident_type') == 'Theft' %}selected{% endif %}
+                >
+                    Theft
+                </option>
+
+                <option
+                    value="Assault"
+                    {% if request.args.get('incident_type') == 'Assault' %}selected{% endif %}
+                >
+                    Assault
+                </option>
+
+                <option
+                    value="Harassment"
+                    {% if request.args.get('incident_type') == 'Harassment' %}selected{% endif %}
+                >
+                    Harassment
+                </option>
+
+                <option
+                    value="Vandalism"
+                    {% if request.args.get('incident_type') == 'Vandalism' %}selected{% endif %}
+                >
+                    Vandalism
+                </option>
+
+                <option
+                    value="Suspicious Activity"
+                    {% if request.args.get('incident_type') == 'Suspicious Activity' %}selected{% endif %}
+                >
+                    Suspicious Activity
+                </option>
+
+                <option
+                    value="Emergency SOS"
+                    {% if request.args.get('incident_type') == 'Emergency SOS' %}selected{% endif %}
+                >
+                    Emergency SOS
+                </option>
+
+                <option
+                    value="Other"
+                    {% if request.args.get('incident_type') == 'Other' %}selected{% endif %}
+                >
+                    Other
+                </option>
+
+            </select>
+
+
+            <select name="priority">
+
+                <option value="">
+                    All Priorities
+                </option>
+
+                <option
+                    value="High"
+                    {% if request.args.get('priority') == 'High' %}selected{% endif %}
+                >
+                    High
+                </option>
+
+                <option
+                    value="Medium"
+                    {% if request.args.get('priority') == 'Medium' %}selected{% endif %}
+                >
+                    Medium
+                </option>
+
+                <option
+                    value="Low"
+                    {% if request.args.get('priority') == 'Low' %}selected{% endif %}
+                >
+                    Low
+                </option>
+
+            </select>
+
+
+            <select name="status">
+
+                <option value="">
+                    All Statuses
+                </option>
+
+                <option
+                    value="Pending"
+                    {% if request.args.get('status') == 'Pending' %}selected{% endif %}
+                >
+                    Pending
+                </option>
+
+                <option
+                    value="In Progress"
+                    {% if request.args.get('status') == 'In Progress' %}selected{% endif %}
+                >
+                    In Progress
+                </option>
+
+                <option
+                    value="Resolved"
+                    {% if request.args.get('status') == 'Resolved' %}selected{% endif %}
+                >
+                    Resolved
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="filter-button"
+            >
+                Apply Filters
+            </button>
+
+
+            <a
+                href="/dashboard"
+                class="clear-button"
+            >
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+
+    <!-- DESKTOP INCIDENT TABLE -->
+
+    <div class="desktop-table-container">
+
+        {% if incidents %}
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Reporter</th>
+                    <th>Student / Staff No.</th>
+                    <th>Incident Type</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Date Reported</th>
+                    <th>Update Status</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for incident in incidents %}
+
+                <tr>
+
+                    <td>
+
+                        <span class="incident-id">
+                            #{{ incident[0] }}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        {% if incident[9] == 1 %}
+
+                            <span class="anonymous-badge">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <rect
+                                        x="5"
+                                        y="11"
+                                        width="14"
+                                        height="10"
+                                        rx="2">
+                                    </rect>
+
+                                    <path
+                                        d="M8 11V7a4 4 0 0 1 8 0v4">
+                                    </path>
+                                </svg>
+
+                                ANONYMOUS
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="reporter">
+                                {{ incident[1] }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if incident[9] == 1 %}
+
+                            <span class="identity-hidden">
+                                Identity hidden
+                            </span>
+
+                        {% else %}
+
+                            {{ incident[2] }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        {{ incident[3] }}
+                    </td>
+
+
+                    <td>
+                        {{ incident[4] }}
+                    </td>
+
+
+                    <td class="description">
+                        {{ incident[5] }}
+                    </td>
+
+
+                    <td>
+
+                        {% if incident[6] == "High" %}
+
+                            <span class="badge priority-high">
+                                High
+                            </span>
+
+                        {% elif incident[6] == "Medium" %}
+
+                            <span class="badge priority-medium">
+                                Medium
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge priority-low">
+                                Low
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if incident[7] == "Pending" %}
+
+                            <span class="badge status-pending">
+                                Pending
+                            </span>
+
+                        {% elif incident[7] == "In Progress" %}
+
+                            <span class="badge status-progress">
+                                In Progress
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge status-resolved">
+                                Resolved
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        {{ incident[8] }}
+                    </td>
+
+
+                    <td>
+
+                        <form
+                            method="POST"
+                            action="/update-status/{{ incident[0] }}"
+                            class="status-form"
+                        >
+
+                            <select name="status">
+
+                                <option
+                                    value="Pending"
+                                    {% if incident[7] == 'Pending' %}selected{% endif %}
+                                >
+                                    Pending
+                                </option>
+
+                                <option
+                                    value="In Progress"
+                                    {% if incident[7] == 'In Progress' %}selected{% endif %}
+                                >
+                                    In Progress
+                                </option>
+
+                                <option
+                                    value="Resolved"
+                                    {% if incident[7] == 'Resolved' %}selected{% endif %}
+                                >
+                                    Resolved
+                                </option>
+
+                            </select>
+
+
+                            <button
+                                type="submit"
+                                class="update-button"
+                            >
+                                Update
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h3>
+                    No incidents found
+                </h3>
+
+                <p>
+                    There are no incidents matching the selected filters.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</main>
+
+
+
+<footer class="desktop-footer">
+
+    <div>
+
+        <strong>
+            University of Fort Hare
+        </strong>
+
+        <p>
+            Together in Excellence
+        </p>
+
+    </div>
+
+
+    <div class="desktop-footer-middle">
+
+        <strong>
+            Security Control Centre
+        </strong>
+
+        <p>
+            Alice Campus
+        </p>
+
+    </div>
+
+
+    <div class="desktop-footer-right">
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/logout">
+            Log Out
+        </a>
+
+    </div>
+
+</footer>
+
+
+
+<!-- =========================================================
+     MOBILE SECURITY APP
+========================================================= -->
+
+<div class="mobile-app">
+
+
+    <!-- MOBILE HERO -->
+
+    <section class="mobile-hero">
+
+
+        <header class="mobile-header">
+
+
+            <div class="mobile-brand">
+
+
+                <div class="mobile-logo-box">
+
+                    <img
+                        src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                        alt="University of Fort Hare"
+                    >
+
+                </div>
+
+
+                <div class="mobile-brand-text">
+
+                    <strong>
+                        UFH Security
+                    </strong>
+
+                    <span>
+                        Security Control Centre
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <a
+                href="/logout"
+                class="mobile-logout"
+                aria-label="Log out"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+
+                    <path d="M16 17l5-5-5-5"></path>
+
+                    <path d="M21 12H9"></path>
+
+                </svg>
+
+            </a>
+
+
+        </header>
+
+
+
+        <div class="mobile-hero-content">
+
+            <div class="mobile-label">
+                SECURITY OFFICER
+            </div>
+
+            <h1>
+                Security <span>Control Centre</span>
+            </h1>
+
+            <div class="officer-line">
+                Signed in as {{ username }} • Alice Campus
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <main class="mobile-main">
+
+
+        <!-- HIGH PRIORITY -->
+
+        <div class="emergency-summary">
+
+
+            <div class="emergency-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+
+                    <path
+                        d="M10.29 3.86L1.82 18
+                        a2 2 0 0 0 1.71 3h16.94
+                        a2 2 0 0 0 1.71-3
+                        L13.71 3.86
+                        a2 2 0 0 0-3.42 0z">
+                    </path>
+
+                    <path d="M12 9v4"></path>
+
+                    <path d="M12 17h.01"></path>
+
+                </svg>
+
+            </div>
+
+
+            <div class="emergency-content">
+
+                <span>
+                    URGENT ATTENTION
+                </span>
+
+                <strong>
+                    High-Priority Incidents
+                </strong>
+
+            </div>
+
+
+            <div class="emergency-count">
+                {{ high_priority_incidents }}
+            </div>
+
+
+        </div>
+
+
+
+        <!-- STATISTICS -->
+
+        <div class="mobile-section-title">
+
+            <h2>
+                Incident Overview
+            </h2>
+
+            <p>
+                Current campus incident status
+            </p>
+
+        </div>
+
+
+
+        <div class="mobile-stats">
+
+
+            <!-- TOTAL -->
+
+            <div class="mobile-stat">
+
+                <div class="mobile-stat-top">
+
+                    <span class="mobile-stat-label">
+                        TOTAL
+                    </span>
+
+                    <div class="mobile-stat-icon blue">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M8 6h13"></path>
+                            <path d="M8 12h13"></path>
+                            <path d="M8 18h13"></path>
+                            <path d="M3 6h.01"></path>
+                            <path d="M3 12h.01"></path>
+                            <path d="M3 18h.01"></path>
+                        </svg>
+
+                    </div>
+
+                </div>
+
+                <div class="mobile-stat-number">
+                    {{ total_incidents }}
+                </div>
+
+            </div>
+
+
+
+            <!-- PENDING -->
+
+            <div class="mobile-stat">
+
+                <div class="mobile-stat-top">
+
+                    <span class="mobile-stat-label">
+                        PENDING
+                    </span>
+
+                    <div class="mobile-stat-icon gold">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v5l3 2"></path>
+                        </svg>
+
+                    </div>
+
+                </div>
+
+                <div class="mobile-stat-number">
+                    {{ pending_incidents }}
+                </div>
+
+            </div>
+
+
+
+            <!-- IN PROGRESS -->
+
+            <div class="mobile-stat">
+
+                <div class="mobile-stat-top">
+
+                    <span class="mobile-stat-label">
+                        IN PROGRESS
+                    </span>
+
+                    <div class="mobile-stat-icon orange">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M12 2v4"></path>
+                            <path d="M12 18v4"></path>
+                            <path d="M4.93 4.93l2.83 2.83"></path>
+                            <path d="M2 12h4"></path>
+                            <path d="M18 12h4"></path>
+                        </svg>
+
+                    </div>
+
+                </div>
+
+                <div class="mobile-stat-number">
+                    {{ in_progress_incidents }}
+                </div>
+
+            </div>
+
+
+
+            <!-- RESOLVED -->
+
+            <div class="mobile-stat">
+
+                <div class="mobile-stat-top">
+
+                    <span class="mobile-stat-label">
+                        RESOLVED
+                    </span>
+
+                    <div class="mobile-stat-icon green">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M8 12l3 3 5-6"></path>
+                        </svg>
+
+                    </div>
+
+                </div>
+
+                <div class="mobile-stat-number">
+                    {{ resolved_incidents }}
+                </div>
+
+            </div>
+
+
+
+            <!-- HIGH PRIORITY -->
+
+            <div class="mobile-stat high">
+
+                <div class="mobile-stat-top">
+
+                    <span class="mobile-stat-label">
+                        HIGH PRIORITY
+                    </span>
+
+                    <div class="mobile-stat-icon red">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                d="M10.29 3.86L1.82 18
+                                a2 2 0 0 0 1.71 3h16.94
+                                a2 2 0 0 0 1.71-3
+                                L13.71 3.86
+                                a2 2 0 0 0-3.42 0z">
+                            </path>
+
+                            <path d="M12 9v4"></path>
+
+                            <path d="M12 17h.01"></path>
+                        </svg>
+
+                    </div>
+
+                </div>
+
+                <div class="mobile-stat-number">
+                    {{ high_priority_incidents }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- FILTERS -->
+
+        <div
+            class="mobile-section-title"
+            id="mobile-incidents"
+        >
+
+            <h2>
+                Incident Management
+            </h2>
+
+            <p>
+                Search, review and update reported incidents
+            </p>
+
+        </div>
+
+
+
+        <div class="mobile-filter-card">
+
+            <form
+                method="GET"
+                action="/dashboard"
+            >
+
+
+                <div class="mobile-search">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                    </svg>
+
+
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search incidents..."
+                        value="{{ request.args.get('search', '') }}"
+                    >
+
+                </div>
+
+
+
+                <div class="mobile-filter-grid">
+
+
+                    <select name="incident_type">
+
+                        <option value="">
+                            All Types
+                        </option>
+
+                        <option
+                            value="Theft"
+                            {% if request.args.get('incident_type') == 'Theft' %}selected{% endif %}
+                        >
+                            Theft
+                        </option>
+
+                        <option
+                            value="Assault"
+                            {% if request.args.get('incident_type') == 'Assault' %}selected{% endif %}
+                        >
+                            Assault
+                        </option>
+
+                        <option
+                            value="Harassment"
+                            {% if request.args.get('incident_type') == 'Harassment' %}selected{% endif %}
+                        >
+                            Harassment
+                        </option>
+
+                        <option
+                            value="Vandalism"
+                            {% if request.args.get('incident_type') == 'Vandalism' %}selected{% endif %}
+                        >
+                            Vandalism
+                        </option>
+
+                        <option
+                            value="Suspicious Activity"
+                            {% if request.args.get('incident_type') == 'Suspicious Activity' %}selected{% endif %}
+                        >
+                            Suspicious Activity
+                        </option>
+
+                        <option
+                            value="Emergency SOS"
+                            {% if request.args.get('incident_type') == 'Emergency SOS' %}selected{% endif %}
+                        >
+                            Emergency SOS
+                        </option>
+
+                        <option
+                            value="Other"
+                            {% if request.args.get('incident_type') == 'Other' %}selected{% endif %}
+                        >
+                            Other
+                        </option>
+
+                    </select>
+
+
+
+                    <select name="priority">
+
+                        <option value="">
+                            All Priorities
+                        </option>
+
+                        <option
+                            value="High"
+                            {% if request.args.get('priority') == 'High' %}selected{% endif %}
+                        >
+                            High
+                        </option>
+
+                        <option
+                            value="Medium"
+                            {% if request.args.get('priority') == 'Medium' %}selected{% endif %}
+                        >
+                            Medium
+                        </option>
+
+                        <option
+                            value="Low"
+                            {% if request.args.get('priority') == 'Low' %}selected{% endif %}
+                        >
+                            Low
+                        </option>
+
+                    </select>
+
+
+
+                    <select name="status">
+
+                        <option value="">
+                            All Statuses
+                        </option>
+
+                        <option
+                            value="Pending"
+                            {% if request.args.get('status') == 'Pending' %}selected{% endif %}
+                        >
+                            Pending
+                        </option>
+
+                        <option
+                            value="In Progress"
+                            {% if request.args.get('status') == 'In Progress' %}selected{% endif %}
+                        >
+                            In Progress
+                        </option>
+
+                        <option
+                            value="Resolved"
+                            {% if request.args.get('status') == 'Resolved' %}selected{% endif %}
+                        >
+                            Resolved
+                        </option>
+
+                    </select>
+
+
+                </div>
+
+
+
+                <div class="mobile-filter-actions">
+
+                    <button
+                        type="submit"
+                        class="mobile-filter-submit"
+                    >
+                        Apply Filters
+                    </button>
+
+
+                    <a
+                        href="/dashboard#mobile-incidents"
+                        class="mobile-filter-clear"
+                    >
+                        Clear
+                    </a>
+
+                </div>
+
+
+            </form>
+
+        </div>
+
+
+
+        <!-- INCIDENT LIST -->
+
+        <div class="mobile-section-title">
+
+            <h2>
+                Reported Incidents
+            </h2>
+
+            <p>
+                Most recent matching incidents
+            </p>
+
+        </div>
+
+
+
+        {% if incidents %}
+
+
+            {% for incident in incidents %}
+
+
+                <article
+                    class="incident-card {% if incident[6] == 'High' %}high-priority{% endif %}"
+                >
+
+
+                    <div class="incident-card-header">
+
+
+                        <div>
+
+                            <div class="incident-number">
+                                REPORT #{{ incident[0] }}
+                            </div>
+
+                            <div class="incident-type">
+                                {{ incident[3] }}
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="incident-badges">
+
+
+                            {% if incident[6] == "High" %}
+
+                                <span class="badge priority-high">
+                                    High
+                                </span>
+
+                            {% elif incident[6] == "Medium" %}
+
+                                <span class="badge priority-medium">
+                                    Medium
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge priority-low">
+                                    Low
+                                </span>
+
+                            {% endif %}
+
+
+
+                            {% if incident[7] == "Pending" %}
+
+                                <span class="badge status-pending">
+                                    Pending
+                                </span>
+
+                            {% elif incident[7] == "In Progress" %}
+
+                                <span class="badge status-progress">
+                                    In Progress
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge status-resolved">
+                                    Resolved
+                                </span>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- REPORTER -->
+
+                    <div class="mobile-reporter">
+
+                        <div class="mobile-reporter-label">
+                            REPORTER
+                        </div>
+
+
+                        <div class="mobile-reporter-value">
+
+
+                            {% if incident[9] == 1 %}
+
+
+                                <span class="anonymous-badge">
+
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+
+                                        <rect
+                                            x="5"
+                                            y="11"
+                                            width="14"
+                                            height="10"
+                                            rx="2">
+                                        </rect>
+
+                                        <path
+                                            d="M8 11V7a4 4 0 0 1 8 0v4">
+                                        </path>
+
+                                    </svg>
+
+                                    ANONYMOUS
+
+                                </span>
+
+
+                            {% else %}
+
+
+                                {{ incident[1] }}
+                                •
+                                {{ incident[2] }}
+
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- INFO -->
+
+                    <div class="incident-info-grid">
+
+
+                        <div class="incident-info">
+
+                            <span>
+                                Location
+                            </span>
+
+                            <strong>
+                                {{ incident[4] }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="incident-info">
+
+                            <span>
+                                Date Reported
+                            </span>
+
+                            <strong>
+                                {{ incident[8] }}
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="mobile-description">
+
+                        <span>
+                            Description
+                        </span>
+
+                        <p>
+                            {{ incident[5] }}
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- STATUS UPDATE -->
+
+                    <div class="mobile-status-section">
+
+                        <span class="mobile-status-label">
+                            UPDATE INCIDENT STATUS
+                        </span>
+
+
+                        <form
+                            method="POST"
+                            action="/update-status/{{ incident[0] }}"
+                            class="mobile-status-form"
+                        >
+
+
+                            <select name="status">
+
+
+                                <option
+                                    value="Pending"
+                                    {% if incident[7] == 'Pending' %}selected{% endif %}
+                                >
+                                    Pending
+                                </option>
+
+
+                                <option
+                                    value="In Progress"
+                                    {% if incident[7] == 'In Progress' %}selected{% endif %}
+                                >
+                                    In Progress
+                                </option>
+
+
+                                <option
+                                    value="Resolved"
+                                    {% if incident[7] == 'Resolved' %}selected{% endif %}
+                                >
+                                    Resolved
+                                </option>
+
+
+                            </select>
+
+
+                            <button
+                                type="submit"
+                                class="mobile-update-button"
+                            >
+                                Update
+                            </button>
+
+
+                        </form>
+
+
+                    </div>
+
+
+                </article>
+
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <div class="mobile-empty">
+
+                <h3>
+                    No incidents found
+                </h3>
+
+                <p>
+                    No reports match the selected filters.
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </main>
+
+
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+
+    <nav class="security-bottom-nav">
+
+
+        <a
+            href="/dashboard"
+            class="active"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1">
+                </rect>
+
+                <rect
+                    x="14"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1">
+                </rect>
+
+                <rect
+                    x="3"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1">
+                </rect>
+
+                <rect
+                    x="14"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1">
+                </rect>
+            </svg>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+
+        <a href="/dashboard?status=Pending#mobile-incidents">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="9">
+                </circle>
+
+                <path d="M12 7v5l3 2"></path>
+            </svg>
+
+            <span>
+                Pending
+            </span>
+
+        </a>
+
+
+
+        <a
+            href="/dashboard?priority=High#mobile-incidents"
+            class="emergency-nav"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    d="M10.29 3.86L1.82 18
+                    a2 2 0 0 0 1.71 3h16.94
+                    a2 2 0 0 0 1.71-3
+                    L13.71 3.86
+                    a2 2 0 0 0-3.42 0z">
+                </path>
+
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+            </svg>
+
+            <span>
+                Urgent
+            </span>
+
+        </a>
+
+
+
+        <a href="/logout">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    d="M9 21H5a2 2 0 0 1-2-2V5
+                    a2 2 0 0 1 2-2h4">
+                </path>
+
+                <path d="M16 17l5-5-5-5"></path>
+
+                <path d="M21 12H9"></path>
+            </svg>
+
+            <span>
+                Log Out
+            </span>
+
+        </a>
+
+
+    </nav>
+
+
+</div>
+
+
+<div style="position:fixed;right:18px;bottom:18px;z-index:9999;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a href="{{ url_for('notifications_page') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Notifications</a><a href="{{ url_for('emergency_control') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Emergency Control</a><a href="{{ url_for('officer_status') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Officer Status / GPS</a><a href="{{ url_for('campus_map') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Campus Map</a></div></body>
+
+</html>

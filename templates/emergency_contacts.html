@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="UFH Security">
+    <meta name="theme-color" content="#062d63">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}"
+    >
+
+    <title>Emergency Contacts | UFH Campus Security</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+            min-height: 100vh;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .topbar {
+            min-height: 96px;
+            padding: 10px 50px;
+            background: white;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            border-bottom: 1px solid #e4eaf2;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ufh-logo {
+            width: 90px;
+            height: auto;
+        }
+
+        .divider {
+            width: 1px;
+            height: 55px;
+            background: #d8dee8;
+        }
+
+        .brand-text h1 {
+            color: #062d63;
+            font-size: 22px;
+        }
+
+        .brand-text p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .role-pill {
+            padding: 9px 14px;
+
+            background: #eef5ff;
+            color: #0751a8;
+
+            border-radius: 30px;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .logout {
+            padding: 13px 22px;
+
+            background: #062d63;
+            color: white;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+            font-weight: bold;
+
+            transition: 0.2s;
+        }
+
+        .logout:hover {
+            background: #041f46;
+        }
+
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 245px;
+
+            background-image:
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98) 0%,
+                    rgba(4,45,98,0.90) 45%,
+                    rgba(4,57,120,0.48) 75%,
+                    rgba(3,46,98,0.25) 100%
+                ),
+                url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+            background-size: cover;
+            background-position: center;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-inner {
+            width: 100%;
+            max-width: 1450px;
+            margin: auto;
+            padding: 38px 55px;
+        }
+
+        .hero-label {
+            display: inline-block;
+
+            padding: 8px 14px;
+
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+
+            border-radius: 30px;
+
+            color: white;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            margin-bottom: 16px;
+        }
+
+        .hero h2 {
+            color: white;
+            font-size: 44px;
+            line-height: 1.08;
+        }
+
+        .hero h2 span {
+            color: #ffc928;
+        }
+
+        .hero p {
+            margin-top: 13px;
+
+            max-width: 680px;
+
+            color: #f0f5fb;
+
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        main {
+            max-width: 1450px;
+            margin: auto;
+            padding: 35px 55px 55px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 24px;
+
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #0751a8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           INTRO CARD
+        ========================= */
+
+        .intro-card {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-top: 6px solid #0751a8;
+
+            border-radius: 16px;
+
+            padding: 28px 30px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.08);
+
+            display: flex;
+            align-items: center;
+
+            gap: 18px;
+        }
+
+        .intro-icon {
+            width: 62px;
+            height: 62px;
+            min-width: 62px;
+
+            border-radius: 15px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .intro-icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .intro-text h2 {
+            color: #062d63;
+            font-size: 26px;
+        }
+
+        .intro-text p {
+            margin-top: 7px;
+
+            color: #687b91;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================
+           CONTACT GRID
+        ========================= */
+
+        .contacts-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 22px;
+        }
+
+
+        /* =========================
+           CONTACT CARD
+        ========================= */
+
+        .contact-card {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-top: 5px solid #0751a8;
+
+            border-radius: 16px;
+
+            padding: 27px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.07);
+
+            display: flex;
+            flex-direction: column;
+
+            min-height: 285px;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 11px 27px rgba(30,60,100,0.12);
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 17px;
+        }
+
+        .card-icon {
+            width: 55px;
+            height: 55px;
+            min-width: 55px;
+
+            border-radius: 14px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-icon svg {
+            width: 29px;
+            height: 29px;
+        }
+
+        .card-heading h3 {
+            color: #062d63;
+            font-size: 20px;
+        }
+
+        .contact-card p {
+            color: #687b91;
+
+            line-height: 1.6;
+
+            margin-bottom: 10px;
+        }
+
+        .contact-card p strong {
+            color: #062d63;
+        }
+
+        .card-spacer {
+            flex: 1;
+        }
+
+
+        /* =========================
+           CALL BUTTON
+        ========================= */
+
+        .call-button {
+            width: 100%;
+
+            min-height: 76px;
+
+            margin-top: 17px;
+            padding: 11px 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0867c9,
+                    #064a98
+                );
+
+            border: 2px solid #2877c8;
+            border-radius: 13px;
+
+            color: white;
+
+            text-decoration: none;
+
+            display: flex;
+            align-items: center;
+
+            box-shadow:
+                0 7px 18px rgba(7,81,168,0.18);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .call-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 10px 24px rgba(7,81,168,0.27);
+        }
+
+        .call-icon {
+            width: 55px;
+            min-width: 55px;
+            height: 50px;
+
+            margin-right: 15px;
+
+            border-right:
+                1px solid rgba(255,255,255,0.42);
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .call-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .call-text {
+            flex: 1;
+        }
+
+        .call-text strong {
+            display: block;
+
+            color: white;
+
+            font-size: 16px;
+        }
+
+        .call-text span {
+            display: block;
+
+            margin-top: 4px;
+
+            color: #dbeafe;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .call-arrow {
+            margin-left: 10px;
+
+            font-size: 27px;
+
+            line-height: 1;
+        }
+
+
+        /* =========================
+           CAMPUS CONTROL
+        ========================= */
+
+        .campus-control {
+            border-top-color: #062d63;
+        }
+
+        .campus-control .card-icon {
+            background: #e9f0f9;
+            color: #062d63;
+        }
+
+
+        /* =========================
+           POLICE CARD
+        ========================= */
+
+        .police-card {
+            border-top-color: #173f77;
+        }
+
+
+        /* =========================
+           EMERGENCY SERVICES
+        ========================= */
+
+        .medical-card {
+            border-top-color: #16805b;
+        }
+
+        .medical-card .card-icon {
+            background: #e7f8f0;
+            color: #16805b;
+        }
+
+        .medical-card .call-button {
+            background:
+                linear-gradient(
+                    135deg,
+                    #18815c,
+                    #116747
+                );
+
+            border-color: #2d9a75;
+
+            box-shadow:
+                0 7px 18px rgba(22,128,91,0.18);
+        }
+
+        .medical-card .call-button:hover {
+            box-shadow:
+                0 10px 24px rgba(22,128,91,0.25);
+        }
+
+        .medical-card .call-text span {
+            color: #e4fff5;
+        }
+
+
+        /* =========================
+           SOS CARD
+        ========================= */
+
+        .sos-card {
+            grid-column: 1 / -1;
+
+            min-height: 0;
+
+            border: 1px solid #ffcbd1;
+            border-top: 6px solid #ef233c;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #fffafb,
+                    #fff5f6
+                );
+        }
+
+        .sos-card .card-icon {
+            background: #ffe8eb;
+            color: #e80d21;
+        }
+
+        .sos-card .card-heading h3 {
+            color: #d7192d;
+        }
+
+        .sos-layout {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(350px, 0.75fr);
+
+            gap: 30px;
+
+            align-items: center;
+        }
+
+        .sos-button {
+            width: 100%;
+
+            min-height: 96px;
+
+            padding: 0 22px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3545 0%,
+                    #ef1d31 45%,
+                    #d90d21 100%
+                );
+
+            border: 4px solid #ff7180;
+            border-radius: 15px;
+
+            color: white;
+
+            text-decoration: none;
+
+            display: flex;
+            align-items: center;
+
+            box-shadow:
+                0 0 0 5px rgba(255,38,57,0.07),
+                0 8px 24px rgba(232,13,33,0.22);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .sos-button:hover {
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 0 0 6px rgba(255,38,57,0.10),
+                0 13px 30px rgba(232,13,33,0.30);
+        }
+
+        .sos-button-icon {
+            width: 68px;
+            min-width: 68px;
+            height: 61px;
+
+            margin-right: 19px;
+
+            border-right:
+                1px solid rgba(255,255,255,0.45);
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .sos-button-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .sos-button-text {
+            flex: 1;
+        }
+
+        .sos-button-text strong {
+            display: block;
+
+            color: white;
+
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .sos-button-text span {
+            display: block;
+
+            margin-top: 5px;
+
+            color: #fff0f2;
+
+            font-size: 12px;
+        }
+
+        .sos-arrow {
+            margin-left: 15px;
+
+            color: white;
+
+            font-size: 32px;
+        }
+
+
+        /* =========================
+           IMPORTANT NOTICE
+        ========================= */
+
+        .important-note {
+            margin-top: 25px;
+
+            background: #fff8ed;
+
+            border: 1px solid #ffe1b8;
+            border-left: 5px solid #f28b22;
+
+            border-radius: 11px;
+
+            padding: 19px 21px;
+
+            display: flex;
+            align-items: flex-start;
+
+            gap: 13px;
+
+            color: #536273;
+
+            line-height: 1.6;
+        }
+
+        .note-icon {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+
+            color: #d96d08;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .note-icon svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .important-note strong {
+            color: #a84d00;
+        }
+
+
+        /* =========================
+           BACK
+        ========================= */
+
+        .bottom-actions {
+            margin-top: 25px;
+
+            display: flex;
+            justify-content: center;
+        }
+
+        .back-button {
+            padding: 15px 22px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 10px;
+
+            background: white;
+            color: #0751a8;
+
+            border: 1px solid #d8e3ef;
+            border-radius: 11px;
+
+            text-decoration: none;
+            font-weight: bold;
+
+            box-shadow:
+                0 5px 15px rgba(30,60,100,0.07);
+
+            transition: 0.2s;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 9px 20px rgba(30,60,100,0.12);
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            background: #05295d;
+            color: white;
+
+            padding: 22px 50px;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+        footer p {
+            color: #d6e0ed;
+            margin-top: 5px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 900px) {
+
+            .contacts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sos-card {
+                grid-column: auto;
+            }
+
+            .sos-layout {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+
+        @media(max-width: 750px) {
+
+            .topbar {
+                padding: 10px 20px;
+            }
+
+            .divider,
+            .role-pill {
+                display: none;
+            }
+
+            .brand-text h1 {
+                font-size: 17px;
+            }
+
+            .brand-text p {
+                display: none;
+            }
+
+            .ufh-logo {
+                width: 70px;
+            }
+
+            .logout {
+                padding: 11px 16px;
+            }
+
+            .hero-inner {
+                padding: 35px 25px;
+            }
+
+            .hero h2 {
+                font-size: 36px;
+            }
+
+            main {
+                padding: 30px 20px;
+            }
+
+            .intro-card {
+                align-items: flex-start;
+                padding: 23px;
+            }
+
+        }
+
+
+        @media(max-width: 520px) {
+
+            .brand-text {
+                display: none;
+            }
+
+            .hero h2 {
+                font-size: 31px;
+            }
+
+            .contact-card {
+                padding: 21px;
+            }
+
+            .sos-button {
+                padding: 0 14px;
+            }
+
+            .sos-button-icon {
+                width: 55px;
+                min-width: 55px;
+
+                margin-right: 13px;
+            }
+
+            .sos-button-icon svg {
+                width: 34px;
+                height: 34px;
+            }
+
+            .sos-button-text strong {
+                font-size: 16px;
+            }
+
+            .sos-button-text span {
+                font-size: 11px;
+            }
+
+            .sos-arrow {
+                font-size: 27px;
+                margin-left: 7px;
+            }
+
+        }
+
+
+        .mobile-app{display:none}
+        @media(max-width:750px){
+          body{padding-bottom:calc(78px + env(safe-area-inset-bottom));background:#f4f7fb}
+          body>.topbar,body>.hero,body>main,body>footer{display:none!important}
+          .mobile-app{display:block;min-height:100vh}
+          .mhero{min-height:280px;border-radius:0 0 34px 34px;background-image:linear-gradient(155deg,rgba(2,29,66,.98),rgba(4,44,94,.94) 52%,rgba(4,75,143,.76)),url("{{ url_for('static_files', filename='alice-campus.png') }}");background-size:cover;background-position:center;overflow:hidden}
+          .mhead{padding:calc(15px + env(safe-area-inset-top)) 20px 10px;display:flex;align-items:center;justify-content:space-between}.mbrand{display:flex;align-items:center;gap:12px}.mlogo{width:53px;height:53px;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.16)}.mlogo img{width:44px}.mbrand strong{display:block;color:#fff;font-size:17px}.mbrand span{display:block;color:rgba(255,255,255,.72);font-size:11px;margin-top:4px}.mback{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center}.mback svg{width:22px}
+          .mcopy{padding:22px 20px 48px}.mkicker{color:#ffc928;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:8px}.mcopy h1{color:#fff;font-size:31px}.mcopy h1 span{color:#ffc928}.mcopy p{color:rgba(255,255,255,.82);font-size:13px;line-height:1.5;margin-top:9px;max-width:330px}
+          .mcontent{margin-top:-30px;position:relative;z-index:3;padding:0 17px 28px}.mintro{background:#fff;border:1px solid #e1e8f1;border-top:5px solid #0751a8;border-radius:22px;padding:17px;box-shadow:0 12px 30px rgba(20,45,80,.1)}.mintro strong{color:#062d63;font-size:16px}.mintro p{color:#7b8b9e;font-size:10px;line-height:1.45;margin-top:5px}.msection{margin:23px 3px 11px}.msection h2{color:#062d63;font-size:17px}.msection p{color:#8190a2;font-size:10px;margin-top:4px}
+          .mcontact{display:flex;align-items:center;gap:12px;margin-bottom:11px;padding:15px;background:#fff;border:1px solid #e1e8f1;border-radius:19px;box-shadow:0 6px 18px rgba(20,45,80,.06);text-decoration:none;color:#062d63}.micon{width:47px;height:47px;flex:0 0 47px;border-radius:14px;background:#eaf3ff;color:#0751a8;display:flex;align-items:center;justify-content:center}.micon svg{width:24px}.mtext{flex:1}.mtext strong{display:block;font-size:12px}.mtext small{display:block;color:#8391a2;font-size:9px;margin-top:3px}.mnum{display:block;color:#0751a8;font-size:11px;font-weight:800;margin-top:5px}.mcall{width:38px;height:38px;border-radius:12px;background:#0751a8;color:#fff;display:flex;align-items:center;justify-content:center}.mcall svg{width:19px}
+          .msos{display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;margin-top:17px;padding:15px;min-height:88px;border-radius:19px;border:3px solid #ff7180;background:linear-gradient(135deg,#ff3545,#ed1c32 50%,#d90429);box-shadow:0 10px 24px rgba(217,4,41,.24)}.msosicon{width:54px;height:54px;border-radius:15px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}.msosicon svg{width:30px}.msostext{flex:1}.msostext strong{display:block;font-size:13px}.msostext span{display:block;font-size:9px;color:#fff0f2;margin-top:4px}.mnotice{margin-top:13px;padding:14px;border-radius:17px;background:#fff8ed;border:1px solid #ffe1b8;color:#7a5a39;font-size:9px;line-height:1.5}.mnotice strong{color:#a84d00}
+          .mnav{position:fixed;left:0;right:0;bottom:0;z-index:100;min-height:72px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(255,255,255,.98);border-top:1px solid #e4eaf2;display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 -8px 25px rgba(20,40,70,.07)}.mnav a{min-height:53px;text-decoration:none;color:#8390a1;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.mnav svg{width:22px;height:22px}.mnav .active{color:#0751a8;font-weight:800}.mnav .sos{color:#d90429;font-weight:800}.sosbubble{width:45px;height:45px;margin-top:-25px;margin-bottom:-4px;border-radius:50%;background:#d90429;color:#fff;border:4px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 16px rgba(217,4,41,.3)}
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <img
+            src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+            class="ufh-logo"
+            alt="University of Fort Hare Logo"
+        >
+
+        <div class="divider"></div>
+
+        <div class="brand-text">
+
+            <h1>
+                Campus Security Management System
+            </h1>
+
+            <p>
+                Alice Campus
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+        <div class="role-pill">
+            Student
+        </div>
+
+        <a href="/logout" class="logout">
+            Log Out
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+    <div class="hero-inner">
+
+        <div class="hero-label">
+            UNIVERSITY OF FORT HARE • ALICE CAMPUS
+        </div>
+
+        <h2>
+            Emergency <span>Contacts.</span>
+        </h2>
+
+        <p>
+            Quickly reach campus security, police and emergency
+            services when immediate assistance is required.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<main>
+
+
+    <div class="breadcrumb">
+
+        <a href="/student-dashboard">
+            Home
+        </a>
+
+        &nbsp; › &nbsp;
+
+        Emergency Contacts
+
+    </div>
+
+
+    <!-- =========================
+         INTRO
+    ========================= -->
+
+    <section class="intro-card">
+
+        <div class="intro-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+
+        </div>
+
+
+        <div class="intro-text">
+
+            <h2>
+                Emergency Assistance
+            </h2>
+
+            <p>
+                Select the appropriate contact below. On a supported
+                device, press the call button to open the phone application
+                with the emergency number ready to dial.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CONTACTS
+    ========================= -->
+
+    <div class="contacts-grid">
+
+
+        <!-- =========================
+             CAMPUS CONTROL
+        ========================= -->
+
+        <article class="contact-card campus-control">
+
+
+            <div class="card-heading">
+
+                <div class="card-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    UFH Campus Control
+                </h3>
+
+            </div>
+
+
+            <p>
+                Alice Campus security and incident reporting.
+            </p>
+
+            <p>
+                Campus Control is located at the
+                <strong>Great Hall</strong>.
+            </p>
+
+
+            <div class="card-spacer"></div>
+
+
+            <a
+                href="tel:0406022243"
+                class="call-button"
+            >
+
+                <div class="call-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="call-text">
+
+                    <strong>
+                        Call Campus Control
+                    </strong>
+
+                    <span>
+                        040 602 2243
+                    </span>
+
+                </div>
+
+
+                <div class="call-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </article>
+
+
+        <!-- =========================
+             UFH EMERGENCY CONTACT
+        ========================= -->
+
+        <article class="contact-card">
+
+
+            <div class="card-heading">
+
+                <div class="card-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle cx="12" cy="7" r="4"></circle>
+                        <path d="M4 21a8 8 0 0 1 16 0"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    UFH Emergency Contact
+                </h3>
+
+            </div>
+
+
+            <p>
+                University emergency contact person:
+            </p>
+
+            <p>
+                <strong>Mr M Paliso</strong>
+            </p>
+
+
+            <div class="card-spacer"></div>
+
+
+            <a
+                href="tel:0646283897"
+                class="call-button"
+            >
+
+                <div class="call-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="call-text">
+
+                    <strong>
+                        Call UFH Emergency Contact
+                    </strong>
+
+                    <span>
+                        064 628 3897
+                    </span>
+
+                </div>
+
+
+                <div class="call-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </article>
+
+
+        <!-- =========================
+             SAPS
+        ========================= -->
+
+        <article class="contact-card police-card">
+
+
+            <div class="card-heading">
+
+                <div class="card-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M12 2l3 3 4-.5-.5 4 3 3-3 3 .5 4-4-.5-3 3-3-3-4 .5.5-4-3-3 3-3-.5-4 4 .5z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    South African Police
+                </h3>
+
+            </div>
+
+
+            <p>
+                Police emergency assistance for situations requiring
+                immediate law-enforcement response.
+            </p>
+
+
+            <div class="card-spacer"></div>
+
+
+            <a
+                href="tel:10111"
+                class="call-button"
+            >
+
+                <div class="call-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="call-text">
+
+                    <strong>
+                        Call SAPS Emergency
+                    </strong>
+
+                    <span>
+                        10111
+                    </span>
+
+                </div>
+
+
+                <div class="call-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </article>
+
+
+        <!-- =========================
+             EMERGENCY SERVICES
+        ========================= -->
+
+        <article class="contact-card medical-card">
+
+
+            <div class="card-heading">
+
+                <div class="card-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 8v8"></path>
+                        <path d="M8 12h8"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Emergency Services
+                </h3>
+
+            </div>
+
+
+            <p>
+                Emergency services number available from a
+                mobile phone.
+            </p>
+
+
+            <div class="card-spacer"></div>
+
+
+            <a
+                href="tel:112"
+                class="call-button"
+            >
+
+                <div class="call-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="call-text">
+
+                    <strong>
+                        Call Emergency Services
+                    </strong>
+
+                    <span>
+                        112
+                    </span>
+
+                </div>
+
+
+                <div class="call-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+        </article>
+
+
+        <!-- =========================
+             CAMPUS SOS
+        ========================= -->
+
+        <article class="contact-card sos-card">
+
+
+            <div class="sos-layout">
+
+
+                <div>
+
+
+                    <div class="card-heading">
+
+                        <div class="card-icon">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M8 17h8"></path>
+                                <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                                <path d="M5 21h14"></path>
+                                <path d="M12 2v3"></path>
+                                <path d="M4.2 5.2l2.1 2.1"></path>
+                                <path d="M19.8 5.2l-2.1 2.1"></path>
+                                <path d="M2 12h3"></path>
+                                <path d="M19 12h3"></path>
+                            </svg>
+
+                        </div>
+
+                        <h3>
+                            Campus Emergency SOS
+                        </h3>
+
+                    </div>
+
+
+                    <p>
+                        Send a high-priority emergency report directly
+                        to Campus Security through the system.
+                    </p>
+
+                    <p>
+                        Use this when you require urgent assistance
+                        on campus.
+                    </p>
+
+
+                </div>
+
+
+                <a
+                    href="/sos"
+                    class="sos-button"
+                >
+
+                    <div class="sos-button-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M8 17h8"></path>
+                            <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                            <path d="M5 21h14"></path>
+                            <path d="M12 2v3"></path>
+                            <path d="M4.2 5.2l2.1 2.1"></path>
+                            <path d="M19.8 5.2l-2.1 2.1"></path>
+                            <path d="M2 12h3"></path>
+                            <path d="M19 12h3"></path>
+                        </svg>
+
+                    </div>
+
+
+                    <div class="sos-button-text">
+
+                        <strong>
+                            EMERGENCY SOS
+                        </strong>
+
+                        <span>
+                            Request immediate campus assistance
+                        </span>
+
+                    </div>
+
+
+                    <div class="sos-arrow">
+                        →
+                    </div>
+
+                </a>
+
+
+            </div>
+
+
+        </article>
+
+
+    </div>
+
+
+    <!-- =========================
+         IMPORTANT NOTICE
+    ========================= -->
+
+    <div class="important-note">
+
+
+        <div class="note-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+            </svg>
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Important:
+            </strong>
+
+            If there is an immediate threat to life, contact
+            emergency services or Campus Control first. The Campus
+            SOS feature can also be used to record the incident in
+            the system.
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================
+         BACK
+    ========================= -->
+
+    <div class="bottom-actions">
+
+        <a
+            href="/student-dashboard"
+            class="back-button"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M19 12H5"></path>
+                <path d="M12 19l-7-7 7-7"></path>
+            </svg>
+
+            Return to Student Dashboard
+
+        </a>
+
+    </div>
+
+
+</main>
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer>
+
+    <strong>
+        University of Fort Hare
+    </strong>
+
+    <p>
+        Campus Security Management System • Alice Campus
+    </p>
+
+</footer>
+
+
+<div class="mobile-app"><section class="mhero"><div class="mhead"><div class="mbrand"><div class="mlogo"><img src="{{ url_for('static_files', filename='ufh-logo.png') }}" alt="UFH"></div><div><strong>UFH Security</strong><span>Alice Campus</span></div></div><a class="mback" href="/student-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></a></div><div class="mcopy"><div class="mkicker">EMERGENCY ASSISTANCE</div><h1>Emergency <span>Contacts</span></h1><p>Quickly reach campus security, police and emergency services when immediate assistance is required.</p></div></section><main class="mcontent"><section class="mintro"><strong>Tap to Call</strong><p>Select a contact below to open your phone application with the emergency number ready to dial.</p></section><div class="msection"><h2>Campus & Emergency Services</h2><p>Important numbers for Alice Campus</p></div>
+<a class="mcontact" href="tel:0406022243"><div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg></div><div class="mtext"><strong>UFH Campus Control</strong><small>Alice Campus security • Great Hall</small><span class="mnum">040 602 2243</span></div><div class="mcall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></div></a>
+<a class="mcontact" href="tel:0646283897"><div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></div><div class="mtext"><strong>UFH Emergency Contact</strong><small>Mr M Paliso</small><span class="mnum">064 628 3897</span></div><div class="mcall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></div></a>
+<a class="mcontact" href="tel:10111"><div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg></div><div class="mtext"><strong>South African Police</strong><small>Police emergency assistance</small><span class="mnum">10111</span></div><div class="mcall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></div></a>
+<a class="mcontact" href="tel:112"><div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></div><div class="mtext"><strong>Emergency Services</strong><small>Emergency number from a mobile phone</small><span class="mnum">112</span></div><div class="mcall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg></div></a>
+<a class="msos" href="/sos"><div class="msosicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg></div><div class="msostext"><strong>EMERGENCY SOS</strong><span>Send a high-priority alert to Campus Security</span></div></a>
+<div class="mnotice"><strong>Important:</strong> If there is an immediate threat to life, contact emergency services or Campus Control first. The Campus SOS feature can also record the incident in the system.</div></main>
+<nav class="mnav"><a href="/student-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg><span>Home</span></a><a href="/my-reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg><span>Reports</span></a><a href="/sos" class="sos"><div class="sosbubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg></div><span>SOS</span></a><a href="/emergency-contacts" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18"></path></svg><span>Contacts</span></a></nav></div>
+</body>
+
+</html>

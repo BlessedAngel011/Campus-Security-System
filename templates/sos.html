@@ -1,0 +1,3421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta name="theme-color" content="#062d63">
+
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default">
+
+    <meta
+        name="apple-mobile-web-app-title"
+        content="UFH Security">
+
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}">
+
+    <link
+        rel="apple-touch-icon"
+        href="{{ url_for('static_files', filename='icon-192.png') }}">
+
+
+    <title>
+        Emergency SOS | UFH Campus Security
+    </title>
+
+
+    <style>
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        body {
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f7fb;
+
+            color: #10284f;
+        }
+
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        /* =========================================================
+           DESKTOP HEADER
+        ========================================================= */
+
+        .desktop-header {
+
+            min-height: 94px;
+
+            padding: 10px 50px;
+
+            background: white;
+
+            border-bottom:
+                1px solid #e4eaf2;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content:
+                space-between;
+        }
+
+
+        .desktop-brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 18px;
+        }
+
+
+        .desktop-logo {
+
+            width: 88px;
+
+            height: auto;
+        }
+
+
+        .desktop-divider {
+
+            width: 1px;
+
+            height: 53px;
+
+            background: #d8dee8;
+        }
+
+
+        .desktop-brand h1 {
+
+            color: #062d63;
+
+            font-size: 21px;
+        }
+
+
+        .desktop-brand p {
+
+            margin-top: 5px;
+
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+
+        .desktop-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+        }
+
+
+        .desktop-role {
+
+            padding: 9px 14px;
+
+            border-radius: 30px;
+
+            background: #eef5ff;
+
+            color: #0751a8;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+
+        .desktop-logout {
+
+            padding: 12px 20px;
+
+            border-radius: 9px;
+
+            background: #062d63;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: 700;
+        }
+
+
+        /* =========================================================
+           DESKTOP HERO
+        ========================================================= */
+
+        .desktop-hero {
+
+            min-height: 230px;
+
+            background-image:
+
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98),
+                    rgba(4,45,98,0.88),
+                    rgba(4,57,120,0.40)
+                ),
+
+                url(
+                    "{{ url_for('static_files', filename='alice-campus.png') }}"
+                );
+
+            background-size: cover;
+
+            background-position: center;
+
+            display: flex;
+
+            align-items: center;
+        }
+
+
+        .desktop-hero-inner {
+
+            width: 100%;
+
+            max-width: 1400px;
+
+            margin: auto;
+
+            padding: 38px 55px;
+        }
+
+
+        .desktop-label {
+
+            display: inline-block;
+
+            padding: 8px 14px;
+
+            margin-bottom: 14px;
+
+            border-radius: 30px;
+
+            border:
+                1px solid rgba(255,255,255,0.20);
+
+            background:
+                rgba(255,255,255,0.12);
+
+            color: white;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+
+        .desktop-hero h2 {
+
+            color: white;
+
+            font-size: 43px;
+
+            line-height: 1.08;
+        }
+
+
+        .desktop-hero h2 span {
+            color: #ff5365;
+        }
+
+
+        .desktop-hero p {
+
+            margin-top: 12px;
+
+            max-width: 650px;
+
+            color: #e9f0f8;
+
+            font-size: 16px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================================================
+           DESKTOP MAIN
+        ========================================================= */
+
+        .desktop-main {
+
+            max-width: 1400px;
+
+            margin: auto;
+
+            padding: 34px 55px 55px;
+        }
+
+
+        .breadcrumb {
+
+            margin-bottom: 22px;
+
+            color: #718096;
+
+            font-size: 14px;
+        }
+
+
+        .breadcrumb a {
+
+            color: #0751a8;
+
+            text-decoration: none;
+
+            font-weight: 700;
+        }
+
+
+        .desktop-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 2fr)
+                minmax(300px, 0.8fr);
+
+            gap: 25px;
+
+            align-items: start;
+        }
+
+
+        /* =========================================================
+           SOS CARD
+        ========================================================= */
+
+        .sos-card {
+
+            padding: 31px;
+
+            background: white;
+
+            border:
+                1px solid #e1e8f1;
+
+            border-top:
+                6px solid #ef233c;
+
+            border-radius: 17px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(20,45,80,0.08);
+        }
+
+
+        .sos-heading {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+
+        .sos-heading-icon {
+
+            width: 61px;
+
+            height: 61px;
+
+            min-width: 61px;
+
+            border-radius: 15px;
+
+            background: #ffe9ec;
+
+            color: #e91d35;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .sos-heading-icon svg {
+
+            width: 34px;
+
+            height: 34px;
+        }
+
+
+        .sos-heading h2 {
+
+            color: #062d63;
+
+            font-size: 27px;
+        }
+
+
+        .logged-in {
+
+            margin-top: 8px;
+
+            margin-left: 76px;
+
+            color: #687b91;
+
+            font-size: 14px;
+        }
+
+
+        .logged-in strong {
+            color: #062d63;
+        }
+
+
+        /* =========================================================
+           WARNING
+        ========================================================= */
+
+        .warning {
+
+            margin-top: 25px;
+
+            padding: 17px;
+
+            background: #fff0f2;
+
+            border:
+                1px solid #ffd7dc;
+
+            border-left:
+                5px solid #ef233c;
+
+            border-radius: 11px;
+
+            color: #b41f31;
+
+            line-height: 1.5;
+        }
+
+
+        .warning-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            margin-bottom: 5px;
+
+            color: #d71932;
+
+            font-weight: 800;
+        }
+
+
+        .warning-title svg {
+
+            width: 19px;
+
+            height: 19px;
+        }
+
+
+        .error {
+
+            margin-top: 18px;
+
+            padding: 14px;
+
+            border-radius: 10px;
+
+            border:
+                1px solid #fecaca;
+
+            background: #fee2e2;
+
+            color: #991b1b;
+
+            font-weight: 700;
+        }
+
+
+        /* =========================================================
+           LOCATION AREA
+        ========================================================= */
+
+        .location-section {
+
+            margin-top: 25px;
+        }
+
+
+        .field-label {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            margin-bottom: 10px;
+
+            color: #062d63;
+
+            font-size: 15px;
+
+            font-weight: 800;
+        }
+
+
+        .field-label svg {
+
+            width: 20px;
+
+            height: 20px;
+
+            color: #0751a8;
+        }
+
+
+        .gps-button {
+
+            width: 100%;
+
+            min-height: 62px;
+
+            padding: 13px 18px;
+
+            border:
+                2px solid #0751a8;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef6ff,
+                    #e4f1ff
+                );
+
+            color: #0751a8;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 11px;
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            transition: 0.2s;
+        }
+
+
+        .gps-button:hover {
+
+            background: #dcecff;
+
+            transform:
+                translateY(-1px);
+        }
+
+
+        .gps-button svg {
+
+            width: 23px;
+
+            height: 23px;
+        }
+
+
+        .gps-status {
+
+            display: none;
+
+            margin-top: 12px;
+
+            padding: 13px 14px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        .gps-status.loading {
+
+            display: block;
+
+            background: #eef5ff;
+
+            border:
+                1px solid #cfe1f8;
+
+            color: #0751a8;
+        }
+
+
+        .gps-status.success {
+
+            display: block;
+
+            background: #e8f7ef;
+
+            border:
+                1px solid #bde8cf;
+
+            color: #167347;
+        }
+
+
+        .gps-status.error-status {
+
+            display: block;
+
+            background: #fff1f3;
+
+            border:
+                1px solid #ffd7dc;
+
+            color: #c91830;
+        }
+
+
+        .location-divider {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin: 20px 0;
+
+            color: #8998a9;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+
+        .location-divider::before,
+        .location-divider::after {
+
+            content: "";
+
+            flex: 1;
+
+            height: 1px;
+
+            background: #e0e7ef;
+        }
+
+
+        .manual-location {
+
+            width: 100%;
+
+            min-height: 54px;
+
+            padding: 15px;
+
+            border:
+                1px solid #b8c8db;
+
+            border-radius: 10px;
+
+            background: #fbfdff;
+
+            color: #10284f;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+
+        .manual-location:focus {
+
+            border-color: #0751a8;
+
+            background: white;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(7,81,168,0.09);
+        }
+
+
+        .field-help {
+
+            margin-top: 7px;
+
+            color: #8795a7;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+        }
+
+
+        /* =========================================================
+           SEND SOS
+        ========================================================= */
+
+        .send-sos {
+
+            width: 100%;
+
+            min-height: 100px;
+
+            margin-top: 26px;
+
+            padding: 15px 22px;
+
+            border:
+                4px solid #ff7180;
+
+            border-radius: 16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3545,
+                    #ed1c32,
+                    #d90429
+                );
+
+            color: white;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            text-align: left;
+
+            box-shadow:
+                0 8px 24px
+                rgba(217,4,41,0.25);
+
+            transition: 0.2s;
+        }
+
+
+        .send-sos:hover {
+
+            transform:
+                translateY(-2px);
+        }
+
+
+        .send-sos-icon {
+
+            width: 65px;
+
+            height: 65px;
+
+            min-width: 65px;
+
+            margin-right: 17px;
+
+            border-radius: 15px;
+
+            background:
+                rgba(255,255,255,0.14);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .send-sos-icon svg {
+
+            width: 38px;
+
+            height: 38px;
+        }
+
+
+        .send-sos-text {
+            flex: 1;
+        }
+
+
+        .send-sos-text strong {
+
+            display: block;
+
+            font-size: 19px;
+        }
+
+
+        .send-sos-text span {
+
+            display: block;
+
+            margin-top: 5px;
+
+            color: #fff0f2;
+
+            font-size: 13px;
+        }
+
+
+        .send-arrow {
+
+            margin-left: 15px;
+
+            font-size: 30px;
+        }
+
+
+        /* =========================================================
+           SIDE CARDS
+        ========================================================= */
+
+        .side-card {
+
+            margin-bottom: 20px;
+
+            padding: 23px;
+
+            border:
+                1px solid #e1e8f1;
+
+            border-radius: 16px;
+
+            background: white;
+
+            box-shadow:
+                0 7px 20px
+                rgba(20,45,80,0.06);
+        }
+
+
+        .side-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            margin-bottom: 13px;
+        }
+
+
+        .side-icon {
+
+            width: 45px;
+
+            height: 45px;
+
+            min-width: 45px;
+
+            border-radius: 12px;
+
+            background: #eaf3ff;
+
+            color: #0751a8;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .side-icon svg {
+
+            width: 24px;
+
+            height: 24px;
+        }
+
+
+        .side-title h3 {
+
+            color: #062d63;
+
+            font-size: 18px;
+        }
+
+
+        .side-card p {
+
+            color: #687b91;
+
+            font-size: 14px;
+
+            line-height: 1.55;
+        }
+
+
+        .call-link {
+
+            margin-top: 13px;
+
+            min-height: 67px;
+
+            padding: 12px;
+
+            border-radius: 12px;
+
+            text-decoration: none;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+
+        .call-red {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ef233c,
+                    #d90429
+                );
+
+            color: white;
+        }
+
+
+        .call-outline {
+
+            border:
+                2px solid #ef233c;
+
+            color: #d71932;
+
+            background: white;
+        }
+
+
+        .call-icon {
+
+            width: 42px;
+
+            height: 42px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .call-icon svg {
+
+            width: 25px;
+
+            height: 25px;
+        }
+
+
+        .call-info {
+            flex: 1;
+        }
+
+
+        .call-info strong {
+
+            display: block;
+
+            font-size: 14px;
+        }
+
+
+        .call-info span {
+
+            display: block;
+
+            margin-top: 4px;
+
+            font-size: 12px;
+
+            opacity: 0.85;
+        }
+
+
+        .back-dashboard {
+
+            width: 100%;
+
+            margin-top: 18px;
+
+            padding: 15px;
+
+            border:
+                1px solid #d8e3ef;
+
+            border-radius: 11px;
+
+            background: white;
+
+            color: #0751a8;
+
+            text-decoration: none;
+
+            font-weight: 700;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 8px;
+        }
+
+
+        .back-dashboard svg {
+
+            width: 19px;
+
+            height: 19px;
+        }
+
+
+        /* =========================================================
+           DESKTOP FOOTER
+        ========================================================= */
+
+        .desktop-footer {
+
+            padding: 22px 40px;
+
+            background: #05295d;
+
+            color: white;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+
+        .desktop-footer p {
+
+            margin-top: 5px;
+
+            color: #d6e0ed;
+        }
+
+
+        /* =========================================================
+           MOBILE HIDDEN ON DESKTOP
+        ========================================================= */
+
+        .mobile-app {
+            display: none;
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media(max-width: 750px) {
+
+            body {
+
+                padding-bottom:
+                    calc(
+                        78px +
+                        env(safe-area-inset-bottom)
+                    );
+            }
+
+
+            .desktop-header,
+            .desktop-hero,
+            .desktop-main,
+            .desktop-footer {
+
+                display: none !important;
+            }
+
+
+            .mobile-app {
+
+                display: block;
+
+                min-height: 100vh;
+            }
+
+
+            /* =====================================================
+               MOBILE HERO
+            ===================================================== */
+
+            .mobile-hero {
+
+                position: relative;
+
+                min-height: 290px;
+
+                overflow: hidden;
+
+                border-radius:
+                    0 0 34px 34px;
+
+                background-image:
+
+                    linear-gradient(
+                        155deg,
+                        rgba(2,29,66,0.98),
+                        rgba(4,44,94,0.94),
+                        rgba(4,75,143,0.75)
+                    ),
+
+                    url(
+                        "{{ url_for('static_files', filename='alice-campus.png') }}"
+                    );
+
+                background-size: cover;
+
+                background-position: center;
+            }
+
+
+            .mobile-header {
+
+                position: relative;
+
+                z-index: 5;
+
+                padding:
+                    calc(
+                        15px +
+                        env(safe-area-inset-top)
+                    )
+                    19px
+                    12px;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content:
+                    space-between;
+            }
+
+
+            .mobile-brand {
+
+                display: flex;
+
+                align-items: center;
+
+                gap: 11px;
+            }
+
+
+            .mobile-logo {
+
+                width: 52px;
+
+                height: 52px;
+
+                border-radius: 15px;
+
+                background:
+                    rgba(255,255,255,0.97);
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                box-shadow:
+                    0 6px 18px
+                    rgba(0,0,0,0.17);
+            }
+
+
+            .mobile-logo img {
+
+                width: 43px;
+
+                height: 43px;
+
+                object-fit: contain;
+            }
+
+
+            .mobile-brand strong {
+
+                display: block;
+
+                color: white;
+
+                font-size: 16px;
+            }
+
+
+            .mobile-brand span {
+
+                display: block;
+
+                margin-top: 4px;
+
+                color:
+                    rgba(255,255,255,0.72);
+
+                font-size: 10px;
+            }
+
+
+            .mobile-back {
+
+                width: 43px;
+
+                height: 43px;
+
+                border-radius: 50%;
+
+                border:
+                    1px solid
+                    rgba(255,255,255,0.22);
+
+                background:
+                    rgba(255,255,255,0.14);
+
+                color: white;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+            }
+
+
+            .mobile-back svg {
+
+                width: 21px;
+
+                height: 21px;
+            }
+
+
+            .mobile-hero-text {
+
+                padding:
+                    24px 20px 48px;
+            }
+
+
+            .mobile-page-label {
+
+                margin-bottom: 8px;
+
+                color: #ff6c78;
+
+                font-size: 10px;
+
+                font-weight: 800;
+
+                letter-spacing: 1px;
+            }
+
+
+            .mobile-hero-text h1 {
+
+                color: white;
+
+                font-size: 30px;
+
+                line-height: 1.12;
+            }
+
+
+            .mobile-hero-text h1 span {
+                color: #ff5365;
+            }
+
+
+            .mobile-hero-text p {
+
+                max-width: 330px;
+
+                margin-top: 9px;
+
+                color:
+                    rgba(255,255,255,0.82);
+
+                font-size: 12px;
+
+                line-height: 1.5;
+            }
+
+
+            /* =====================================================
+               MOBILE CONTENT
+            ===================================================== */
+
+            .mobile-content {
+
+                position: relative;
+
+                z-index: 10;
+
+                margin-top: -31px;
+
+                padding:
+                    0 16px 30px;
+            }
+
+
+            .mobile-sos-card {
+
+                padding: 17px;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-top:
+                    5px solid #ef233c;
+
+                border-radius: 22px;
+
+                background: white;
+
+                box-shadow:
+                    0 12px 30px
+                    rgba(20,45,80,0.11);
+            }
+
+
+            .mobile-sos-heading {
+
+                display: flex;
+
+                align-items: center;
+
+                gap: 11px;
+            }
+
+
+            .mobile-sos-icon {
+
+                width: 50px;
+
+                height: 50px;
+
+                min-width: 50px;
+
+                border-radius: 14px;
+
+                background: #ffe9ec;
+
+                color: #e91d35;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+            }
+
+
+            .mobile-sos-icon svg {
+
+                width: 28px;
+
+                height: 28px;
+            }
+
+
+            .mobile-sos-heading h2 {
+
+                color: #062d63;
+
+                font-size: 16px;
+            }
+
+
+            .mobile-sos-heading p {
+
+                margin-top: 3px;
+
+                color: #8090a3;
+
+                font-size: 9px;
+            }
+
+
+            .mobile-warning {
+
+                margin-top: 15px;
+
+                padding: 12px;
+
+                border-radius: 14px;
+
+                border:
+                    1px solid #ffd7dc;
+
+                background: #fff1f3;
+
+                color: #a52a3a;
+
+                font-size: 9px;
+
+                line-height: 1.45;
+            }
+
+
+            .mobile-warning strong {
+
+                display: block;
+
+                margin-bottom: 3px;
+
+                color: #c91830;
+
+                font-size: 10px;
+            }
+
+
+            .mobile-error {
+
+                margin-top: 13px;
+
+                padding: 11px;
+
+                border:
+                    1px solid #fecaca;
+
+                border-radius: 12px;
+
+                background: #fee2e2;
+
+                color: #991b1b;
+
+                font-size: 10px;
+
+                font-weight: 700;
+            }
+
+
+            /* =====================================================
+               MOBILE LOCATION
+            ===================================================== */
+
+            .mobile-location {
+
+                margin-top: 17px;
+            }
+
+
+            .mobile-field-label {
+
+                display: flex;
+
+                align-items: center;
+
+                gap: 7px;
+
+                margin-bottom: 8px;
+
+                color: #062d63;
+
+                font-size: 10px;
+
+                font-weight: 800;
+            }
+
+
+            .mobile-field-label svg {
+
+                width: 17px;
+
+                height: 17px;
+
+                color: #0751a8;
+            }
+
+
+            .mobile-gps {
+
+                width: 100%;
+
+                min-height: 62px;
+
+                padding: 12px;
+
+                border:
+                    2px solid #0751a8;
+
+                border-radius: 15px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #eef6ff,
+                        #e4f1ff
+                    );
+
+                color: #0751a8;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                gap: 9px;
+
+                font-size: 11px;
+
+                font-weight: 800;
+            }
+
+
+            .mobile-gps svg {
+
+                width: 21px;
+
+                height: 21px;
+            }
+
+
+            .mobile-divider {
+
+                display: flex;
+
+                align-items: center;
+
+                gap: 9px;
+
+                margin: 15px 0;
+
+                color: #8b98a8;
+
+                font-size: 8px;
+
+                font-weight: 700;
+            }
+
+
+            .mobile-divider::before,
+            .mobile-divider::after {
+
+                content: "";
+
+                flex: 1;
+
+                height: 1px;
+
+                background: #e0e7ef;
+            }
+
+
+            .mobile-manual-location {
+
+                width: 100%;
+
+                min-height: 49px;
+
+                padding: 13px;
+
+                border:
+                    1px solid #cbd6e3;
+
+                border-radius: 13px;
+
+                background: #fbfdff;
+
+                color: #10284f;
+
+                font-size: 12px;
+
+                outline: none;
+            }
+
+
+            .mobile-manual-location:focus {
+
+                border-color: #0751a8;
+
+                background: white;
+            }
+
+
+            .mobile-help {
+
+                margin-top: 6px;
+
+                color: #8a98a9;
+
+                font-size: 8px;
+
+                line-height: 1.4;
+            }
+
+
+            .mobile-gps-status {
+
+                display: none;
+
+                margin-top: 10px;
+
+                padding: 10px 11px;
+
+                border-radius: 11px;
+
+                font-size: 9px;
+
+                line-height: 1.45;
+            }
+
+
+            /* =====================================================
+               MOBILE SOS BUTTON
+            ===================================================== */
+
+            .mobile-send {
+
+                width: 100%;
+
+                min-height: 84px;
+
+                margin-top: 19px;
+
+                padding: 11px 12px;
+
+                border:
+                    3px solid #ff7180;
+
+                border-radius: 17px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #ff3545,
+                        #ed1c32,
+                        #d90429
+                    );
+
+                color: white;
+
+                display: flex;
+
+                align-items: center;
+
+                text-align: left;
+
+                box-shadow:
+                    0 9px 23px
+                    rgba(217,4,41,0.26);
+            }
+
+
+            .mobile-send:active {
+
+                transform:
+                    scale(0.985);
+            }
+
+
+            .mobile-send-icon {
+
+                width: 53px;
+
+                height: 53px;
+
+                min-width: 53px;
+
+                margin-right: 12px;
+
+                border-radius: 14px;
+
+                background:
+                    rgba(255,255,255,0.14);
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+            }
+
+
+            .mobile-send-icon svg {
+
+                width: 30px;
+
+                height: 30px;
+            }
+
+
+            .mobile-send-text {
+                flex: 1;
+            }
+
+
+            .mobile-send-text strong {
+
+                display: block;
+
+                font-size: 12px;
+
+                font-weight: 800;
+            }
+
+
+            .mobile-send-text span {
+
+                display: block;
+
+                margin-top: 4px;
+
+                color: #fff0f2;
+
+                font-size: 8px;
+            }
+
+
+            /* =====================================================
+               MOBILE CALLS
+            ===================================================== */
+
+            .mobile-section-title {
+
+                margin:
+                    22px 3px 11px;
+            }
+
+
+            .mobile-section-title h2 {
+
+                color: #062d63;
+
+                font-size: 16px;
+            }
+
+
+            .mobile-section-title p {
+
+                margin-top: 3px;
+
+                color: #8190a2;
+
+                font-size: 9px;
+            }
+
+
+            .mobile-calls {
+
+                display: grid;
+
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap: 10px;
+            }
+
+
+            .mobile-call {
+
+                min-height: 122px;
+
+                padding: 14px;
+
+                border-radius: 18px;
+
+                text-decoration: none;
+
+                display: flex;
+
+                flex-direction: column;
+            }
+
+
+            .mobile-call-red {
+
+                background:
+                    linear-gradient(
+                        145deg,
+                        #ef233c,
+                        #d90429
+                    );
+
+                color: white;
+
+                box-shadow:
+                    0 8px 22px
+                    rgba(217,4,41,0.18);
+            }
+
+
+            .mobile-call-white {
+
+                border:
+                    1px solid #e1e8f1;
+
+                background: white;
+
+                color: #062d63;
+
+                box-shadow:
+                    0 6px 18px
+                    rgba(20,45,80,0.06);
+            }
+
+
+            .mobile-call-icon {
+
+                width: 39px;
+
+                height: 39px;
+
+                margin-bottom: 13px;
+
+                border-radius: 11px;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+            }
+
+
+            .mobile-call-red
+            .mobile-call-icon {
+
+                background:
+                    rgba(255,255,255,0.15);
+            }
+
+
+            .mobile-call-white
+            .mobile-call-icon {
+
+                background: #eaf3ff;
+
+                color: #0751a8;
+            }
+
+
+            .mobile-call-icon svg {
+
+                width: 20px;
+
+                height: 20px;
+            }
+
+
+            .mobile-call strong {
+
+                font-size: 10px;
+
+                line-height: 1.3;
+            }
+
+
+            .mobile-call span {
+
+                margin-top: 5px;
+
+                font-size: 9px;
+            }
+
+
+            /* =====================================================
+               MOBILE BOTTOM NAV
+            ===================================================== */
+
+            .bottom-nav {
+
+                position: fixed;
+
+                left: 0;
+
+                right: 0;
+
+                bottom: 0;
+
+                z-index: 100;
+
+                min-height: 71px;
+
+                padding:
+                    8px
+                    8px
+                    calc(
+                        8px +
+                        env(safe-area-inset-bottom)
+                    );
+
+                border-top:
+                    1px solid #e4eaf2;
+
+                background:
+                    rgba(255,255,255,0.98);
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+
+                box-shadow:
+                    0 -8px 25px
+                    rgba(20,40,70,0.07);
+            }
+
+
+            .bottom-nav a {
+
+                min-height: 52px;
+
+                color: #8390a1;
+
+                text-decoration: none;
+
+                display: flex;
+
+                flex-direction: column;
+
+                align-items: center;
+
+                justify-content: center;
+
+                gap: 4px;
+
+                font-size: 9px;
+
+                font-weight: 600;
+            }
+
+
+            .bottom-nav svg {
+
+                width: 21px;
+
+                height: 21px;
+            }
+
+
+            .bottom-nav .active-sos {
+
+                color: #d90429;
+
+                font-weight: 800;
+            }
+
+
+            .bottom-nav .sos-circle {
+
+                width: 44px;
+
+                height: 44px;
+
+                margin-top: -24px;
+
+                margin-bottom: -4px;
+
+                border-radius: 50%;
+
+                border:
+                    4px solid white;
+
+                background: #d90429;
+
+                color: white;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                box-shadow:
+                    0 5px 16px
+                    rgba(217,4,41,0.30);
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     DESKTOP HEADER
+========================================================= -->
+
+<header class="desktop-header">
+
+    <div class="desktop-brand">
+
+        <img
+            src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+            class="desktop-logo"
+            alt="University of Fort Hare">
+
+        <div class="desktop-divider"></div>
+
+        <div>
+
+            <h1>
+                Campus Security Management System
+            </h1>
+
+            <p>
+                University of Fort Hare • Alice Campus
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="desktop-actions">
+
+        <div class="desktop-role">
+            Student • {{ username }}
+        </div>
+
+        <a
+            href="/logout"
+            class="desktop-logout">
+
+            Log Out
+
+        </a>
+
+    </div>
+
+</header>
+
+
+
+<!-- =========================================================
+     DESKTOP HERO
+========================================================= -->
+
+<section class="desktop-hero">
+
+    <div class="desktop-hero-inner">
+
+        <div class="desktop-label">
+            UNIVERSITY OF FORT HARE • ALICE CAMPUS
+        </div>
+
+        <h2>
+            Emergency <span>SOS.</span>
+        </h2>
+
+        <p>
+            Share your current location and send an immediate
+            high-priority alert to Campus Security.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     DESKTOP MAIN
+========================================================= -->
+
+<main class="desktop-main">
+
+
+    <div class="breadcrumb">
+
+        <a href="/student-dashboard">
+            Home
+        </a>
+
+        &nbsp; › &nbsp;
+
+        Emergency SOS
+
+    </div>
+
+
+    <div class="desktop-grid">
+
+
+        <!-- =====================================================
+             DESKTOP SOS
+        ====================================================== -->
+
+        <section class="sos-card">
+
+
+            <div class="sos-heading">
+
+                <div class="sos-heading-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M8 17h8"></path>
+
+                        <path
+                            d="M7 17v-5a5 5 0 0 1 10 0v5">
+                        </path>
+
+                        <path d="M5 21h14"></path>
+
+                        <path d="M12 2v3"></path>
+
+                        <path d="M4.2 5.2l2.1 2.1"></path>
+
+                        <path d="M19.8 5.2l-2.1 2.1"></path>
+
+                        <path d="M2 12h3"></path>
+
+                        <path d="M19 12h3"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <h2>
+                        Request Emergency Assistance
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p class="logged-in">
+
+                Logged in as:
+
+                <strong>
+                    {{ username }}
+                </strong>
+
+            </p>
+
+
+            <div class="warning">
+
+                <div class="warning-title">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path
+                            d="M10.3 2.9L1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0z">
+                        </path>
+
+                        <path d="M12 9v4"></path>
+
+                        <path d="M12 17h.01"></path>
+
+                    </svg>
+
+                    Emergency use only
+
+                </div>
+
+                Sending this alert creates a high-priority
+                Emergency SOS incident for Campus Security.
+
+            </div>
+
+
+            {% if error %}
+
+            <div class="error">
+                {{ error }}
+            </div>
+
+            {% endif %}
+
+
+            <form
+                method="POST"
+                action="/sos"
+                id="desktop-sos-form">
+
+
+                <div class="location-section">
+
+
+                    <label class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path
+                                d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z">
+                            </path>
+
+                            <circle
+                                cx="12"
+                                cy="10"
+                                r="3">
+                            </circle>
+
+                        </svg>
+
+                        Emergency Location *
+
+                    </label>
+
+
+                    <button
+                        type="button"
+                        class="gps-button"
+                        onclick="getSOSLocation(
+                            'desktop-location',
+                            'desktop-gps-status'
+                        )">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="7">
+                            </circle>
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="2">
+                            </circle>
+
+                            <path d="M12 2v3"></path>
+
+                            <path d="M12 19v3"></path>
+
+                            <path d="M2 12h3"></path>
+
+                            <path d="M19 12h3"></path>
+
+                        </svg>
+
+                        USE MY CURRENT LOCATION
+
+                    </button>
+
+
+                    <div
+                        id="desktop-gps-status"
+                        class="gps-status">
+                    </div>
+
+
+                    <div class="location-divider">
+                        OR ENTER LOCATION MANUALLY
+                    </div>
+
+
+                    <input
+                        id="desktop-location"
+                        class="manual-location"
+                        type="text"
+                        name="location"
+                        placeholder="Example: Library, Residence, Main Gate, Sports Field"
+                        required>
+
+
+                    <p class="field-help">
+
+                        If GPS is unavailable, enter the
+                        nearest building or campus landmark.
+
+                    </p>
+
+
+                </div>
+
+
+                <!--
+                    Description intentionally removed.
+
+                    app.py already supplies the default:
+                    "Emergency assistance requested."
+                    when no description is submitted.
+                -->
+
+
+                <button
+                    type="submit"
+                    class="send-sos">
+
+                    <div class="send-sos-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M8 17h8"></path>
+
+                            <path
+                                d="M7 17v-5a5 5 0 0 1 10 0v5">
+                            </path>
+
+                            <path d="M5 21h14"></path>
+
+                            <path d="M12 2v3"></path>
+
+                            <path d="M4.2 5.2l2.1 2.1"></path>
+
+                            <path d="M19.8 5.2l-2.1 2.1"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="send-sos-text">
+
+                        <strong>
+                            SEND EMERGENCY ALERT
+                        </strong>
+
+                        <span>
+                            Alert Campus Security immediately
+                        </span>
+
+                    </div>
+
+
+                    <div class="send-arrow">
+                        →
+                    </div>
+
+                </button>
+
+
+            <input type="hidden" name="latitude" class="gps-latitude"><input type="hidden" name="longitude" class="gps-longitude"></form>
+
+
+            <a
+                href="/student-dashboard"
+                class="back-dashboard">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2">
+
+                    <path d="M19 12H5"></path>
+
+                    <path d="M12 19l-7-7 7-7"></path>
+
+                </svg>
+
+                Return to Student Dashboard
+
+            </a>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             DESKTOP SIDE
+        ====================================================== -->
+
+        <aside>
+
+
+            <div class="side-card">
+
+                <div class="side-title">
+
+                    <div class="side-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72">
+                            </path>
+
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Need Immediate Help?
+                    </h3>
+
+                </div>
+
+
+                <p>
+                    You can also contact emergency services
+                    directly.
+                </p>
+
+
+                <a
+                    href="tel:+27406022243"
+                    class="call-link call-red">
+
+                    <div class="call-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6">
+                            </path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="call-info">
+
+                        <strong>
+                            UFH Campus Control
+                        </strong>
+
+                        <span>
+                            040 602 2243
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="tel:10111"
+                    class="call-link call-outline">
+
+                    <div class="call-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2">
+                            </path>
+
+                            <path
+                                d="M4.11 2h3a2 2 0 0 1 2 1.72">
+                            </path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="call-info">
+
+                        <strong>
+                            SAPS Emergency
+                        </strong>
+
+                        <span>
+                            10111
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+            </div>
+
+
+            <div class="side-card">
+
+                <div class="side-title">
+
+                    <div class="side-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path
+                                d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z">
+                            </path>
+
+                            <path d="M9 12l2 2 4-4"></path>
+
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Location Sharing
+                    </h3>
+
+                </div>
+
+
+                <p>
+
+                    For the fastest response, allow location
+                    access when your browser asks for permission.
+                    If GPS is unavailable, enter your campus
+                    location manually.
+
+                </p>
+
+            </div>
+
+
+        </aside>
+
+
+    </div>
+
+</main>
+
+
+
+<footer class="desktop-footer">
+
+    <strong>
+        University of Fort Hare
+    </strong>
+
+    <p>
+        Campus Security Management System • Alice Campus
+    </p>
+
+</footer>
+
+
+
+<!-- =========================================================
+     MOBILE APP
+========================================================= -->
+
+<div class="mobile-app">
+
+
+    <section class="mobile-hero">
+
+
+        <header class="mobile-header">
+
+
+            <div class="mobile-brand">
+
+
+                <div class="mobile-logo">
+
+                    <img
+                        src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                        alt="UFH">
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        UFH Security
+                    </strong>
+
+                    <span>
+                        Alice Campus
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <a
+                href="/student-dashboard"
+                class="mobile-back"
+                aria-label="Return to dashboard">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M19 12H5"></path>
+
+                    <path d="M12 19l-7-7 7-7"></path>
+
+                </svg>
+
+            </a>
+
+
+        </header>
+
+
+        <div class="mobile-hero-text">
+
+
+            <div class="mobile-page-label">
+                EMERGENCY ASSISTANCE
+            </div>
+
+
+            <h1>
+                Emergency <span>SOS</span>
+            </h1>
+
+
+            <p>
+
+                Share your current location and immediately
+                alert UFH Campus Security.
+
+            </p>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <main class="mobile-content">
+
+
+        <section class="mobile-sos-card">
+
+
+            <div class="mobile-sos-heading">
+
+
+                <div class="mobile-sos-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M8 17h8"></path>
+
+                        <path
+                            d="M7 17v-5a5 5 0 0 1 10 0v5">
+                        </path>
+
+                        <path d="M5 21h14"></path>
+
+                        <path d="M12 2v3"></path>
+
+                        <path d="M4.2 5.2l2.1 2.1"></path>
+
+                        <path d="M19.8 5.2l-2.1 2.1"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <h2>
+                        Request Emergency Assistance
+                    </h2>
+
+                    <p>
+                        Signed in as {{ username }}
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="mobile-warning">
+
+                <strong>
+                    Emergency use only
+                </strong>
+
+                Sending this alert immediately creates a
+                high-priority incident for Campus Security.
+
+            </div>
+
+
+            {% if error %}
+
+            <div class="mobile-error">
+                {{ error }}
+            </div>
+
+            {% endif %}
+
+
+
+            <form
+                method="POST"
+                action="/sos"
+                id="mobile-sos-form">
+
+
+                <div class="mobile-location">
+
+
+                    <label class="mobile-field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path
+                                d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z">
+                            </path>
+
+                            <circle
+                                cx="12"
+                                cy="10"
+                                r="3">
+                            </circle>
+
+                        </svg>
+
+                        YOUR EMERGENCY LOCATION
+
+                    </label>
+
+
+                    <button
+                        type="button"
+                        class="mobile-gps"
+                        onclick="getSOSLocation(
+                            'mobile-location',
+                            'mobile-gps-status'
+                        )">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="7">
+                            </circle>
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="2">
+                            </circle>
+
+                            <path d="M12 2v3"></path>
+
+                            <path d="M12 19v3"></path>
+
+                            <path d="M2 12h3"></path>
+
+                            <path d="M19 12h3"></path>
+
+                        </svg>
+
+                        USE MY CURRENT LOCATION
+
+                    </button>
+
+
+                    <div
+                        id="mobile-gps-status"
+                        class="mobile-gps-status">
+                    </div>
+
+
+                    <div class="mobile-divider">
+                        OR ENTER LOCATION MANUALLY
+                    </div>
+
+
+                    <input
+                        id="mobile-location"
+                        class="mobile-manual-location"
+                        type="text"
+                        name="location"
+                        placeholder="Library, Residence, Main Gate..."
+                        autocomplete="street-address"
+                        required>
+
+
+                    <p class="mobile-help">
+
+                        If location access fails, enter the
+                        nearest building or campus landmark.
+
+                    </p>
+
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="mobile-send">
+
+
+                    <div class="mobile-send-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M8 17h8"></path>
+
+                            <path
+                                d="M7 17v-5a5 5 0 0 1 10 0v5">
+                            </path>
+
+                            <path d="M5 21h14"></path>
+
+                            <path d="M12 2v3"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="mobile-send-text">
+
+                        <strong>
+                            SEND EMERGENCY ALERT
+                        </strong>
+
+                        <span>
+                            Alert Campus Security immediately
+                        </span>
+
+                    </div>
+
+
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path d="M5 12h14"></path>
+
+                        <path d="M13 6l6 6-6 6"></path>
+
+                    </svg>
+
+
+                </button>
+
+
+            <input type="hidden" name="latitude" class="gps-latitude"><input type="hidden" name="longitude" class="gps-longitude"></form>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             MOBILE CALLS
+        ====================================================== -->
+
+        <div class="mobile-section-title">
+
+            <h2>
+                Call for Help
+            </h2>
+
+            <p>
+                Contact emergency services directly
+            </p>
+
+        </div>
+
+
+        <div class="mobile-calls">
+
+
+            <a
+                href="tel:0406022243"
+                class="mobile-call mobile-call-red">
+
+
+                <div class="mobile-call-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2">
+                        </path>
+
+                        <path
+                            d="M4.11 2h3a2 2 0 0 1 2 1.72">
+                        </path>
+
+                    </svg>
+
+                </div>
+
+
+                <strong>
+                    UFH Campus Control
+                </strong>
+
+                <span>
+                    040 602 2243
+                </span>
+
+
+            </a>
+
+
+
+            <a
+                href="tel:10111"
+                class="mobile-call mobile-call-white">
+
+
+                <div class="mobile-call-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2">
+                        </path>
+
+                        <path
+                            d="M4.11 2h3a2 2 0 0 1 2 1.72">
+                        </path>
+
+                    </svg>
+
+                </div>
+
+
+                <strong>
+                    SAPS Emergency
+                </strong>
+
+                <span>
+                    10111
+                </span>
+
+
+            </a>
+
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- =========================================================
+         MOBILE BOTTOM NAVIGATION
+    ========================================================= -->
+
+    <nav class="bottom-nav">
+
+
+        <a href="/student-dashboard">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <path d="M3 11l9-8 9 8"></path>
+
+                <path
+                    d="M5 10v10h14V10">
+                </path>
+
+            </svg>
+
+            Home
+
+        </a>
+
+
+
+        <a href="/my-reports">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
+                </path>
+
+                <path d="M14 2v6h6"></path>
+
+            </svg>
+
+            Reports
+
+        </a>
+
+
+
+        <a
+            href="/sos"
+            class="active-sos">
+
+            <div class="sos-circle">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2">
+
+                    <path d="M8 17h8"></path>
+
+                    <path
+                        d="M7 17v-5a5 5 0 0 1 10 0v5">
+                    </path>
+
+                </svg>
+
+            </div>
+
+            SOS
+
+        </a>
+
+
+
+        <a href="/account">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <circle
+                    cx="12"
+                    cy="8"
+                    r="4">
+                </circle>
+
+                <path
+                    d="M4 21a8 8 0 0 1 16 0">
+                </path>
+
+            </svg>
+
+            Account
+
+        </a>
+
+
+    </nav>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     GPS LOCATION
+========================================================= -->
+
+<script>
+
+    function getSOSLocation(
+        inputId,
+        statusId
+    ) {
+
+        const locationInput =
+            document.getElementById(
+                inputId
+            );
+
+        const statusBox =
+            document.getElementById(
+                statusId
+            );
+
+
+        statusBox.style.display =
+            "block";
+
+        statusBox.style.background =
+            "#eef5ff";
+
+        statusBox.style.border =
+            "1px solid #cfe1f8";
+
+        statusBox.style.color =
+            "#0751a8";
+
+        statusBox.textContent =
+            "Getting your current location...";
+
+
+        if (!navigator.geolocation) {
+
+            showLocationError(
+                statusBox,
+                "Location services are not supported on this device. Please enter your location manually."
+            );
+
+            return;
+        }
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            function(position) {
+
+
+                const latitude =
+                    position.coords.latitude;
+
+
+                const longitude =
+                    position.coords.longitude;
+                document.querySelectorAll('.gps-latitude').forEach(el => el.value = latitude);
+                document.querySelectorAll('.gps-longitude').forEach(el => el.value = longitude);
+
+
+                const accuracy =
+                    Math.round(
+                        position.coords.accuracy
+                    );
+
+
+                /*
+                    Store the coordinates in the existing
+                    location field.
+
+                    This means the current Flask /sos route
+                    can save the GPS location without a
+                    database change.
+                */
+
+                locationInput.value =
+
+                    "GPS: " +
+
+                    latitude.toFixed(6) +
+
+                    ", " +
+
+                    longitude.toFixed(6) +
+
+                    " | Accuracy: approximately " +
+
+                    accuracy +
+
+                    " metres";
+
+
+                statusBox.style.display =
+                    "block";
+
+                statusBox.style.background =
+                    "#e8f7ef";
+
+                statusBox.style.border =
+                    "1px solid #bde8cf";
+
+                statusBox.style.color =
+                    "#167347";
+
+                statusBox.textContent =
+
+                    "Location acquired successfully. Accuracy: approximately " +
+
+                    accuracy +
+
+                    " metres.";
+
+
+            },
+
+
+            function(error) {
+
+
+                let message =
+
+                    "Unable to access your location. Please enter your location manually.";
+
+
+                if (error.code === 1) {
+
+                    message =
+
+                        "Location permission was denied. Allow location access in your browser settings or enter your location manually.";
+
+                }
+
+
+                else if (error.code === 2) {
+
+                    message =
+
+                        "Your current location could not be determined. Please enter your location manually.";
+
+                }
+
+
+                else if (error.code === 3) {
+
+                    message =
+
+                        "The location request timed out. Try again or enter your location manually.";
+
+                }
+
+
+                showLocationError(
+                    statusBox,
+                    message
+                );
+
+
+            },
+
+
+            {
+
+                enableHighAccuracy: true,
+
+                timeout: 15000,
+
+                maximumAge: 0
+
+            }
+
+        );
+
+    }
+
+
+
+    function showLocationError(
+        statusBox,
+        message
+    ) {
+
+        statusBox.style.display =
+            "block";
+
+        statusBox.style.background =
+            "#fff1f3";
+
+        statusBox.style.border =
+            "1px solid #ffd7dc";
+
+        statusBox.style.color =
+            "#c91830";
+
+        statusBox.textContent =
+            message;
+
+    }
+
+</script>
+
+
+
+<!-- =========================================================
+     SERVICE WORKER
+========================================================= -->
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function() {
+
+                navigator.serviceWorker
+                    .register(
+                        "/service-worker.js",
+                        {
+                            scope: "/"
+                        }
+                    )
+                    .catch(
+                        function(error) {
+
+                            console.log(
+                                "Service worker registration failed:",
+                                error
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

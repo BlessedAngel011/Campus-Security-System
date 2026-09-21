@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta name="theme-color" content="#062d63">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UFH Security">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}">
+
+    <link
+        rel="apple-touch-icon"
+        href="{{ url_for('static_files', filename='icon-192.png') }}">
+
+    <title>My Reports | UFH Campus Security</title>
+
+    <style>
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+            min-height: 100vh;
+        }
+
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        /* =========================================================
+           DESKTOP HEADER
+        ========================================================= */
+
+        .topbar {
+            min-height: 96px;
+            padding: 10px 50px;
+            background: white;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            border-bottom: 1px solid #e4eaf2;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ufh-logo {
+            width: 90px;
+            height: auto;
+        }
+
+        .divider {
+            width: 1px;
+            height: 55px;
+            background: #d8dee8;
+        }
+
+        .brand-text h1 {
+            color: #062d63;
+            font-size: 22px;
+        }
+
+        .brand-text p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .role-pill {
+            padding: 9px 14px;
+            background: #eef5ff;
+            color: #0751a8;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .logout {
+            background: #062d63;
+            color: white;
+
+            padding: 13px 22px;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* =========================================================
+           DESKTOP HERO
+        ========================================================= */
+
+        .desktop-hero {
+            min-height: 245px;
+
+            background-image:
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98) 0%,
+                    rgba(4,45,98,0.90) 45%,
+                    rgba(4,57,120,0.48) 75%,
+                    rgba(3,46,98,0.25) 100%
+                ),
+                url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+            background-size: cover;
+            background-position: center;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-hero-inner {
+            width: 100%;
+            max-width: 1450px;
+
+            margin: auto;
+            padding: 38px 55px;
+        }
+
+        .desktop-hero-label {
+            display: inline-block;
+
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+
+            color: white;
+
+            padding: 8px 14px;
+            border-radius: 30px;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            margin-bottom: 16px;
+        }
+
+        .desktop-hero h2 {
+            color: white;
+            font-size: 44px;
+            line-height: 1.08;
+        }
+
+        .desktop-hero h2 span {
+            color: #ffc928;
+        }
+
+        .desktop-hero p {
+            margin-top: 13px;
+            color: #f0f5fb;
+            font-size: 17px;
+            line-height: 1.6;
+            max-width: 680px;
+        }
+
+
+        /* =========================================================
+           DESKTOP MAIN
+        ========================================================= */
+
+        .desktop-main {
+            max-width: 1450px;
+            margin: auto;
+            padding: 35px 55px 55px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 24px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #0751a8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* =========================================================
+           DESKTOP HEADING
+        ========================================================= */
+
+        .heading-card {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-top: 6px solid #0751a8;
+
+            border-radius: 16px;
+
+            padding: 30px 32px;
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.08);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 25px;
+        }
+
+        .heading-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .heading-icon {
+            width: 62px;
+            height: 62px;
+            min-width: 62px;
+
+            border-radius: 15px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heading-icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .heading-text h2 {
+            color: #062d63;
+            font-size: 27px;
+        }
+
+        .heading-text p {
+            margin-top: 7px;
+            color: #687b91;
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           NEW REPORT BUTTON
+        ========================================================= */
+
+        .new-report-button {
+            min-width: 230px;
+
+            padding: 15px 19px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0867c9,
+                    #064a98
+                );
+
+            color: white;
+
+            border-radius: 12px;
+
+            text-decoration: none;
+
+            display: flex;
+            align-items: center;
+
+            box-shadow:
+                0 7px 18px rgba(7,81,168,0.20);
+        }
+
+        .new-report-icon {
+            width: 45px;
+            min-width: 45px;
+
+            margin-right: 13px;
+
+            border-right:
+                1px solid rgba(255,255,255,0.40);
+
+            display: flex;
+            align-items: center;
+        }
+
+        .new-report-icon svg {
+            width: 27px;
+            height: 27px;
+        }
+
+        .new-report-text {
+            flex: 1;
+        }
+
+        .new-report-text strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .new-report-text span {
+            display: block;
+
+            margin-top: 3px;
+
+            color: #dbeafe;
+
+            font-size: 11px;
+        }
+
+        .new-report-arrow svg {
+            width: 22px;
+            height: 22px;
+        }
+
+
+        /* =========================================================
+           DESKTOP REPORTS
+        ========================================================= */
+
+        .section-heading {
+            margin: 28px 2px 17px;
+        }
+
+        .section-heading h3 {
+            color: #062d63;
+            font-size: 20px;
+        }
+
+        .section-heading p {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .report-card {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-left: 5px solid #0751a8;
+
+            border-radius: 15px;
+
+            padding: 25px 27px;
+            margin-bottom: 18px;
+
+            box-shadow:
+                0 6px 18px rgba(30,60,100,0.07);
+        }
+
+        .report-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+
+            gap: 20px;
+        }
+
+        .report-title-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .report-icon {
+            width: 49px;
+            height: 49px;
+            min-width: 49px;
+
+            border-radius: 12px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .report-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .report-title h3 {
+            color: #062d63;
+            margin-bottom: 5px;
+            font-size: 19px;
+        }
+
+        .report-number {
+            color: #718096;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 7px;
+        }
+
+
+        /* =========================================================
+           BADGES
+        ========================================================= */
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+
+            padding: 7px 12px;
+
+            border-radius: 30px;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: currentColor;
+        }
+
+        .high {
+            background: #fee2e2;
+            color: #b4232e;
+        }
+
+        .medium {
+            background: #fff3cd;
+            color: #8a5a00;
+        }
+
+        .low {
+            background: #dcfce7;
+            color: #167342;
+        }
+
+        .pending {
+            background: #eef1f5;
+            color: #536273;
+        }
+
+        .in-progress {
+            background: #dbeafe;
+            color: #1d5fbf;
+        }
+
+        .resolved {
+            background: #dcfce7;
+            color: #16804b;
+        }
+
+
+        /* =========================================================
+           DETAILS
+        ========================================================= */
+
+        .report-divider {
+            height: 1px;
+            background: #e7edf4;
+            margin: 22px 0;
+        }
+
+        .details-grid {
+            display: grid;
+
+            grid-template-columns:
+                minmax(180px, 0.7fr)
+                minmax(260px, 1.5fr)
+                minmax(180px, 0.7fr);
+
+            gap: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+        }
+
+        .detail-icon {
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+
+            border-radius: 9px;
+
+            background: #f0f6ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .detail-content strong {
+            display: block;
+
+            color: #062d63;
+
+            font-size: 12px;
+
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+
+            margin-bottom: 5px;
+        }
+
+        .detail-content p {
+            color: #5d7087;
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+            overflow-wrap: anywhere;
+        }
+
+
+        /* =========================================================
+           EMPTY STATE
+        ========================================================= */
+
+        .empty {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-top: 6px solid #0751a8;
+
+            text-align: center;
+
+            padding: 55px 30px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.08);
+        }
+
+        .empty-icon {
+            width: 82px;
+            height: 82px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 20px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-icon svg {
+            width: 43px;
+            height: 43px;
+        }
+
+        .empty h2 {
+            color: #062d63;
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            color: #687b91;
+            line-height: 1.6;
+        }
+
+        .empty-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+
+            margin-top: 22px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0867c9,
+                    #064a98
+                );
+
+            color: white;
+
+            padding: 14px 21px;
+
+            border-radius: 11px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .empty-button svg {
+            width: 21px;
+            height: 21px;
+        }
+
+
+        /* =========================================================
+           DESKTOP RETURN
+        ========================================================= */
+
+        .bottom-actions {
+            display: flex;
+            justify-content: center;
+
+            margin-top: 28px;
+        }
+
+        .dashboard-button {
+            padding: 15px 22px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            background: white;
+            color: #0751a8;
+
+            border: 1px solid #d8e3ef;
+            border-radius: 11px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .dashboard-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+
+        /* =========================================================
+           DESKTOP FOOTER
+        ========================================================= */
+
+        .desktop-footer {
+            background: #05295d;
+            color: white;
+
+            padding: 22px 50px;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+        .desktop-footer p {
+            color: #d6e0ed;
+            margin-top: 5px;
+        }
+
+
+        /* =========================================================
+           MOBILE HIDDEN ON DESKTOP
+        ========================================================= */
+
+        .mobile-app {
+            display: none;
+        }
+
+
+        /* =========================================================
+           MOBILE APP
+        ========================================================= */
+
+        @media(max-width: 750px) {
+
+            body {
+                background: #f4f7fb;
+
+                padding-bottom:
+                    calc(82px + env(safe-area-inset-bottom));
+            }
+
+            .topbar,
+            .desktop-hero,
+            .desktop-main,
+            .desktop-footer {
+                display: none !important;
+            }
+
+            .mobile-app {
+                display: block;
+                min-height: 100vh;
+            }
+
+
+            /* =====================================================
+               MOBILE UFH HERO
+            ===================================================== */
+
+            .mobile-hero {
+                position: relative;
+
+                overflow: hidden;
+
+                min-height: 285px;
+
+                background-image:
+                    linear-gradient(
+                        150deg,
+                        rgba(2,29,66,0.98) 0%,
+                        rgba(4,44,94,0.94) 50%,
+                        rgba(3,78,151,0.76) 100%
+                    ),
+                    url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+                background-size: cover;
+                background-position: center;
+
+                border-radius: 0 0 34px 34px;
+            }
+
+            .mobile-hero::after {
+                content: "";
+
+                position: absolute;
+
+                width: 230px;
+                height: 230px;
+
+                right: -120px;
+                top: 70px;
+
+                border-radius: 50%;
+
+                background: rgba(255,255,255,0.055);
+            }
+
+
+            /* =====================================================
+               MOBILE HEADER
+            ===================================================== */
+
+            .app-header {
+                position: relative;
+                z-index: 5;
+
+                padding:
+                    calc(15px + env(safe-area-inset-top))
+                    20px
+                    12px;
+
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .app-brand {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .app-logo-wrap {
+                width: 53px;
+                height: 53px;
+
+                border-radius: 15px;
+
+                background: rgba(255,255,255,0.96);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 6px 20px rgba(0,0,0,0.17);
+            }
+
+            .app-logo-wrap img {
+                width: 44px;
+                height: 44px;
+                object-fit: contain;
+            }
+
+            .app-brand-text strong {
+                display: block;
+
+                color: white;
+
+                font-size: 17px;
+            }
+
+            .app-brand-text span {
+                display: block;
+
+                color: rgba(255,255,255,0.72);
+
+                font-size: 11px;
+
+                margin-top: 4px;
+            }
+
+            .mobile-back {
+                width: 44px;
+                height: 44px;
+
+                border-radius: 50%;
+
+                background: rgba(255,255,255,0.15);
+
+                border:
+                    1px solid rgba(255,255,255,0.22);
+
+                color: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                text-decoration: none;
+
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            .mobile-back svg {
+                width: 22px;
+                height: 22px;
+            }
+
+
+            /* =====================================================
+               MOBILE HERO CONTENT
+            ===================================================== */
+
+            .mobile-hero-content {
+                position: relative;
+                z-index: 4;
+
+                padding: 26px 20px 43px;
+            }
+
+            .mobile-page-label {
+                color: #f6c62d;
+
+                font-size: 11px;
+                font-weight: 800;
+
+                letter-spacing: 1px;
+
+                margin-bottom: 8px;
+            }
+
+            .mobile-hero-content h1 {
+                color: white;
+
+                font-size: 30px;
+                line-height: 1.12;
+
+                letter-spacing: -0.5px;
+            }
+
+            .mobile-hero-content p {
+                color: rgba(255,255,255,0.80);
+
+                margin-top: 9px;
+
+                font-size: 13px;
+                line-height: 1.5;
+
+                max-width: 330px;
+            }
+
+
+            /* =====================================================
+               MOBILE CONTENT
+            ===================================================== */
+
+            .mobile-content {
+                position: relative;
+
+                margin-top: -28px;
+
+                padding: 0 17px 30px;
+
+                z-index: 10;
+            }
+
+
+            /* =====================================================
+               REPORT ACTION
+            ===================================================== */
+
+            .mobile-action-card {
+                background: white;
+
+                border: 1px solid #e1e8f1;
+
+                border-radius: 22px;
+
+                padding: 16px;
+
+                box-shadow:
+                    0 12px 30px rgba(20,45,80,0.10);
+            }
+
+            .mobile-new-report {
+                min-height: 72px;
+
+                padding: 13px 14px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #0867c9,
+                        #064a98
+                    );
+
+                color: white;
+
+                border-radius: 17px;
+
+                text-decoration: none;
+
+                display: flex;
+                align-items: center;
+
+                box-shadow:
+                    0 8px 20px rgba(7,81,168,0.20);
+            }
+
+            .mobile-new-report-icon {
+                width: 49px;
+                height: 49px;
+                min-width: 49px;
+
+                border-radius: 14px;
+
+                background: rgba(255,255,255,0.14);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                margin-right: 13px;
+            }
+
+            .mobile-new-report-icon svg {
+                width: 27px;
+                height: 27px;
+            }
+
+            .mobile-new-report-text {
+                flex: 1;
+            }
+
+            .mobile-new-report-text strong {
+                display: block;
+                font-size: 14px;
+            }
+
+            .mobile-new-report-text span {
+                display: block;
+
+                margin-top: 4px;
+
+                color: #dbeafe;
+
+                font-size: 10px;
+            }
+
+            .mobile-new-report-arrow svg {
+                width: 22px;
+                height: 22px;
+            }
+
+
+            /* =====================================================
+               MOBILE SECTION HEADING
+            ===================================================== */
+
+            .mobile-section-heading {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+
+                gap: 12px;
+
+                margin: 23px 3px 13px;
+            }
+
+            .mobile-section-heading h2 {
+                color: #062d63;
+                font-size: 18px;
+            }
+
+            .mobile-section-heading p {
+                color: #7a899c;
+
+                font-size: 10px;
+
+                margin-top: 4px;
+            }
+
+            .mobile-section-icon {
+                width: 38px;
+                height: 38px;
+
+                border-radius: 12px;
+
+                background: #e8f2ff;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-section-icon svg {
+                width: 20px;
+                height: 20px;
+            }
+
+
+            /* =====================================================
+               MOBILE REPORT CARD
+            ===================================================== */
+
+            .mobile-report-card {
+                background: white;
+
+                border: 1px solid #e1e8f1;
+
+                border-radius: 22px;
+
+                padding: 17px;
+
+                margin-bottom: 14px;
+
+                box-shadow:
+                    0 7px 20px rgba(20,45,80,0.065);
+            }
+
+            .mobile-report-top {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+
+                gap: 10px;
+            }
+
+            .mobile-report-title {
+                display: flex;
+                align-items: center;
+
+                gap: 11px;
+
+                min-width: 0;
+            }
+
+            .mobile-report-icon {
+                width: 45px;
+                height: 45px;
+                min-width: 45px;
+
+                border-radius: 13px;
+
+                background: #eaf3ff;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-report-icon svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .mobile-report-title h3 {
+                color: #062d63;
+
+                font-size: 15px;
+                line-height: 1.25;
+
+                overflow-wrap: anywhere;
+            }
+
+            .mobile-report-number {
+                color: #8795a7;
+
+                font-size: 9px;
+                font-weight: 700;
+
+                letter-spacing: 0.5px;
+
+                margin-top: 4px;
+            }
+
+            .mobile-status {
+                padding: 7px 9px;
+
+                border-radius: 30px;
+
+                font-size: 9px;
+                font-weight: 800;
+
+                white-space: nowrap;
+
+                display: inline-flex;
+                align-items: center;
+
+                gap: 5px;
+            }
+
+            .mobile-status::before {
+                content: "";
+
+                width: 6px;
+                height: 6px;
+
+                border-radius: 50%;
+
+                background: currentColor;
+            }
+
+
+            /* =====================================================
+               MOBILE DETAILS
+            ===================================================== */
+
+            .mobile-report-divider {
+                height: 1px;
+
+                background: #edf1f5;
+
+                margin: 15px 0;
+            }
+
+            .mobile-detail {
+                display: flex;
+                align-items: flex-start;
+
+                gap: 10px;
+
+                margin-bottom: 13px;
+            }
+
+            .mobile-detail:last-of-type {
+                margin-bottom: 0;
+            }
+
+            .mobile-detail-icon {
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+
+                border-radius: 10px;
+
+                background: #f1f6fc;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-detail-icon svg {
+                width: 17px;
+                height: 17px;
+            }
+
+            .mobile-detail-text strong {
+                display: block;
+
+                color: #8491a2;
+
+                font-size: 9px;
+
+                text-transform: uppercase;
+
+                letter-spacing: 0.5px;
+
+                margin-bottom: 3px;
+            }
+
+            .mobile-detail-text p {
+                color: #3f536b;
+
+                font-size: 12px;
+                line-height: 1.45;
+
+                overflow-wrap: anywhere;
+            }
+
+
+            /* =====================================================
+               MOBILE CARD FOOTER
+            ===================================================== */
+
+            .mobile-report-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                gap: 10px;
+
+                padding-top: 14px;
+
+                margin-top: 14px;
+
+                border-top: 1px solid #edf1f5;
+            }
+
+            .mobile-priority {
+                display: inline-flex;
+                align-items: center;
+
+                gap: 6px;
+
+                padding: 7px 10px;
+
+                border-radius: 30px;
+
+                font-size: 9px;
+                font-weight: 800;
+            }
+
+            .mobile-priority::before {
+                content: "";
+
+                width: 6px;
+                height: 6px;
+
+                border-radius: 50%;
+
+                background: currentColor;
+            }
+
+            .mobile-date {
+                display: flex;
+                align-items: center;
+
+                gap: 6px;
+
+                color: #8491a2;
+
+                font-size: 9px;
+                font-weight: 600;
+
+                text-align: right;
+            }
+
+            .mobile-date svg {
+                width: 15px;
+                height: 15px;
+            }
+
+
+            /* =====================================================
+               MOBILE EMPTY
+            ===================================================== */
+
+            .mobile-empty {
+                background: white;
+
+                border: 1px solid #e1e8f1;
+
+                border-radius: 22px;
+
+                padding: 35px 22px;
+
+                text-align: center;
+
+                box-shadow:
+                    0 7px 20px rgba(20,45,80,0.065);
+            }
+
+            .mobile-empty-icon {
+                width: 68px;
+                height: 68px;
+
+                margin: 0 auto 15px;
+
+                border-radius: 20px;
+
+                background: #eaf3ff;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-empty-icon svg {
+                width: 34px;
+                height: 34px;
+            }
+
+            .mobile-empty h2 {
+                color: #062d63;
+
+                font-size: 18px;
+
+                margin-bottom: 7px;
+            }
+
+            .mobile-empty p {
+                color: #74859a;
+
+                font-size: 11px;
+                line-height: 1.55;
+            }
+
+            .mobile-empty a {
+                margin-top: 18px;
+
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+
+                gap: 8px;
+
+                padding: 13px 18px;
+
+                border-radius: 14px;
+
+                background: #0751a8;
+                color: white;
+
+                text-decoration: none;
+
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .mobile-empty a svg {
+                width: 18px;
+                height: 18px;
+            }
+
+
+            /* =====================================================
+               MOBILE SAFETY NOTE
+            ===================================================== */
+
+            .mobile-note {
+                display: flex;
+                align-items: flex-start;
+
+                gap: 11px;
+
+                margin-top: 17px;
+
+                padding: 15px;
+
+                background: #eef5ff;
+
+                border: 1px solid #d3e4fa;
+
+                border-radius: 17px;
+            }
+
+            .mobile-note-icon {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+
+                border-radius: 11px;
+
+                background: #dbeafe;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-note-icon svg {
+                width: 19px;
+                height: 19px;
+            }
+
+            .mobile-note strong {
+                display: block;
+
+                color: #062d63;
+
+                font-size: 11px;
+
+                margin-bottom: 3px;
+            }
+
+            .mobile-note p {
+                color: #647891;
+
+                font-size: 10px;
+                line-height: 1.45;
+            }
+
+
+            /* =====================================================
+               BOTTOM NAV
+            ===================================================== */
+
+            .bottom-nav {
+                position: fixed;
+
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                min-height: 72px;
+
+                padding:
+                    8px
+                    8px
+                    calc(8px + env(safe-area-inset-bottom));
+
+                background: rgba(255,255,255,0.98);
+
+                border-top: 1px solid #e4eaf2;
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+
+                z-index: 100;
+
+                box-shadow:
+                    0 -8px 25px rgba(20,40,70,0.07);
+            }
+
+            .bottom-nav a {
+                color: #8390a1;
+
+                text-decoration: none;
+
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                gap: 4px;
+
+                font-size: 10px;
+                font-weight: 600;
+
+                min-height: 53px;
+            }
+
+            .bottom-nav a svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .bottom-nav .active {
+                color: #0751a8;
+            }
+
+            .bottom-nav .nav-sos {
+                color: #d90429;
+            }
+
+            .bottom-nav .nav-sos-icon {
+                width: 43px;
+                height: 43px;
+
+                margin-top: -24px;
+                margin-bottom: -4px;
+
+                border-radius: 50%;
+
+                background: #d90429;
+                color: white;
+
+                border: 4px solid white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 5px 16px rgba(217,4,41,0.30);
+            }
+
+            .bottom-nav .nav-sos-icon svg {
+                width: 21px;
+                height: 21px;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     DESKTOP VERSION
+========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <img
+            src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+            class="ufh-logo"
+            alt="University of Fort Hare Logo">
+
+        <div class="divider"></div>
+
+        <div class="brand-text">
+            <h1>Campus Security Management System</h1>
+            <p>Alice Campus</p>
+        </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+        <div class="role-pill">
+            Student • {{ username }}
+        </div>
+
+        <a href="/logout" class="logout">
+            Log Out
+        </a>
+
+    </div>
+
+</header>
+
+
+
+<section class="desktop-hero">
+
+    <div class="desktop-hero-inner">
+
+        <div class="desktop-hero-label">
+            UNIVERSITY OF FORT HARE • ALICE CAMPUS
+        </div>
+
+        <h2>
+            My <span>Reports.</span>
+        </h2>
+
+        <p>
+            Track the incidents you have reported and
+            follow their current security status.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<main class="desktop-main">
+
+    <div class="breadcrumb">
+
+        <a href="/student-dashboard">
+            Home
+        </a>
+
+        &nbsp; › &nbsp;
+
+        My Reports
+
+    </div>
+
+
+
+    <section class="heading-card">
+
+        <div class="heading-left">
+
+            <div class="heading-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"></path>
+                    <rect x="9" y="2" width="6" height="5" rx="1"></rect>
+                    <path d="M8 12h8"></path>
+                    <path d="M8 16h6"></path>
+
+                </svg>
+
+            </div>
+
+
+            <div class="heading-text">
+
+                <h2>
+                    My Incident Reports
+                </h2>
+
+                <p>
+                    Welcome, <strong>{{ username }}</strong>.
+                    View and track the incidents you have submitted.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <a
+            href="/report"
+            class="new-report-button">
+
+            <div class="new-report-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M12 12v6"></path>
+                    <path d="M9 15h6"></path>
+
+                </svg>
+
+            </div>
+
+
+            <div class="new-report-text">
+
+                <strong>
+                    REPORT NEW INCIDENT
+                </strong>
+
+                <span>
+                    Submit a security report
+                </span>
+
+            </div>
+
+
+            <div class="new-report-arrow">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M5 12h14"></path>
+                    <path d="m13 6 6 6-6 6"></path>
+
+                </svg>
+
+            </div>
+
+        </a>
+
+    </section>
+
+
+
+    {% if reports %}
+
+    <div class="section-heading">
+
+        <h3>
+            Your Submitted Incidents
+        </h3>
+
+        <p>
+            Latest status information from Campus Security
+        </p>
+
+    </div>
+
+
+
+    {% for report in reports %}
+
+    <article class="report-card">
+
+        <div class="report-top">
+
+            <div class="report-title-area">
+
+                <div class="report-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M8 13h8"></path>
+                        <path d="M8 17h6"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div class="report-title">
+
+                    <h3>
+                        {{ report[1] }}
+                    </h3>
+
+                    <div class="report-number">
+                        REPORT #{{ report[0] }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="badges">
+
+                {% if report[4] == "High" %}
+
+                <span class="badge high">
+                    <span class="badge-dot"></span>
+                    High Priority
+                </span>
+
+                {% elif report[4] == "Medium" %}
+
+                <span class="badge medium">
+                    <span class="badge-dot"></span>
+                    Medium Priority
+                </span>
+
+                {% else %}
+
+                <span class="badge low">
+                    <span class="badge-dot"></span>
+                    Low Priority
+                </span>
+
+                {% endif %}
+
+
+
+                {% if report[5] == "Pending" %}
+
+                <span class="badge pending">
+                    <span class="badge-dot"></span>
+                    Pending
+                </span>
+
+                {% elif report[5] == "In Progress" %}
+
+                <span class="badge in-progress">
+                    <span class="badge-dot"></span>
+                    In Progress
+                </span>
+
+                {% else %}
+
+                <span class="badge resolved">
+                    <span class="badge-dot"></span>
+                    Resolved
+                </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+
+        <div class="report-divider"></div>
+
+
+
+        <div class="details-grid">
+
+
+            <div class="detail-item">
+
+                <div class="detail-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+
+                    </svg>
+
+                </div>
+
+                <div class="detail-content">
+
+                    <strong>Location</strong>
+
+                    <p>
+                        {{ report[2] }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="detail-item">
+
+                <div class="detail-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path d="M4 4h16v13H7l-3 3V4z"></path>
+                        <path d="M8 9h8"></path>
+                        <path d="M8 13h5"></path>
+
+                    </svg>
+
+                </div>
+
+                <div class="detail-content">
+
+                    <strong>Description</strong>
+
+                    <p>
+                        {{ report[3] }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="detail-item">
+
+                <div class="detail-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <rect
+                            x="3"
+                            y="5"
+                            width="18"
+                            height="16"
+                            rx="2">
+                        </rect>
+
+                        <path d="M16 3v4"></path>
+                        <path d="M8 3v4"></path>
+                        <path d="M3 10h18"></path>
+
+                    </svg>
+
+                </div>
+
+                <div class="detail-content">
+
+                    <strong>Date Reported</strong>
+
+                    <p>
+                        {{ report[6] }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </article>
+
+    {% endfor %}
+
+
+
+    {% else %}
+
+    <section class="empty">
+
+        <div class="empty-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"></path>
+                <rect x="9" y="2" width="6" height="5" rx="1"></rect>
+                <path d="M8 13h8"></path>
+                <path d="M8 17h5"></path>
+
+            </svg>
+
+        </div>
+
+
+        <h2>
+            No Reports Yet
+        </h2>
+
+        <p>
+            You have not submitted any security incidents yet.
+            When you submit a report, you will be able to
+            track its progress here.
+        </p>
+
+
+        <a
+            href="/report"
+            class="empty-button">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <path d="M12 5v14"></path>
+                <path d="M5 12h14"></path>
+
+            </svg>
+
+            Report Your First Incident
+
+        </a>
+
+    </section>
+
+    {% endif %}
+
+
+
+    <div class="bottom-actions">
+
+        <a
+            href="/student-dashboard"
+            class="dashboard-button">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <path d="M19 12H5"></path>
+                <path d="M12 19l-7-7 7-7"></path>
+
+            </svg>
+
+            Return to Student Dashboard
+
+        </a>
+
+    </div>
+
+</main>
+
+
+
+<footer class="desktop-footer">
+
+    <strong>
+        University of Fort Hare
+    </strong>
+
+    <p>
+        Campus Security Management System • Alice Campus
+    </p>
+
+</footer>
+
+
+
+<!-- =========================================================
+     MOBILE APP VERSION
+========================================================= -->
+
+<div class="mobile-app">
+
+
+    <!-- MOBILE UFH HERO -->
+
+    <section class="mobile-hero">
+
+        <header class="app-header">
+
+            <div class="app-brand">
+
+                <div class="app-logo-wrap">
+
+                    <img
+                        src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                        alt="UFH">
+
+                </div>
+
+
+                <div class="app-brand-text">
+
+                    <strong>
+                        UFH Security
+                    </strong>
+
+                    <span>
+                        Alice Campus
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="/student-dashboard"
+                class="mobile-back"
+                aria-label="Return to dashboard">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+
+                </svg>
+
+            </a>
+
+        </header>
+
+
+
+        <div class="mobile-hero-content">
+
+            <div class="mobile-page-label">
+                INCIDENT TRACKING
+            </div>
+
+            <h1>
+                My Reports
+            </h1>
+
+            <p>
+                Track your submitted incidents and see
+                the latest status from Campus Security.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- MOBILE CONTENT -->
+
+    <main class="mobile-content">
+
+
+        <!-- NEW REPORT -->
+
+        <section class="mobile-action-card">
+
+            <a
+                href="/report"
+                class="mobile-new-report">
+
+                <div class="mobile-new-report-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M12 12v6"></path>
+                        <path d="M9 15h6"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div class="mobile-new-report-text">
+
+                    <strong>
+                        REPORT NEW INCIDENT
+                    </strong>
+
+                    <span>
+                        Submit a new campus security report
+                    </span>
+
+                </div>
+
+
+                <div class="mobile-new-report-arrow">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M5 12h14"></path>
+                        <path d="m13 6 6 6-6 6"></path>
+
+                    </svg>
+
+                </div>
+
+            </a>
+
+        </section>
+
+
+
+        {% if reports %}
+
+
+        <!-- SECTION TITLE -->
+
+        <div class="mobile-section-heading">
+
+            <div>
+
+                <h2>
+                    Your Incidents
+                </h2>
+
+                <p>
+                    Latest Campus Security status
+                </p>
+
+            </div>
+
+
+            <div class="mobile-section-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"></path>
+                    <rect x="9" y="2" width="6" height="5" rx="1"></rect>
+
+                </svg>
+
+            </div>
+
+        </div>
+
+
+
+        {% for report in reports %}
+
+
+        <!-- =====================================================
+             MOBILE REPORT
+        ====================================================== -->
+
+        <article class="mobile-report-card">
+
+
+            <div class="mobile-report-top">
+
+
+                <div class="mobile-report-title">
+
+                    <div class="mobile-report-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <path d="M8 13h8"></path>
+                            <path d="M8 17h6"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3>
+                            {{ report[1] }}
+                        </h3>
+
+                        <div class="mobile-report-number">
+                            REPORT #{{ report[0] }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                {% if report[5] == "Pending" %}
+
+                <span class="mobile-status pending">
+                    Pending
+                </span>
+
+                {% elif report[5] == "In Progress" %}
+
+                <span class="mobile-status in-progress">
+                    In Progress
+                </span>
+
+                {% else %}
+
+                <span class="mobile-status resolved">
+                    Resolved
+                </span>
+
+                {% endif %}
+
+
+            </div>
+
+
+
+            <div class="mobile-report-divider"></div>
+
+
+
+            <!-- LOCATION -->
+
+            <div class="mobile-detail">
+
+                <div class="mobile-detail-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+
+                    </svg>
+
+                </div>
+
+
+                <div class="mobile-detail-text">
+
+                    <strong>
+                        Location
+                    </strong>
+
+                    <p>
+                        {{ report[2] }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="mobile-detail">
+
+                <div class="mobile-detail-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M4 4h16v13H7l-3 3V4z"></path>
+                        <path d="M8 9h8"></path>
+                        <path d="M8 13h5"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div class="mobile-detail-text">
+
+                    <strong>
+                        Description
+                    </strong>
+
+                    <p>
+                        {{ report[3] }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FOOTER -->
+
+            <div class="mobile-report-footer">
+
+
+                {% if report[4] == "High" %}
+
+                <span class="mobile-priority high">
+                    High Priority
+                </span>
+
+                {% elif report[4] == "Medium" %}
+
+                <span class="mobile-priority medium">
+                    Medium Priority
+                </span>
+
+                {% else %}
+
+                <span class="mobile-priority low">
+                    Low Priority
+                </span>
+
+                {% endif %}
+
+
+
+                <div class="mobile-date">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <rect
+                            x="3"
+                            y="5"
+                            width="18"
+                            height="16"
+                            rx="2">
+                        </rect>
+
+                        <path d="M16 3v4"></path>
+                        <path d="M8 3v4"></path>
+                        <path d="M3 10h18"></path>
+
+                    </svg>
+
+                    {{ report[6] }}
+
+                </div>
+
+
+            </div>
+
+
+        </article>
+
+
+        {% endfor %}
+
+
+
+        <!-- STATUS NOTE -->
+
+        <section class="mobile-note">
+
+            <div class="mobile-note-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+
+                </svg>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Report Status
+                </strong>
+
+                <p>
+                    Your report status will change here when
+                    Campus Security updates the incident.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        {% else %}
+
+
+        <!-- =====================================================
+             MOBILE EMPTY STATE
+        ====================================================== -->
+
+        <div class="mobile-section-heading">
+
+            <div>
+
+                <h2>
+                    Your Incidents
+                </h2>
+
+                <p>
+                    Submitted security reports
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <section class="mobile-empty">
+
+            <div class="mobile-empty-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"></path>
+                    <rect x="9" y="2" width="6" height="5" rx="1"></rect>
+                    <path d="M8 13h8"></path>
+                    <path d="M8 17h5"></path>
+
+                </svg>
+
+            </div>
+
+
+            <h2>
+                No Reports Yet
+            </h2>
+
+
+            <p>
+                You have not submitted an incident report yet.
+                Once you do, its status will appear here.
+            </p>
+
+
+            <a href="/report">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+
+                </svg>
+
+                Report Incident
+
+            </a>
+
+        </section>
+
+
+        {% endif %}
+
+
+    </main>
+
+
+
+    <!-- =========================================================
+         MOBILE BOTTOM NAVIGATION
+    ========================================================= -->
+
+    <nav class="bottom-nav">
+
+
+        <!-- HOME -->
+
+        <a href="/student-dashboard">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M3 11l9-8 9 8"></path>
+                <path d="M5 10v10h14V10"></path>
+                <path d="M9 20v-6h6v6"></path>
+
+            </svg>
+
+            <span>
+                Home
+            </span>
+
+        </a>
+
+
+
+        <!-- REPORTS ACTIVE -->
+
+        <a
+            href="/my-reports"
+            class="active">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"></path>
+                <rect x="9" y="2" width="6" height="5" rx="1"></rect>
+                <path d="M8 12h8"></path>
+                <path d="M8 16h6"></path>
+
+            </svg>
+
+            <span>
+                Reports
+            </span>
+
+        </a>
+
+
+
+        <!-- SOS -->
+
+        <a
+            href="/sos"
+            class="nav-sos">
+
+            <div class="nav-sos-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M8 17h8"></path>
+                    <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                    <path d="M5 21h14"></path>
+                    <path d="M12 2v3"></path>
+
+                </svg>
+
+            </div>
+
+            <span>
+                SOS
+            </span>
+
+        </a>
+
+
+
+        <!-- CONTACTS -->
+
+        <a href="/emergency-contacts">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+                         19.79 19.79 0 0 1-8.63-3.07
+                         19.5 19.5 0 0 1-6-6
+                         19.79 19.79 0 0 1-3.07-8.67
+                         A2 2 0 0 1 4.11 2h3
+                         a2 2 0 0 1 2 1.72
+                         12.84 12.84 0 0 0 .7 2.81
+                         2 2 0 0 1-.45 2.11L8.09 9.91
+                         a16 16 0 0 0 6 6l1.27-1.27
+                         a2 2 0 0 1 2.11-.45
+                         12.84 12.84 0 0 0 2.81.7
+                         A2 2 0 0 1 22 16.92z">
+                </path>
+
+            </svg>
+
+            <span>
+                Contacts
+            </span>
+
+        </a>
+
+
+    </nav>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     SERVICE WORKER
+========================================================= -->
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker
+                    .register("/static/service-worker.js")
+                    .catch(function (error) {
+
+                        console.error(
+                            "Service Worker registration failed:",
+                            error
+                        );
+
+                    });
+
+            }
+        );
+
+    }
+
+</script>
+
+
+<div style="position:fixed;right:18px;bottom:18px;z-index:9999;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a href="{{ url_for('notifications_page') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Notifications</a><a href="{{ url_for('campus_map') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Campus Map</a></div></body>
+</html>

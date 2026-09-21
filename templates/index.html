@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#062d63">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default"
+    >
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}"
+    >
+
+    <title>UFH Campus Security</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+        }
+
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        /* =====================================================
+           DESKTOP WEBSITE
+        ===================================================== */
+
+        .desktop-site {
+            display: block;
+        }
+
+        .desktop-topbar {
+            min-height: 96px;
+            padding: 10px 55px;
+
+            background: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom: 1px solid #e5eaf1;
+        }
+
+        .desktop-brand {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .desktop-logo {
+            width: 112px;
+            height: auto;
+        }
+
+        .desktop-divider {
+            width: 1px;
+            height: 58px;
+            background: #d8dee8;
+        }
+
+        .desktop-brand-text h1 {
+            margin: 0;
+            color: #072e68;
+            font-size: 24px;
+        }
+
+        .desktop-brand-text p {
+            margin: 5px 0 0;
+            color: #64748b;
+        }
+
+        .desktop-login {
+            background: #062d63;
+            color: white;
+
+            padding: 13px 23px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           DESKTOP HERO
+        ===================================================== */
+
+        .desktop-hero {
+            min-height: 470px;
+
+            background-image:
+
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98),
+                    rgba(4,42,91,0.95) 37%,
+                    rgba(4,52,112,0.72) 62%,
+                    rgba(3,46,98,0.20)
+                ),
+
+                url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+            background-size: cover;
+            background-position: center;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-hero-inner {
+            width: 100%;
+            max-width: 1450px;
+
+            margin: auto;
+            padding: 55px 65px;
+        }
+
+        .desktop-campus-label {
+            display: inline-block;
+
+            padding: 7px 13px;
+
+            background: rgba(255,255,255,0.14);
+            color: white;
+
+            border-radius: 25px;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            margin-bottom: 20px;
+        }
+
+        .desktop-hero h2 {
+            margin: 0;
+
+            color: white;
+
+            font-size: 55px;
+            line-height: 1.05;
+
+            max-width: 680px;
+        }
+
+        .desktop-hero h2 span {
+            display: block;
+
+            color: #f6c62d;
+
+            margin-top: 8px;
+        }
+
+        .desktop-hero-description {
+            max-width: 670px;
+
+            margin-top: 22px;
+
+            color: #f1f6fc;
+
+            font-size: 18px;
+            line-height: 1.65;
+        }
+
+        .desktop-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+
+            margin-top: 30px;
+        }
+
+        .desktop-primary,
+        .desktop-secondary {
+            min-height: 51px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 10px;
+
+            padding: 0 23px;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .desktop-primary {
+            background: white;
+            color: #063a7c;
+
+            box-shadow:
+                0 8px 22px rgba(0,0,0,0.18);
+        }
+
+        .desktop-secondary {
+            color: white;
+
+            border:
+                1px solid rgba(255,255,255,0.55);
+
+            background:
+                rgba(255,255,255,0.10);
+        }
+
+        .desktop-primary svg,
+        .desktop-secondary svg {
+            width: 20px;
+            height: 20px;
+        }
+
+
+        /* =====================================================
+           DESKTOP MAIN
+        ===================================================== */
+
+        .desktop-main {
+            max-width: 1450px;
+
+            margin: auto;
+            padding: 45px 65px;
+        }
+
+        .desktop-heading {
+            max-width: 720px;
+
+            margin: auto auto 34px;
+
+            text-align: center;
+        }
+
+        .desktop-heading h2 {
+            margin: 0;
+
+            color: #092d61;
+
+            font-size: 31px;
+        }
+
+        .desktop-heading p {
+            margin: 10px 0 0;
+
+            color: #687b91;
+
+            line-height: 1.6;
+        }
+
+        .desktop-features {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 22px;
+        }
+
+        .desktop-feature {
+            background: white;
+
+            border:
+                1px solid #e2e9f2;
+
+            border-radius: 15px;
+
+            padding: 28px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.07);
+        }
+
+        .desktop-feature-icon {
+            width: 67px;
+            height: 67px;
+
+            border-radius: 16px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin-bottom: 20px;
+        }
+
+        .desktop-feature-icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .blue {
+            background: #e5f0ff;
+            color: #0751a8;
+        }
+
+        .gold {
+            background: #fff2cb;
+            color: #be8100;
+        }
+
+        .red {
+            background: #fde5e7;
+            color: #d81b27;
+        }
+
+        .desktop-feature h3 {
+            margin: 0 0 11px;
+
+            color: #092c5d;
+        }
+
+        .desktop-feature p {
+            margin: 0;
+
+            color: #61748d;
+
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           DESKTOP ROLES
+        ===================================================== */
+
+        .desktop-roles {
+            margin-top: 50px;
+
+            padding: 38px;
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #072e68,
+                    #0c4a96
+                );
+
+            color: white;
+        }
+
+        .desktop-roles h2 {
+            margin: 0 0 8px;
+        }
+
+        .desktop-roles > p {
+            margin: 0 0 25px;
+
+            color: #dce8f7;
+        }
+
+        .desktop-role-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 17px;
+        }
+
+        .desktop-role-card {
+            padding: 22px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(255,255,255,0.11);
+
+            border:
+                1px solid rgba(255,255,255,0.16);
+        }
+
+        .desktop-role-card svg {
+            width: 32px;
+            height: 32px;
+
+            margin-bottom: 10px;
+
+            color: #f6c62d;
+        }
+
+        .desktop-role-card h3 {
+            margin: 0 0 7px;
+        }
+
+        .desktop-role-card p {
+            margin: 0;
+
+            color: #dce8f7;
+
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           DESKTOP CTA
+        ===================================================== */
+
+        .desktop-cta {
+            margin-top: 45px;
+
+            padding: 35px;
+
+            background: white;
+
+            border:
+                1px solid #e2e9f2;
+
+            border-radius: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 30px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.06);
+        }
+
+        .desktop-cta h2 {
+            margin: 0 0 8px;
+
+            color: #092d61;
+        }
+
+        .desktop-cta p {
+            margin: 0;
+
+            color: #687b91;
+        }
+
+        .desktop-cta a {
+            padding: 14px 25px;
+
+            border-radius: 9px;
+
+            background: #062d63;
+            color: white;
+
+            text-decoration: none;
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+
+        /* =====================================================
+           DESKTOP FOOTER
+        ===================================================== */
+
+        .desktop-footer {
+            padding: 22px 50px;
+
+            background: #05295d;
+            color: white;
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr 1fr;
+
+            align-items: center;
+
+            font-size: 13px;
+        }
+
+        .desktop-footer p {
+            margin: 5px 0 0;
+
+            color: #d6e0ed;
+        }
+
+        .desktop-footer-middle {
+            text-align: center;
+        }
+
+        .desktop-footer-right {
+            text-align: right;
+        }
+
+        .desktop-footer-right a {
+            margin-left: 16px;
+
+            color: #d6e0ed;
+
+            text-decoration: none;
+        }
+
+
+        /* =====================================================
+           MOBILE APP
+        ===================================================== */
+
+        .mobile-app {
+            display: none;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media(max-width: 750px) {
+
+            body {
+                background: #f3f6fa;
+            }
+
+            .desktop-site {
+                display: none;
+            }
+
+            .mobile-app {
+                display: block;
+                min-height: 100vh;
+            }
+
+
+            /* =================================================
+               MOBILE HERO
+            ================================================= */
+
+            .mobile-hero {
+                position: relative;
+
+                min-height: 600px;
+
+                overflow: hidden;
+
+                border-radius:
+                    0 0 32px 32px;
+
+                background-image:
+
+                    linear-gradient(
+                        180deg,
+                        rgba(3,35,75,0.94) 0%,
+                        rgba(3,43,91,0.88) 42%,
+                        rgba(3,39,82,0.94) 100%
+                    ),
+
+                    url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+                background-size: cover;
+                background-position: center;
+            }
+
+
+            /* =================================================
+               MOBILE HEADER
+            ================================================= */
+
+            .mobile-header {
+                padding:
+                    calc(
+                        14px +
+                        env(safe-area-inset-top)
+                    )
+                    18px
+                    10px;
+
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+
+                gap: 11px;
+            }
+
+            .mobile-logo {
+                width: 52px;
+                height: 52px;
+
+                border-radius: 14px;
+
+                background: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 5px 18px rgba(0,0,0,0.15);
+            }
+
+            .mobile-logo img {
+                width: 44px;
+                height: 44px;
+
+                object-fit: contain;
+            }
+
+            .mobile-brand-text strong {
+                display: block;
+
+                color: white;
+
+                font-size: 16px;
+            }
+
+            .mobile-brand-text span {
+                display: block;
+
+                margin-top: 3px;
+
+                color:
+                    rgba(255,255,255,0.70);
+
+                font-size: 10px;
+            }
+
+            .mobile-header-login {
+                width: 43px;
+                height: 43px;
+
+                border-radius: 50%;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background:
+                    rgba(255,255,255,0.13);
+
+                border:
+                    1px solid rgba(255,255,255,0.20);
+
+                color: white;
+
+                text-decoration: none;
+            }
+
+            .mobile-header-login svg {
+                width: 20px;
+                height: 20px;
+            }
+
+
+            /* =================================================
+               MOBILE HERO CONTENT
+            ================================================= */
+
+            .mobile-hero-content {
+                padding: 53px 20px 42px;
+            }
+
+            .mobile-campus-label {
+                display: inline-flex;
+                align-items: center;
+
+                gap: 6px;
+
+                padding: 7px 10px;
+
+                border-radius: 30px;
+
+                background:
+                    rgba(255,255,255,0.12);
+
+                border:
+                    1px solid rgba(255,255,255,0.10);
+
+                color: #f6c62d;
+
+                font-size: 9px;
+                font-weight: 800;
+
+                letter-spacing: 0.5px;
+            }
+
+            .mobile-campus-label svg {
+                width: 13px;
+                height: 13px;
+            }
+
+            .mobile-hero h1 {
+                margin: 20px 0 0;
+
+                color: white;
+
+                font-size: 40px;
+                line-height: 1.03;
+
+                letter-spacing: -1px;
+            }
+
+            .mobile-hero h1 span {
+                display: block;
+
+                margin-top: 7px;
+
+                color: #f6c62d;
+            }
+
+            .mobile-hero-description {
+                margin: 20px 0 0;
+
+                max-width: 430px;
+
+                color:
+                    rgba(255,255,255,0.82);
+
+                font-size: 14px;
+                line-height: 1.65;
+            }
+
+
+            /* =================================================
+               MOBILE BUTTONS
+            ================================================= */
+
+            .mobile-actions {
+                display: grid;
+
+                gap: 11px;
+
+                margin-top: 28px;
+            }
+
+            .mobile-sign-in,
+            .mobile-register {
+                width: 100%;
+                min-height: 56px;
+
+                border-radius: 15px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                gap: 9px;
+
+                text-decoration: none;
+
+                font-size: 12px;
+                font-weight: 800;
+
+                letter-spacing: 0.2px;
+            }
+
+            .mobile-sign-in {
+                background: white;
+                color: #063a7c;
+
+                box-shadow:
+                    0 8px 22px rgba(0,0,0,0.18);
+            }
+
+            .mobile-register {
+                color: white;
+
+                background:
+                    rgba(255,255,255,0.10);
+
+                border:
+                    1px solid rgba(255,255,255,0.42);
+            }
+
+            .mobile-sign-in svg,
+            .mobile-register svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .mobile-help {
+                margin-top: 16px;
+
+                text-align: center;
+
+                color:
+                    rgba(255,255,255,0.60);
+
+                font-size: 9px;
+                line-height: 1.5;
+            }
+
+
+            /* =================================================
+               MOBILE MAIN
+            ================================================= */
+
+            .mobile-main {
+                padding: 25px 15px 35px;
+            }
+
+            .mobile-section-heading {
+                margin: 0 3px 13px;
+            }
+
+            .mobile-section-heading span {
+                color: #0751a8;
+
+                font-size: 9px;
+                font-weight: 800;
+
+                letter-spacing: 0.8px;
+            }
+
+            .mobile-section-heading h2 {
+                margin: 5px 0 0;
+
+                color: #062d63;
+
+                font-size: 20px;
+            }
+
+            .mobile-section-heading p {
+                margin: 6px 0 0;
+
+                color: #7b899a;
+
+                font-size: 10px;
+                line-height: 1.5;
+            }
+
+
+            /* =================================================
+               MOBILE FEATURE CARDS
+            ================================================= */
+
+            .mobile-features {
+                display: grid;
+
+                gap: 10px;
+            }
+
+            .mobile-feature-card {
+                min-height: 95px;
+
+                padding: 14px;
+
+                background: white;
+
+                border:
+                    1px solid #e1e8f1;
+
+                border-radius: 18px;
+
+                display: flex;
+                align-items: center;
+
+                gap: 13px;
+
+                box-shadow:
+                    0 5px 16px rgba(30,60,100,0.05);
+            }
+
+            .mobile-feature-icon {
+                width: 48px;
+                height: 48px;
+
+                min-width: 48px;
+
+                border-radius: 14px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-feature-icon svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .mobile-feature-content {
+                flex: 1;
+            }
+
+            .mobile-feature-content h3 {
+                margin: 0;
+
+                color: #062d63;
+
+                font-size: 13px;
+            }
+
+            .mobile-feature-content p {
+                margin: 5px 0 0;
+
+                color: #7c8b9d;
+
+                font-size: 9px;
+                line-height: 1.5;
+            }
+
+            .mobile-arrow {
+                width: 18px;
+                height: 18px;
+
+                color: #9ba8b6;
+            }
+
+
+            /* =================================================
+               MOBILE SAFETY CARD
+            ================================================= */
+
+            .mobile-safety-card {
+                margin-top: 23px;
+
+                padding: 18px;
+
+                border-radius: 20px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #062d63,
+                        #0b4d99
+                    );
+
+                color: white;
+
+                box-shadow:
+                    0 9px 24px rgba(6,45,99,0.18);
+            }
+
+            .mobile-safety-top {
+                display: flex;
+                align-items: center;
+
+                gap: 11px;
+            }
+
+            .mobile-shield {
+                width: 44px;
+                height: 44px;
+
+                min-width: 44px;
+
+                border-radius: 13px;
+
+                background:
+                    rgba(255,255,255,0.13);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                color: #f6c62d;
+            }
+
+            .mobile-shield svg {
+                width: 23px;
+                height: 23px;
+            }
+
+            .mobile-safety-top span {
+                display: block;
+
+                color: #f6c62d;
+
+                font-size: 8px;
+                font-weight: 800;
+
+                letter-spacing: 0.6px;
+            }
+
+            .mobile-safety-top strong {
+                display: block;
+
+                margin-top: 4px;
+
+                font-size: 14px;
+            }
+
+            .mobile-safety-card p {
+                margin: 13px 0 0;
+
+                color:
+                    rgba(255,255,255,0.75);
+
+                font-size: 10px;
+                line-height: 1.6;
+            }
+
+
+            /* =================================================
+               MOBILE ACCOUNT CTA
+            ================================================= */
+
+            .mobile-account-cta {
+                margin-top: 22px;
+
+                padding: 17px;
+
+                border-radius: 19px;
+
+                background: white;
+
+                border:
+                    1px solid #e1e8f1;
+
+                text-align: center;
+            }
+
+            .mobile-account-cta h3 {
+                margin: 0;
+
+                color: #062d63;
+
+                font-size: 15px;
+            }
+
+            .mobile-account-cta p {
+                margin: 6px 0 14px;
+
+                color: #7c8b9d;
+
+                font-size: 9px;
+                line-height: 1.5;
+            }
+
+            .mobile-account-cta a {
+                min-height: 46px;
+
+                border-radius: 12px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background: #0751a8;
+                color: white;
+
+                text-decoration: none;
+
+                font-size: 10px;
+                font-weight: 800;
+            }
+
+
+            /* =================================================
+               MOBILE FOOTER
+            ================================================= */
+
+            .mobile-footer {
+                padding:
+                    3px 20px
+                    calc(
+                        22px +
+                        env(safe-area-inset-bottom)
+                    );
+
+                text-align: center;
+
+                color: #8795a6;
+
+                font-size: 8px;
+
+                line-height: 1.6;
+            }
+
+            .mobile-footer strong {
+                color: #60758c;
+            }
+
+        }
+
+
+        /* =====================================================
+           DESKTOP TABLET
+        ===================================================== */
+
+        @media(min-width: 751px) and (max-width: 1000px) {
+
+            .desktop-features,
+            .desktop-role-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     DESKTOP WEBSITE
+========================================================= -->
+
+<div class="desktop-site">
+
+
+    <header class="desktop-topbar">
+
+
+        <div class="desktop-brand">
+
+            <img
+                src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                class="desktop-logo"
+                alt="University of Fort Hare"
+            >
+
+            <div class="desktop-divider"></div>
+
+            <div class="desktop-brand-text">
+
+                <h1>
+                    Campus Security Management System
+                </h1>
+
+                <p>
+                    University of Fort Hare — Alice Campus
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="/login"
+            class="desktop-login"
+        >
+            Login to System
+        </a>
+
+
+    </header>
+
+
+
+    <section class="desktop-hero">
+
+
+        <div class="desktop-hero-inner">
+
+
+            <div class="desktop-campus-label">
+                UNIVERSITY OF FORT HARE • ALICE CAMPUS
+            </div>
+
+
+            <h2>
+
+                A Safer Campus.
+
+                <span>
+                    Together.
+                </span>
+
+            </h2>
+
+
+            <p class="desktop-hero-description">
+
+                A central campus safety platform for students,
+                security officers and administrators to report,
+                monitor and respond to security incidents.
+
+            </p>
+
+
+            <div class="desktop-buttons">
+
+
+                <a
+                    href="/login"
+                    class="desktop-primary"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <path d="M10 17l5-5-5-5"></path>
+                        <path d="M15 12H3"></path>
+                    </svg>
+
+                    Login to System
+
+                </a>
+
+
+                <a
+                    href="#desktop-features"
+                    class="desktop-secondary"
+                >
+
+                    Learn More
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M12 5v14"></path>
+                        <path d="M6 13l6 6 6-6"></path>
+                    </svg>
+
+                </a>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <main
+        class="desktop-main"
+        id="desktop-features"
+    >
+
+
+        <div class="desktop-heading">
+
+            <h2>
+                Campus Safety Made Simple
+            </h2>
+
+            <p>
+
+                The system connects students with campus security
+                and provides tools for incident reporting,
+                monitoring and emergency response.
+
+            </p>
+
+        </div>
+
+
+
+        <div class="desktop-features">
+
+
+            <div class="desktop-feature">
+
+                <div class="desktop-feature-icon blue">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <path d="M14 2v6h6"></path>
+                        <path d="M12 12v6"></path>
+                        <path d="M9 15h6"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Report Incidents
+                </h3>
+
+                <p>
+
+                    Students can securely submit details about
+                    theft, assault, harassment, vandalism,
+                    suspicious activity and other safety concerns.
+
+                </p>
+
+            </div>
+
+
+
+            <div class="desktop-feature">
+
+                <div class="desktop-feature-icon gold">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M8 6h13"></path>
+                        <path d="M8 12h13"></path>
+                        <path d="M8 18h13"></path>
+                        <path d="M3 6h.01"></path>
+                        <path d="M3 12h.01"></path>
+                        <path d="M3 18h.01"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Track Reports
+                </h3>
+
+                <p>
+
+                    Students can monitor submitted incidents
+                    as security moves them from Pending to
+                    In Progress and finally Resolved.
+
+                </p>
+
+            </div>
+
+
+
+            <div class="desktop-feature">
+
+                <div class="desktop-feature-icon red">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M8 17h8"></path>
+                        <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                        <path d="M5 21h14"></path>
+                        <path d="M12 2v3"></path>
+                        <path d="M4.2 5.2l2.1 2.1"></path>
+                        <path d="M19.8 5.2l-2.1 2.1"></path>
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Priority Response
+                </h3>
+
+                <p>
+
+                    Priority levels help campus security
+                    identify urgent situations and respond
+                    appropriately.
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+
+        <section class="desktop-roles">
+
+
+            <h2>
+                One System. Different Roles.
+            </h2>
+
+            <p>
+                Each user is directed to the tools they need after signing in.
+            </p>
+
+
+            <div class="desktop-role-grid">
+
+
+                <div class="desktop-role-card">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M4 22c0-4 3.5-7 8-7s8 3 8 7"></path>
+                    </svg>
+
+                    <h3>
+                        Students
+                    </h3>
+
+                    <p>
+                        Report incidents, track reports,
+                        access emergency contacts and use Campus SOS.
+                    </p>
+
+                </div>
+
+
+
+                <div class="desktop-role-card">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+
+                    <h3>
+                        Security Officers
+                    </h3>
+
+                    <p>
+                        View incidents, identify priority cases,
+                        search reports and update incident status.
+                    </p>
+
+                </div>
+
+
+
+                <div class="desktop-role-card">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M4 21a8 8 0 0 1 16 0"></path>
+                    </svg>
+
+                    <h3>
+                        Administrators
+                    </h3>
+
+                    <p>
+                        Create accounts and manage system users,
+                        roles, passwords and account access.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <section class="desktop-cta">
+
+
+            <div>
+
+                <h2>
+                    Ready to access the system?
+                </h2>
+
+                <p>
+                    Sign in using your Campus Security account.
+                </p>
+
+            </div>
+
+
+            <a href="/login">
+                Login to System →
+            </a>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <footer class="desktop-footer">
+
+
+        <div>
+
+            <strong>
+                University of Fort Hare
+            </strong>
+
+            <p>
+                Together in Excellence
+            </p>
+
+        </div>
+
+
+        <div class="desktop-footer-middle">
+
+            <strong>
+                Campus Security Management System
+            </strong>
+
+            <p>
+                Alice Campus
+            </p>
+
+        </div>
+
+
+        <div class="desktop-footer-right">
+
+            <a href="/login">
+                Login
+            </a>
+
+            <a href="#desktop-features">
+                About
+            </a>
+
+        </div>
+
+
+    </footer>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     MOBILE APP LANDING PAGE
+========================================================= -->
+
+<div class="mobile-app">
+
+
+    <!-- =====================================================
+         MOBILE HERO
+    ===================================================== -->
+
+    <section class="mobile-hero">
+
+
+        <header class="mobile-header">
+
+
+            <div class="mobile-brand">
+
+
+                <div class="mobile-logo">
+
+                    <img
+                        src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                        alt="University of Fort Hare"
+                    >
+
+                </div>
+
+
+                <div class="mobile-brand-text">
+
+                    <strong>
+                        UFH Security
+                    </strong>
+
+                    <span>
+                        Alice Campus
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+
+            <a
+                href="/login"
+                class="mobile-header-login"
+                aria-label="Sign in"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <path d="M10 17l5-5-5-5"></path>
+                    <path d="M15 12H3"></path>
+                </svg>
+
+            </a>
+
+
+        </header>
+
+
+
+        <div class="mobile-hero-content">
+
+
+            <div class="mobile-campus-label">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12z"></path>
+                    <circle cx="12" cy="9" r="2.5"></circle>
+                </svg>
+
+                UNIVERSITY OF FORT HARE
+
+            </div>
+
+
+
+            <h1>
+
+                A Safer Campus.
+
+                <span>
+                    Together.
+                </span>
+
+            </h1>
+
+
+
+            <p class="mobile-hero-description">
+
+                Your campus safety platform for reporting incidents,
+                tracking security reports and accessing emergency
+                assistance at Alice Campus.
+
+            </p>
+
+
+
+            <div class="mobile-actions">
+
+
+                <a
+                    href="/login"
+                    class="mobile-sign-in"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <path d="M10 17l5-5-5-5"></path>
+                        <path d="M15 12H3"></path>
+                    </svg>
+
+                    SIGN IN TO SYSTEM
+
+                </a>
+
+
+
+                <a
+                    href="/register"
+                    class="mobile-register"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                    >
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M2 21a7 7 0 0 1 14 0"></path>
+                        <path d="M19 8v6"></path>
+                        <path d="M16 11h6"></path>
+                    </svg>
+
+                    CREATE STUDENT ACCOUNT
+
+                </a>
+
+
+            </div>
+
+
+
+            <div class="mobile-help">
+
+                Students can create an account directly.
+                Security Officer and Administrator accounts
+                are managed by system administrators.
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MOBILE CONTENT
+    ===================================================== -->
+
+    <main class="mobile-main">
+
+
+        <div class="mobile-section-heading">
+
+            <span>
+                CAMPUS SAFETY
+            </span>
+
+            <h2>
+                Safety tools in one place
+            </h2>
+
+            <p>
+                Access the services you need through your UFH Security account.
+            </p>
+
+        </div>
+
+
+
+        <div class="mobile-features">
+
+
+            <!-- INCIDENT REPORTING -->
+
+            <div class="mobile-feature-card">
+
+
+                <div class="mobile-feature-icon blue">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <path d="M14 2v6h6"></path>
+                        <path d="M12 12v6"></path>
+                        <path d="M9 15h6"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="mobile-feature-content">
+
+                    <h3>
+                        Incident Reporting
+                    </h3>
+
+                    <p>
+                        Submit campus safety concerns securely,
+                        including the option to hide your identity
+                        from operational incident views.
+                    </p>
+
+                </div>
+
+
+                <svg
+                    class="mobile-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+
+
+            </div>
+
+
+
+            <!-- SOS -->
+
+            <div class="mobile-feature-card">
+
+
+                <div class="mobile-feature-icon red">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                    >
+                        <path d="M8 17h8"></path>
+                        <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                        <path d="M5 21h14"></path>
+                        <path d="M12 2v3"></path>
+                        <path d="M4.2 5.2l2.1 2.1"></path>
+                        <path d="M19.8 5.2l-2.1 2.1"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="mobile-feature-content">
+
+                    <h3>
+                        Campus Emergency SOS
+                    </h3>
+
+                    <p>
+                        Logged-in students can submit a
+                        high-priority emergency alert to campus security.
+                    </p>
+
+                </div>
+
+
+                <svg
+                    class="mobile-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+
+
+            </div>
+
+
+
+            <!-- TRACK REPORTS -->
+
+            <div class="mobile-feature-card">
+
+
+                <div class="mobile-feature-icon gold">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                    >
+                        <path d="M8 6h13"></path>
+                        <path d="M8 12h13"></path>
+                        <path d="M8 18h13"></path>
+                        <path d="M3 6h.01"></path>
+                        <path d="M3 12h.01"></path>
+                        <path d="M3 18h.01"></path>
+                    </svg>
+
+                </div>
+
+
+                <div class="mobile-feature-content">
+
+                    <h3>
+                        Track Your Reports
+                    </h3>
+
+                    <p>
+                        Follow your incident from Pending,
+                        to In Progress, and finally Resolved.
+                    </p>
+
+                </div>
+
+
+                <svg
+                    class="mobile-arrow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             SAFETY CARD
+        ================================================== -->
+
+        <section class="mobile-safety-card">
+
+
+            <div class="mobile-safety-top">
+
+
+                <div class="mobile-shield">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        UFH CAMPUS SECURITY
+                    </span>
+
+                    <strong>
+                        Your Safety. Our Priority.
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <p>
+
+                The system connects students with campus
+                security so incidents can be reported,
+                monitored and managed from one central platform.
+
+            </p>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             STUDENT ACCOUNT CTA
+        ================================================== -->
+
+        <section class="mobile-account-cta">
+
+
+            <h3>
+                New student?
+            </h3>
+
+
+            <p>
+
+                Create your UFH Security student account
+                to start using the campus safety system.
+
+            </p>
+
+
+            <a href="/register">
+                CREATE STUDENT ACCOUNT
+            </a>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <footer class="mobile-footer">
+
+        <strong>
+            University of Fort Hare
+        </strong>
+
+        <br>
+
+        Campus Security Management System • Alice Campus
+
+    </footer>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     SERVICE WORKER
+========================================================= -->
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker
+                    .register(
+                        "/service-worker.js",
+                        {
+                            scope: "/"
+                        }
+                    )
+                    .then(function (registration) {
+
+                        console.log(
+                            "UFH Security service worker registered.",
+                            registration
+                        );
+
+                    })
+                    .catch(function (error) {
+
+                        console.error(
+                            "Service worker registration failed:",
+                            error
+                        );
+
+                    });
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

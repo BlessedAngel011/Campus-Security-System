@@ -1,0 +1,3097 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta name="theme-color" content="#062d63">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default">
+
+    <meta
+        name="apple-mobile-web-app-title"
+        content="UFH Security">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}">
+
+    <link
+        rel="apple-touch-icon"
+        href="{{ url_for('static_files', filename='icon-192.png') }}">
+
+    <title>Report Incident | UFH Campus Security</title>
+
+
+    <style>
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #10284f;
+            min-height: 100vh;
+        }
+
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+
+        /* =========================================================
+           DESKTOP HEADER
+        ========================================================= */
+
+        .topbar {
+            min-height: 96px;
+            padding: 10px 50px;
+            background: white;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            border-bottom: 1px solid #e4eaf2;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ufh-logo {
+            width: 90px;
+            height: auto;
+        }
+
+        .divider {
+            width: 1px;
+            height: 55px;
+            background: #d8dee8;
+        }
+
+        .brand-text h1 {
+            color: #062d63;
+            font-size: 22px;
+        }
+
+        .brand-text p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .role-pill {
+            padding: 9px 14px;
+            background: #eef5ff;
+            color: #0751a8;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .logout {
+            background: #062d63;
+            color: white;
+
+            padding: 13px 22px;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* =========================================================
+           DESKTOP HERO
+        ========================================================= */
+
+        .hero {
+            min-height: 245px;
+
+            background-image:
+                linear-gradient(
+                    90deg,
+                    rgba(2,29,66,0.98) 0%,
+                    rgba(4,45,98,0.90) 45%,
+                    rgba(4,57,120,0.48) 75%,
+                    rgba(3,46,98,0.25) 100%
+                ),
+                url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+            background-size: cover;
+            background-position: center;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-inner {
+            width: 100%;
+            max-width: 1450px;
+
+            margin: auto;
+
+            padding: 38px 55px;
+        }
+
+        .hero-label {
+            display: inline-block;
+
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+
+            color: white;
+
+            padding: 8px 14px;
+
+            border-radius: 30px;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            margin-bottom: 16px;
+        }
+
+        .hero h2 {
+            color: white;
+
+            font-size: 44px;
+            line-height: 1.08;
+        }
+
+        .hero h2 span {
+            color: #ffc928;
+        }
+
+        .hero p {
+            margin-top: 13px;
+
+            color: #f0f5fb;
+
+            font-size: 17px;
+            line-height: 1.6;
+
+            max-width: 680px;
+        }
+
+
+        /* =========================================================
+           DESKTOP MAIN
+        ========================================================= */
+
+        .desktop-main {
+            max-width: 1450px;
+
+            margin: auto;
+
+            padding: 35px 55px 55px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 24px;
+
+            color: #718096;
+
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #0751a8;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+        .content-grid {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 2fr)
+                minmax(300px, 0.8fr);
+
+            gap: 25px;
+
+            align-items: start;
+        }
+
+
+        /* =========================================================
+           FORM CARD
+        ========================================================= */
+
+        .form-card {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+            border-top: 6px solid #0751a8;
+
+            border-radius: 16px;
+
+            padding: 32px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.08);
+        }
+
+        .form-heading {
+            display: flex;
+            align-items: center;
+
+            gap: 17px;
+
+            margin-bottom: 10px;
+        }
+
+        .form-heading-icon {
+            width: 62px;
+            height: 62px;
+            min-width: 62px;
+
+            border-radius: 15px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-heading-icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .form-heading h2 {
+            color: #062d63;
+            font-size: 27px;
+        }
+
+        .intro {
+            color: #687b91;
+
+            line-height: 1.6;
+
+            margin-left: 79px;
+            margin-bottom: 27px;
+        }
+
+
+        /* =========================================================
+           ERROR
+        ========================================================= */
+
+        .error-message {
+            background: #fff1f2;
+
+            border: 1px solid #fecdd3;
+            border-left: 4px solid #e11d48;
+
+            color: #be123c;
+
+            padding: 14px 17px;
+
+            border-radius: 10px;
+
+            margin-bottom: 18px;
+
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           FORM
+        ========================================================= */
+
+        .form-row {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-top: 20px;
+        }
+
+        .field-label {
+            display: flex;
+            align-items: center;
+
+            gap: 9px;
+
+            color: #092d61;
+
+            font-weight: bold;
+
+            margin-bottom: 9px;
+
+            font-size: 15px;
+        }
+
+        .field-label svg {
+            width: 19px;
+            height: 19px;
+
+            color: #0751a8;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+
+            padding: 15px;
+
+            border: 1px solid #b8c8db;
+
+            border-radius: 10px;
+
+            background: white;
+            color: #10284f;
+
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #0751a8;
+
+            box-shadow:
+                0 0 0 3px rgba(7,81,168,0.10);
+        }
+
+        textarea {
+            min-height: 145px;
+            resize: vertical;
+        }
+
+        input:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
+
+        /* =========================================================
+           ANONYMOUS
+        ========================================================= */
+
+        .anonymous-box {
+            display: flex;
+            align-items: center;
+
+            gap: 16px;
+
+            margin-top: 25px;
+
+            padding: 19px 20px;
+
+            background: #f8fbff;
+
+            border: 1px solid #cfe0f5;
+            border-left: 5px solid #0751a8;
+
+            border-radius: 13px;
+        }
+
+        .anonymous-box.enabled {
+            background: #edf6ff;
+            border-color: #8ab8ec;
+        }
+
+        .anonymous-icon {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            border-radius: 13px;
+        }
+
+        .anonymous-box.enabled .anonymous-icon {
+            background: #0751a8;
+            color: white;
+        }
+
+        .anonymous-icon svg {
+            width: 27px;
+            height: 27px;
+        }
+
+        .anonymous-content {
+            flex: 1;
+        }
+
+        .anonymous-title {
+            display: block;
+
+            color: #062d63;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            margin-bottom: 5px;
+        }
+
+        .anonymous-content p {
+            color: #64748b;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           SWITCH
+        ========================================================= */
+
+        .switch {
+            position: relative;
+
+            display: inline-block;
+
+            width: 54px;
+            height: 30px;
+            min-width: 54px;
+
+            cursor: pointer;
+        }
+
+        .switch input {
+            opacity: 0;
+
+            width: 0;
+            height: 0;
+
+            position: absolute;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+
+            background: #cbd5e1;
+
+            border-radius: 30px;
+        }
+
+        .slider::before {
+            content: "";
+
+            position: absolute;
+
+            width: 22px;
+            height: 22px;
+
+            left: 4px;
+            top: 4px;
+
+            background: white;
+
+            border-radius: 50%;
+
+            transition: 0.25s;
+
+            box-shadow:
+                0 2px 6px rgba(0,0,0,0.22);
+        }
+
+        .switch input:checked + .slider {
+            background: #0751a8;
+        }
+
+        .switch input:checked + .slider::before {
+            transform: translateX(24px);
+        }
+
+
+        /* =========================================================
+           SUBMIT
+        ========================================================= */
+
+        .submit-button {
+            width: 100%;
+
+            margin-top: 22px;
+
+            min-height: 82px;
+
+            padding: 15px 24px;
+
+            border: 1px solid #0751a8;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0867c9,
+                    #064a98
+                );
+
+            color: white;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+
+            box-shadow:
+                0 8px 20px rgba(7,81,168,0.22);
+
+            text-align: left;
+        }
+
+        .submit-icon {
+            width: 65px;
+            min-width: 65px;
+
+            margin-right: 20px;
+
+            border-right:
+                1px solid rgba(255,255,255,0.4);
+
+            display: flex;
+            align-items: center;
+        }
+
+        .submit-icon svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .submit-text {
+            flex: 1;
+        }
+
+        .submit-text strong {
+            display: block;
+
+            font-size: 20px;
+        }
+
+        .submit-text span {
+            display: block;
+
+            margin-top: 4px;
+
+            font-size: 13px;
+
+            color: #dbeafe;
+        }
+
+        .submit-arrow svg {
+            width: 25px;
+            height: 25px;
+        }
+
+
+        /* =========================================================
+           BACK
+        ========================================================= */
+
+        .back-button {
+            width: 100%;
+
+            margin-top: 18px;
+
+            padding: 16px 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 10px;
+
+            background: white;
+            color: #0751a8;
+
+            border: 1px solid #d8e3ef;
+
+            border-radius: 12px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+
+        /* =========================================================
+           SIDE CARDS
+        ========================================================= */
+
+        .side-card {
+            background: white;
+
+            border: 1px solid #e2e9f2;
+
+            border-radius: 16px;
+
+            padding: 25px;
+
+            margin-bottom: 22px;
+
+            box-shadow:
+                0 7px 20px rgba(30,60,100,0.07);
+        }
+
+        .side-title {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 14px;
+        }
+
+        .side-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+
+            border-radius: 13px;
+
+            background: #e7f1ff;
+            color: #0751a8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .side-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .side-title h3 {
+            color: #062d63;
+            font-size: 20px;
+        }
+
+        .side-card p {
+            color: #687b91;
+            line-height: 1.6;
+        }
+
+        .tips {
+            list-style: none;
+
+            margin-top: 17px;
+        }
+
+        .tips li {
+            display: flex;
+
+            gap: 11px;
+
+            align-items: flex-start;
+
+            margin: 14px 0;
+
+            color: #536a83;
+
+            line-height: 1.45;
+        }
+
+        .check {
+            width: 23px;
+            height: 23px;
+            min-width: 23px;
+
+            border-radius: 50%;
+
+            background: #e5f7ed;
+            color: #198754;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .check svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .emergency-card {
+            background: #fff7f8;
+            border-color: #ffcbd1;
+        }
+
+        .emergency-card .side-icon {
+            background: #ffe8eb;
+            color: #e80d21;
+        }
+
+        .emergency-card .side-title h3 {
+            color: #d7192d;
+        }
+
+        .sos-link {
+            width: 100%;
+
+            margin-top: 18px;
+
+            min-height: 74px;
+
+            padding: 13px 16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff3545,
+                    #e80d21
+                );
+
+            border: 3px solid #ff7180;
+
+            border-radius: 13px;
+
+            color: white;
+
+            text-decoration: none;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .sos-link-icon {
+            width: 52px;
+            min-width: 52px;
+
+            margin-right: 15px;
+
+            border-right:
+                1px solid rgba(255,255,255,0.45);
+
+            display: flex;
+            align-items: center;
+        }
+
+        .sos-link-icon svg {
+            width: 31px;
+            height: 31px;
+        }
+
+        .sos-link-text {
+            flex: 1;
+        }
+
+        .sos-link-text strong {
+            display: block;
+            font-size: 16px;
+        }
+
+        .sos-link-text span {
+            display: block;
+
+            font-size: 12px;
+
+            margin-top: 3px;
+
+            color: #fff1f2;
+        }
+
+
+        /* =========================================================
+           DESKTOP FOOTER
+        ========================================================= */
+
+        .desktop-footer {
+            background: #05295d;
+            color: white;
+
+            padding: 22px 50px;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+        .desktop-footer p {
+            color: #d6e0ed;
+            margin-top: 5px;
+        }
+
+
+        /* =========================================================
+           MOBILE HIDDEN ON DESKTOP
+        ========================================================= */
+
+        .mobile-app {
+            display: none;
+        }
+
+
+        /* =========================================================
+           MOBILE APP MODE
+        ========================================================= */
+
+        @media(max-width: 750px) {
+
+            body {
+                background: #f4f7fb;
+
+                padding-bottom:
+                    calc(80px + env(safe-area-inset-bottom));
+            }
+
+            .topbar,
+            .hero,
+            .desktop-main,
+            .desktop-footer {
+                display: none !important;
+            }
+
+            .mobile-app {
+                display: block;
+                min-height: 100vh;
+            }
+
+
+            /* =====================================================
+               MOBILE UFH HERO
+            ===================================================== */
+
+            .mobile-hero {
+                position: relative;
+
+                overflow: hidden;
+
+                min-height: 285px;
+
+                background-image:
+                    linear-gradient(
+                        150deg,
+                        rgba(2,29,66,0.98) 0%,
+                        rgba(4,44,94,0.94) 50%,
+                        rgba(3,78,151,0.76) 100%
+                    ),
+                    url("{{ url_for('static_files', filename='alice-campus.png') }}");
+
+                background-size: cover;
+                background-position: center;
+
+                border-radius: 0 0 34px 34px;
+            }
+
+            .mobile-hero::after {
+                content: "";
+
+                position: absolute;
+
+                width: 230px;
+                height: 230px;
+
+                right: -120px;
+                top: 70px;
+
+                border-radius: 50%;
+
+                background: rgba(255,255,255,0.055);
+            }
+
+
+            /* =====================================================
+               MOBILE HEADER
+            ===================================================== */
+
+            .app-header {
+                position: relative;
+                z-index: 5;
+
+                padding:
+                    calc(15px + env(safe-area-inset-top))
+                    20px
+                    12px;
+
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .app-brand {
+                display: flex;
+                align-items: center;
+
+                gap: 12px;
+            }
+
+            .app-logo-wrap {
+                width: 53px;
+                height: 53px;
+
+                border-radius: 15px;
+
+                background: rgba(255,255,255,0.96);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 6px 20px rgba(0,0,0,0.17);
+            }
+
+            .app-logo-wrap img {
+                width: 44px;
+                height: 44px;
+
+                object-fit: contain;
+            }
+
+            .app-brand-text strong {
+                display: block;
+
+                color: white;
+
+                font-size: 17px;
+            }
+
+            .app-brand-text span {
+                display: block;
+
+                color: rgba(255,255,255,0.72);
+
+                font-size: 11px;
+
+                margin-top: 4px;
+            }
+
+            .mobile-back {
+                width: 44px;
+                height: 44px;
+
+                border-radius: 50%;
+
+                background: rgba(255,255,255,0.15);
+
+                border:
+                    1px solid rgba(255,255,255,0.22);
+
+                color: white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                text-decoration: none;
+
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            .mobile-back svg {
+                width: 22px;
+                height: 22px;
+            }
+
+
+            /* =====================================================
+               MOBILE HERO TEXT
+            ===================================================== */
+
+            .mobile-hero-content {
+                position: relative;
+                z-index: 4;
+
+                padding: 26px 20px 43px;
+            }
+
+            .mobile-page-label {
+                color: #f6c62d;
+
+                font-size: 11px;
+                font-weight: 800;
+
+                letter-spacing: 1px;
+
+                margin-bottom: 8px;
+            }
+
+            .mobile-hero-content h1 {
+                color: white;
+
+                font-size: 30px;
+                line-height: 1.12;
+
+                letter-spacing: -0.5px;
+            }
+
+            .mobile-hero-content p {
+                color: rgba(255,255,255,0.80);
+
+                margin-top: 9px;
+
+                font-size: 13px;
+                line-height: 1.5;
+
+                max-width: 330px;
+            }
+
+
+            /* =====================================================
+               MOBILE CONTENT
+            ===================================================== */
+
+            .mobile-content {
+                position: relative;
+
+                margin-top: -28px;
+
+                padding: 0 17px 30px;
+
+                z-index: 10;
+            }
+
+
+            /* =====================================================
+               MOBILE FORM CARD
+            ===================================================== */
+
+            .mobile-form-card {
+                background: white;
+
+                border: 1px solid #e1e8f1;
+
+                border-radius: 24px;
+
+                padding: 20px 17px;
+
+                box-shadow:
+                    0 12px 30px rgba(20,45,80,0.10);
+            }
+
+            .mobile-form-heading {
+                display: flex;
+                align-items: center;
+
+                gap: 12px;
+
+                padding-bottom: 17px;
+
+                border-bottom: 1px solid #edf1f6;
+            }
+
+            .mobile-form-icon {
+                width: 48px;
+                height: 48px;
+                min-width: 48px;
+
+                border-radius: 14px;
+
+                background: #eaf3ff;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-form-icon svg {
+                width: 25px;
+                height: 25px;
+            }
+
+            .mobile-form-heading h2 {
+                color: #062d63;
+
+                font-size: 17px;
+            }
+
+            .mobile-form-heading p {
+                color: #8391a4;
+
+                font-size: 11px;
+                line-height: 1.4;
+
+                margin-top: 4px;
+            }
+
+            .mobile-form-card .form-row {
+                display: block;
+            }
+
+            .mobile-form-card .form-group {
+                margin-top: 18px;
+            }
+
+            .mobile-form-card .field-label {
+                font-size: 13px;
+
+                margin-bottom: 8px;
+            }
+
+            .mobile-form-card .field-label svg {
+                width: 17px;
+                height: 17px;
+            }
+
+            .mobile-form-card input,
+            .mobile-form-card select,
+            .mobile-form-card textarea {
+                font-size: 16px;
+
+                border-radius: 14px;
+
+                padding: 15px 14px;
+
+                background: #fbfcfe;
+
+                border: 1px solid #cbd7e5;
+            }
+
+            .mobile-form-card input:focus,
+            .mobile-form-card select:focus,
+            .mobile-form-card textarea:focus {
+                background: white;
+
+                border-color: #0751a8;
+
+                box-shadow:
+                    0 0 0 3px rgba(7,81,168,0.09);
+            }
+
+            .mobile-form-card textarea {
+                min-height: 135px;
+            }
+
+
+            /* =====================================================
+               MOBILE ANONYMOUS
+            ===================================================== */
+
+            .mobile-form-card .anonymous-box {
+                padding: 15px;
+
+                gap: 11px;
+
+                border-left-width: 1px;
+
+                border-radius: 17px;
+
+                margin-top: 20px;
+            }
+
+            .mobile-form-card .anonymous-icon {
+                width: 43px;
+                height: 43px;
+                min-width: 43px;
+
+                border-radius: 13px;
+            }
+
+            .mobile-form-card .anonymous-icon svg {
+                width: 23px;
+                height: 23px;
+            }
+
+            .mobile-form-card .anonymous-title {
+                font-size: 13px;
+            }
+
+            .mobile-form-card .anonymous-content p {
+                font-size: 10px;
+                line-height: 1.45;
+            }
+
+            .mobile-form-card .switch {
+                width: 48px;
+                min-width: 48px;
+                height: 28px;
+            }
+
+            .mobile-form-card .slider::before {
+                width: 20px;
+                height: 20px;
+            }
+
+            .mobile-form-card
+            .switch input:checked + .slider::before {
+                transform: translateX(20px);
+            }
+
+
+            /* =====================================================
+               MOBILE SUBMIT
+            ===================================================== */
+
+            .mobile-form-card .submit-button {
+                min-height: 76px;
+
+                margin-top: 20px;
+
+                padding: 13px 14px;
+
+                border-radius: 17px;
+
+                box-shadow:
+                    0 10px 22px rgba(7,81,168,0.20);
+            }
+
+            .mobile-form-card .submit-icon {
+                width: 49px;
+                min-width: 49px;
+
+                margin-right: 13px;
+            }
+
+            .mobile-form-card .submit-icon svg {
+                width: 28px;
+                height: 28px;
+            }
+
+            .mobile-form-card .submit-text strong {
+                font-size: 14px;
+            }
+
+            .mobile-form-card .submit-text span {
+                font-size: 10px;
+                line-height: 1.35;
+            }
+
+            .mobile-form-card .submit-arrow {
+                display: flex;
+                align-items: center;
+            }
+
+            .mobile-form-card .submit-arrow svg {
+                width: 22px;
+                height: 22px;
+            }
+
+
+            /* =====================================================
+               MOBILE EMERGENCY CARD
+            ===================================================== */
+
+            .mobile-emergency {
+                margin-top: 17px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #fff8f9,
+                        #fff1f3
+                    );
+
+                border: 1px solid #ffd1d6;
+
+                border-radius: 20px;
+
+                padding: 17px;
+            }
+
+            .mobile-emergency-heading {
+                display: flex;
+                align-items: center;
+
+                gap: 11px;
+            }
+
+            .mobile-emergency-icon {
+                width: 45px;
+                height: 45px;
+                min-width: 45px;
+
+                border-radius: 13px;
+
+                background: #ffe4e8;
+                color: #d90429;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-emergency-icon svg {
+                width: 25px;
+                height: 25px;
+            }
+
+            .mobile-emergency h3 {
+                color: #b70c20;
+
+                font-size: 15px;
+            }
+
+            .mobile-emergency p {
+                color: #7c5360;
+
+                font-size: 11px;
+                line-height: 1.45;
+
+                margin-top: 4px;
+            }
+
+            .mobile-emergency-button {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                margin-top: 14px;
+
+                padding: 14px 15px;
+
+                border-radius: 15px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #f5223d,
+                        #d90429
+                    );
+
+                color: white;
+
+                text-decoration: none;
+
+                box-shadow:
+                    0 8px 18px rgba(217,4,41,0.20);
+            }
+
+            .mobile-emergency-button-left {
+                display: flex;
+                align-items: center;
+
+                gap: 10px;
+            }
+
+            .mobile-emergency-button svg {
+                width: 21px;
+                height: 21px;
+            }
+
+            .mobile-emergency-button strong {
+                font-size: 13px;
+            }
+
+            .mobile-emergency-button span {
+                display: block;
+
+                color: #ffe8ec;
+
+                font-size: 9px;
+
+                margin-top: 2px;
+            }
+
+
+            /* =====================================================
+               MOBILE REPORT TIPS
+            ===================================================== */
+
+            .mobile-tips {
+                margin-top: 17px;
+
+                background: white;
+
+                border: 1px solid #e1e8f1;
+
+                border-radius: 20px;
+
+                padding: 18px;
+
+                box-shadow:
+                    0 6px 18px rgba(20,45,80,0.05);
+            }
+
+            .mobile-tips-heading {
+                display: flex;
+                align-items: center;
+
+                gap: 10px;
+
+                margin-bottom: 13px;
+            }
+
+            .mobile-tips-icon {
+                width: 39px;
+                height: 39px;
+
+                border-radius: 12px;
+
+                background: #eaf3ff;
+                color: #0751a8;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-tips-icon svg {
+                width: 21px;
+                height: 21px;
+            }
+
+            .mobile-tips h3 {
+                color: #062d63;
+
+                font-size: 15px;
+            }
+
+            .mobile-tip {
+                display: flex;
+                align-items: flex-start;
+
+                gap: 9px;
+
+                padding: 9px 0;
+
+                color: #61748b;
+
+                font-size: 11px;
+                line-height: 1.4;
+            }
+
+            .mobile-tip-check {
+                width: 20px;
+                height: 20px;
+                min-width: 20px;
+
+                border-radius: 50%;
+
+                background: #e5f7ed;
+                color: #198754;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-tip-check svg {
+                width: 11px;
+                height: 11px;
+            }
+
+
+            /* =====================================================
+               BOTTOM NAV
+            ===================================================== */
+
+            .bottom-nav {
+                position: fixed;
+
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                min-height: 72px;
+
+                padding:
+                    8px
+                    8px
+                    calc(8px + env(safe-area-inset-bottom));
+
+                background: rgba(255,255,255,0.98);
+
+                border-top: 1px solid #e4eaf2;
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+
+                z-index: 100;
+
+                box-shadow:
+                    0 -8px 25px rgba(20,40,70,0.07);
+            }
+
+            .bottom-nav a {
+                color: #8390a1;
+
+                text-decoration: none;
+
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                gap: 4px;
+
+                font-size: 10px;
+                font-weight: 600;
+
+                min-height: 53px;
+            }
+
+            .bottom-nav a svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .bottom-nav .nav-report {
+                color: #0751a8;
+            }
+
+            .bottom-nav .nav-sos {
+                color: #d90429;
+            }
+
+            .bottom-nav .nav-sos-icon {
+                width: 43px;
+                height: 43px;
+
+                margin-top: -24px;
+                margin-bottom: -4px;
+
+                border-radius: 50%;
+
+                background: #d90429;
+                color: white;
+
+                border: 4px solid white;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                box-shadow:
+                    0 5px 16px rgba(217,4,41,0.30);
+            }
+
+            .bottom-nav .nav-sos-icon svg {
+                width: 21px;
+                height: 21px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     DESKTOP VERSION
+========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <img
+            src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+            class="ufh-logo"
+            alt="University of Fort Hare Logo">
+
+        <div class="divider"></div>
+
+        <div class="brand-text">
+
+            <h1>
+                Campus Security Management System
+            </h1>
+
+            <p>
+                Alice Campus
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-actions">
+
+        <div class="role-pill">
+            Student
+        </div>
+
+        <a href="/logout" class="logout">
+            Log Out
+        </a>
+
+    </div>
+
+</header>
+
+
+
+<section class="hero">
+
+    <div class="hero-inner">
+
+        <div class="hero-label">
+            UNIVERSITY OF FORT HARE • ALICE CAMPUS
+        </div>
+
+        <h2>
+            Report an <span>Incident.</span>
+        </h2>
+
+        <p>
+            Help keep our campus safe by reporting
+            security incidents quickly and accurately.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<main class="desktop-main">
+
+    <div class="breadcrumb">
+
+        <a href="/student-dashboard">
+            Home
+        </a>
+
+        &nbsp; › &nbsp;
+
+        Report Incident
+
+    </div>
+
+
+    <div class="content-grid">
+
+
+        <!-- DESKTOP FORM -->
+
+        <section class="form-card">
+
+            <div class="form-heading">
+
+                <div class="form-heading-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                        <polyline points="14 2 14 8 20 8"></polyline>
+
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+
+                    </svg>
+
+                </div>
+
+                <h2>
+                    Incident Report Form
+                </h2>
+
+            </div>
+
+
+            <p class="intro">
+                Complete the form below to report a campus
+                security incident. Provide as much accurate
+                information as possible.
+            </p>
+
+
+            {% if error %}
+
+            <div class="error-message">
+                {{ error }}
+            </div>
+
+            {% endif %}
+
+
+            <form enctype="multipart/form-data"
+                method="POST"
+                action="/report"
+                class="incident-form">
+
+
+                <div class="form-group">
+
+                    <label
+                        for="desktop_incident_type"
+                        class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path d="M12 3L2 21h20L12 3z"></path>
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+
+                        </svg>
+
+                        Incident Type
+
+                    </label>
+
+                    <select
+                        id="desktop_incident_type"
+                        name="incident_type"
+                        required>
+
+                        <option value="">
+                            Select Incident Type
+                        </option>
+
+                        <option value="Theft">Theft</option>
+
+                        <option value="Assault">Assault</option>
+
+                        <option value="Harassment">Harassment</option>
+
+                        <option value="Vandalism">Vandalism</option>
+
+                        <option value="Suspicious Activity">
+                            Suspicious Activity
+                        </option>
+
+                        <option value="Other">Other</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        for="desktop_location"
+                        class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z"></path>
+
+                            <circle cx="12" cy="10" r="3"></circle>
+
+                        </svg>
+
+                        Location
+
+                    </label>
+
+                    <input
+                        id="desktop_location"
+                        type="text"
+                        name="location"
+                        placeholder="Example: Library, Residence, Student Centre"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        for="desktop_description"
+                        class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2">
+
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                            <polyline points="14 2 14 8 20 8"></polyline>
+
+                            <path d="M8 13h8"></path>
+
+                            <path d="M8 17h6"></path>
+
+                        </svg>
+
+                        Description
+
+                    </label>
+
+                    <textarea
+                        id="desktop_description"
+                        name="description"
+                        rows="6"
+                        placeholder="Describe what happened..."
+                        required></textarea>
+
+                </div>
+
+
+                <div
+                    class="anonymous-box"
+                    data-anonymous-box>
+
+
+                    <div class="anonymous-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+
+                            <path d="M9 12l2 2 4-4"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="anonymous-content">
+
+                        <label
+                            for="desktop_anonymous"
+                            class="anonymous-title"
+                            data-anonymous-title>
+
+                            Submit this report anonymously
+
+                        </label>
+
+                        <p data-anonymous-description>
+                            Hide the identity linked to your account
+                            from campus security personnel viewing this report.
+                        </p>
+
+                    </div>
+
+
+                    <label
+                        class="switch"
+                        aria-label="Submit report anonymously">
+
+                        <input
+                            type="checkbox"
+                            id="desktop_anonymous"
+                            name="anonymous"
+                            data-anonymous-toggle>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="submit-button">
+
+                    <div class="submit-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                            <polyline points="14 2 14 8 20 8"></polyline>
+
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="submit-text">
+
+                        <strong data-submit-title>
+                            SUBMIT INCIDENT REPORT
+                        </strong>
+
+                        <span data-submit-subtitle>
+                            Send this report to campus security
+                        </span>
+
+                    </div>
+
+
+                    <div class="submit-arrow">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M5 12h14"></path>
+                            <path d="m13 6 6 6-6 6"></path>
+
+                        </svg>
+
+                    </div>
+
+                </button>
+
+            
+<div style="margin:18px 0"><label style="display:block;font-weight:800;margin-bottom:8px">Evidence (optional)</label><input type="file" name="evidence" multiple accept="image/*,video/*,.pdf,.doc,.docx" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px"><small>Photos, videos, PDF or Word documents.</small></div>
+</form>
+
+
+            <a
+                href="/student-dashboard"
+                class="back-button">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2">
+
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+
+                </svg>
+
+                Return to Student Dashboard
+
+            </a>
+
+        </section>
+
+
+
+        <aside>
+
+
+            <div class="side-card">
+
+                <div class="side-title">
+
+                    <div class="side-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Reporting Tips
+                    </h3>
+
+                </div>
+
+
+                <p>
+                    Accurate information helps campus security
+                    understand and respond to your report.
+                </p>
+
+
+                <ul class="tips">
+
+                    <li>
+                        <span class="check">✓</span>
+                        Give the exact location of the incident.
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Select the most appropriate incident type.
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Describe what happened clearly.
+                    </li>
+
+                    <li>
+                        <span class="check">✓</span>
+                        Include important details that may help security.
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+
+            <div class="side-card emergency-card">
+
+                <div class="side-title">
+
+                    <div class="side-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M8 17h8"></path>
+                            <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                            <path d="M5 21h14"></path>
+                            <path d="M12 2v3"></path>
+
+                        </svg>
+
+                    </div>
+
+                    <h3>
+                        Is This an Emergency?
+                    </h3>
+
+                </div>
+
+
+                <p>
+                    If you need immediate assistance, use the
+                    Emergency SOS instead of a standard incident report.
+                </p>
+
+
+                <a
+                    href="/sos"
+                    class="sos-link">
+
+                    <div class="sos-link-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8">
+
+                            <path d="M8 17h8"></path>
+                            <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+                            <path d="M5 21h14"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="sos-link-text">
+
+                        <strong>
+                            EMERGENCY SOS
+                        </strong>
+
+                        <span>
+                            Get immediate assistance
+                        </span>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+
+
+
+<footer class="desktop-footer">
+
+    <strong>
+        University of Fort Hare
+    </strong>
+
+    <p>
+        Campus Security Management System • Alice Campus
+    </p>
+
+</footer>
+
+
+
+<!-- =========================================================
+     MOBILE APP VERSION
+========================================================= -->
+
+<div class="mobile-app">
+
+
+    <!-- UFH HERO -->
+
+    <section class="mobile-hero">
+
+
+        <header class="app-header">
+
+
+            <div class="app-brand">
+
+                <div class="app-logo-wrap">
+
+                    <img
+                        src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                        alt="UFH">
+
+                </div>
+
+
+                <div class="app-brand-text">
+
+                    <strong>
+                        UFH Security
+                    </strong>
+
+                    <span>
+                        Alice Campus
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="/student-dashboard"
+                class="mobile-back"
+                aria-label="Return home">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+
+                </svg>
+
+            </a>
+
+        </header>
+
+
+
+        <div class="mobile-hero-content">
+
+            <div class="mobile-page-label">
+                INCIDENT REPORTING
+            </div>
+
+            <h1>
+                Report an Incident
+            </h1>
+
+            <p>
+                Tell Campus Security what happened.
+                Your information helps us respond effectively.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MOBILE CONTENT
+    ====================================================== -->
+
+    <main class="mobile-content">
+
+
+        <section class="mobile-form-card">
+
+
+            <div class="mobile-form-heading">
+
+                <div class="mobile-form-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                        <polyline points="14 2 14 8 20 8"></polyline>
+
+                        <path d="M12 12v6"></path>
+
+                        <path d="M9 15h6"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <h2>
+                        Incident Details
+                    </h2>
+
+                    <p>
+                        Complete all required information below.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% if error %}
+
+            <div
+                class="error-message"
+                style="margin-top:17px;">
+
+                {{ error }}
+
+            </div>
+
+            {% endif %}
+
+
+
+            <form enctype="multipart/form-data"
+                method="POST"
+                action="/report"
+                class="incident-form">
+
+
+                <!-- INCIDENT TYPE -->
+
+                <div class="form-group">
+
+                    <label
+                        for="mobile_incident_type"
+                        class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M12 3L2 21h20L12 3z"></path>
+
+                            <path d="M12 9v4"></path>
+
+                            <path d="M12 17h.01"></path>
+
+                        </svg>
+
+                        Incident Type
+
+                    </label>
+
+
+                    <select
+                        id="mobile_incident_type"
+                        name="incident_type"
+                        required>
+
+                        <option value="">
+                            Select incident type
+                        </option>
+
+                        <option value="Theft">
+                            Theft
+                        </option>
+
+                        <option value="Assault">
+                            Assault
+                        </option>
+
+                        <option value="Harassment">
+                            Harassment
+                        </option>
+
+                        <option value="Vandalism">
+                            Vandalism
+                        </option>
+
+                        <option value="Suspicious Activity">
+                            Suspicious Activity
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- LOCATION -->
+
+                <div class="form-group">
+
+                    <label
+                        for="mobile_location"
+                        class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0z"></path>
+
+                            <circle
+                                cx="12"
+                                cy="10"
+                                r="3">
+                            </circle>
+
+                        </svg>
+
+                        Location
+
+                    </label>
+
+
+                    <input
+                        id="mobile_location"
+                        type="text"
+                        name="location"
+                        placeholder="e.g. Library, Residence, Main Gate"
+                        required>
+
+                </div>
+
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label
+                        for="mobile_description"
+                        class="field-label">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                            <polyline points="14 2 14 8 20 8"></polyline>
+
+                            <path d="M8 13h8"></path>
+
+                            <path d="M8 17h6"></path>
+
+                        </svg>
+
+                        What Happened?
+
+                    </label>
+
+
+                    <textarea
+                        id="mobile_description"
+                        name="description"
+                        placeholder="Describe what happened and include any important details..."
+                        required></textarea>
+
+                </div>
+
+
+
+                <!-- ANONYMOUS -->
+
+                <div
+                    class="anonymous-box"
+                    data-anonymous-box>
+
+
+                    <div class="anonymous-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+
+                            <path d="M9 12l2 2 4-4"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="anonymous-content">
+
+                        <label
+                            for="mobile_anonymous"
+                            class="anonymous-title"
+                            data-anonymous-title>
+
+                            Report Anonymously
+
+                        </label>
+
+                        <p data-anonymous-description>
+                            Hide your identity from Campus Security
+                            personnel viewing this report.
+                        </p>
+
+                    </div>
+
+
+                    <label
+                        class="switch"
+                        aria-label="Submit report anonymously">
+
+                        <input
+                            type="checkbox"
+                            id="mobile_anonymous"
+                            name="anonymous"
+                            data-anonymous-toggle>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    class="submit-button">
+
+                    <div class="submit-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                            <polyline points="14 2 14 8 20 8"></polyline>
+
+                            <path d="M12 12v6"></path>
+
+                            <path d="M9 15h6"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="submit-text">
+
+                        <strong data-submit-title>
+                            SUBMIT REPORT
+                        </strong>
+
+                        <span data-submit-subtitle>
+                            Send this incident to Campus Security
+                        </span>
+
+                    </div>
+
+
+                    <div class="submit-arrow">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <path d="M5 12h14"></path>
+
+                            <path d="m13 6 6 6-6 6"></path>
+
+                        </svg>
+
+                    </div>
+
+                </button>
+
+
+            
+<div style="margin:18px 0"><label style="display:block;font-weight:800;margin-bottom:8px">Evidence (optional)</label><input type="file" name="evidence" multiple accept="image/*,video/*,.pdf,.doc,.docx" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px"><small>Photos, videos, PDF or Word documents.</small></div>
+</form>
+
+        </section>
+
+
+
+        <!-- EMERGENCY -->
+
+        <section class="mobile-emergency">
+
+            <div class="mobile-emergency-heading">
+
+                <div class="mobile-emergency-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M8 17h8"></path>
+
+                        <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+
+                        <path d="M5 21h14"></path>
+
+                        <path d="M12 2v3"></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        Is this an emergency?
+                    </h3>
+
+                    <p>
+                        For immediate danger, send an Emergency SOS instead.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="/sos"
+                class="mobile-emergency-button">
+
+                <div class="mobile-emergency-button-left">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+
+                        <path d="M8 17h8"></path>
+
+                        <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+
+                        <path d="M5 21h14"></path>
+
+                    </svg>
+
+
+                    <div>
+
+                        <strong>
+                            EMERGENCY SOS
+                        </strong>
+
+                        <span>
+                            Request immediate assistance
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M5 12h14"></path>
+
+                    <path d="m13 6 6 6-6 6"></path>
+
+                </svg>
+
+            </a>
+
+        </section>
+
+
+
+        <!-- REPORTING TIPS -->
+
+        <section class="mobile-tips">
+
+            <div class="mobile-tips-heading">
+
+                <div class="mobile-tips-icon">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <circle cx="12" cy="12" r="10"></circle>
+
+                        <path d="M12 16v-4"></path>
+
+                        <path d="M12 8h.01"></path>
+
+                    </svg>
+
+                </div>
+
+                <h3>
+                    Reporting Tips
+                </h3>
+
+            </div>
+
+
+            <div class="mobile-tip">
+
+                <div class="mobile-tip-check">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3">
+
+                        <path d="M5 12l4 4L19 6"></path>
+
+                    </svg>
+
+                </div>
+
+                Give the exact location where the incident happened.
+
+            </div>
+
+
+            <div class="mobile-tip">
+
+                <div class="mobile-tip-check">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3">
+
+                        <path d="M5 12l4 4L19 6"></path>
+
+                    </svg>
+
+                </div>
+
+                Describe what happened clearly and accurately.
+
+            </div>
+
+
+            <div class="mobile-tip">
+
+                <div class="mobile-tip-check">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3">
+
+                        <path d="M5 12l4 4L19 6"></path>
+
+                    </svg>
+
+                </div>
+
+                Include details that may help Campus Security respond.
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================================================
+         MOBILE BOTTOM NAVIGATION
+    ========================================================= -->
+
+    <nav class="bottom-nav">
+
+
+        <!-- HOME -->
+
+        <a href="/student-dashboard">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M3 11l9-8 9 8"></path>
+
+                <path d="M5 10v10h14V10"></path>
+
+                <path d="M9 20v-6h6v6"></path>
+
+            </svg>
+
+            <span>
+                Home
+            </span>
+
+        </a>
+
+
+
+        <!-- REPORTS / REPORT ACTIVE -->
+
+        <a
+            href="/report"
+            class="nav-report">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+                <polyline points="14 2 14 8 20 8"></polyline>
+
+                <path d="M12 12v6"></path>
+
+                <path d="M9 15h6"></path>
+
+            </svg>
+
+            <span>
+                Report
+            </span>
+
+        </a>
+
+
+
+        <!-- SOS -->
+
+        <a
+            href="/sos"
+            class="nav-sos">
+
+            <div class="nav-sos-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+
+                    <path d="M8 17h8"></path>
+
+                    <path d="M7 17v-5a5 5 0 0 1 10 0v5"></path>
+
+                    <path d="M5 21h14"></path>
+
+                    <path d="M12 2v3"></path>
+
+                </svg>
+
+            </div>
+
+            <span>
+                SOS
+            </span>
+
+        </a>
+
+
+
+        <!-- ACCOUNT -->
+
+        <a href="#">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M20 21a8 8 0 0 0-16 0"></path>
+
+                <circle
+                    cx="12"
+                    cy="7"
+                    r="4">
+                </circle>
+
+            </svg>
+
+            <span>
+                Account
+            </span>
+
+        </a>
+
+
+    </nav>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     ANONYMOUS REPORTING
+========================================================= -->
+
+<script>
+
+    document
+        .querySelectorAll(".incident-form")
+        .forEach(function (form) {
+
+            const anonymousToggle =
+                form.querySelector("[data-anonymous-toggle]");
+
+            const anonymousBox =
+                form.querySelector("[data-anonymous-box]");
+
+            const anonymousTitle =
+                form.querySelector("[data-anonymous-title]");
+
+            const anonymousDescription =
+                form.querySelector("[data-anonymous-description]");
+
+            const submitTitle =
+                form.querySelector("[data-submit-title]");
+
+            const submitSubtitle =
+                form.querySelector("[data-submit-subtitle]");
+
+
+            if (!anonymousToggle) {
+                return;
+            }
+
+
+            anonymousToggle.addEventListener(
+                "change",
+                function () {
+
+                    if (this.checked) {
+
+                        anonymousBox.classList.add(
+                            "enabled"
+                        );
+
+                        anonymousTitle.textContent =
+                            "Anonymous Reporting Enabled";
+
+                        anonymousDescription.textContent =
+                            "Your identity will be hidden from Campus Security personnel viewing this report.";
+
+                        submitTitle.textContent =
+                            "SUBMIT ANONYMOUS REPORT";
+
+                        submitSubtitle.textContent =
+                            "Send this report without displaying your identity";
+
+                    }
+
+                    else {
+
+                        anonymousBox.classList.remove(
+                            "enabled"
+                        );
+
+                        anonymousTitle.textContent =
+                            "Report Anonymously";
+
+                        anonymousDescription.textContent =
+                            "Hide your identity from Campus Security personnel viewing this report.";
+
+                        submitTitle.textContent =
+                            "SUBMIT REPORT";
+
+                        submitSubtitle.textContent =
+                            "Send this incident to Campus Security";
+
+                    }
+
+                }
+            );
+
+        });
+
+</script>
+
+
+
+<!-- =========================================================
+     SERVICE WORKER
+========================================================= -->
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker
+                    .register("/static/service-worker.js")
+                    .catch(function (error) {
+
+                        console.error(
+                            "Service Worker registration failed:",
+                            error
+                        );
+
+                    });
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+</html>

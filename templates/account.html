@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#062d63">
+    <link rel="manifest" href="{{ url_for('static_files', filename='manifest.json') }}">
+    <title>My Account | UFH Security</title>
+    <style>
+        *{box-sizing:border-box} body{margin:0;background:#f4f7fb;color:#163456;font-family:Arial,Helvetica,sans-serif}
+        .top{background:#062d63;color:white;padding:18px 24px}.top-inner{max-width:980px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}
+        .brand{display:flex;align-items:center;gap:14px}.brand img{width:76px;background:white;padding:5px;border-radius:10px}.brand strong{display:block;font-size:18px}.brand span{font-size:12px;color:#c8d8ec}
+        .back{color:white;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:10px 14px;border-radius:9px;font-size:13px;font-weight:bold}
+        main{max-width:900px;margin:32px auto;padding:0 18px 40px}.hero{background:white;border:1px solid #dfe7f0;border-radius:18px;padding:28px;box-shadow:0 12px 30px rgba(20,50,90,.07);display:flex;align-items:center;gap:18px}
+        .avatar{width:62px;height:62px;border-radius:17px;background:#e8f1ff;color:#0751a8;display:flex;align-items:center;justify-content:center}.avatar svg{width:31px}.hero h1{margin:0;color:#062d63;font-size:24px}.hero p{margin:7px 0 0;color:#74869a;font-size:13px}.badge{display:inline-block;margin-top:9px;background:#e8f1ff;color:#0751a8;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:bold}
+        .success{margin-top:18px;padding:13px 15px;border:1px solid #bfe5cb;background:#edf9f1;color:#176a38;border-radius:10px;font-size:13px}
+        .section-title{margin:27px 0 12px}.section-title h2{margin:0;color:#062d63;font-size:18px}.section-title p{margin:5px 0 0;color:#7b8b9d;font-size:12px}
+        .card{background:white;border:1px solid #dfe7f0;border-radius:16px;overflow:hidden}.row{display:flex;align-items:center;gap:15px;padding:18px 20px;border-bottom:1px solid #edf1f5}.row:last-child{border-bottom:0}.ico{width:42px;height:42px;border-radius:11px;background:#edf4ff;color:#0751a8;display:flex;align-items:center;justify-content:center;flex:none}.ico svg{width:21px}.txt{min-width:0;flex:1}.txt small{display:block;color:#8493a5;font-size:10px;font-weight:bold;letter-spacing:.5px}.txt strong{display:block;margin-top:4px;color:#17395f;font-size:14px;word-break:break-word}.verified{color:#17834b!important}
+        .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.btn{display:flex;justify-content:center;align-items:center;min-height:50px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:bold}.primary{background:#0751a8;color:white}.secondary{background:white;color:#0751a8;border:1px solid #b9cbe0}
+        @media(max-width:650px){.top{padding:calc(12px + env(safe-area-inset-top)) 14px 12px}.brand img{width:58px}.brand strong{font-size:14px}.brand span{font-size:9px}.back{padding:8px 10px;font-size:11px}main{margin:20px auto;padding:0 13px 30px}.hero{padding:20px 16px}.avatar{width:52px;height:52px}.hero h1{font-size:19px}.actions{grid-template-columns:1fr}.row{padding:15px}}
+    </style>
+</head>
+<body>
+<header class="top"><div class="top-inner"><div class="brand"><img src="{{ url_for('static_files', filename='ufh-logo.png') }}" alt="UFH"><div><strong>UFH Campus Security</strong><span>Alice Campus</span></div></div><a class="back" href="{{ url_for('student_dashboard') }}">Back to Dashboard</a></div></header>
+<main>
+    <section class="hero"><div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></div><div><h1>{{ full_name or username }}</h1><span class="badge">STUDENT ACCOUNT</span><p>Your verified Campus Security profile.</p></div></section>
+    {% if email_changed %}<div class="success">Your new email address has been verified and saved successfully.</div>{% endif %}
+    <div class="section-title"><h2>Account Information</h2><p>Details linked to your Student account</p></div>
+    <section class="card">
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></div><div class="txt"><small>FULL NAME</small><strong>{{ full_name or 'Not available' }}</strong></div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 8h10M7 12h6"></path></svg></div><div class="txt"><small>STUDENT NUMBER</small><strong>{{ student_number or 'Not available' }}</strong></div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></div><div class="txt"><small>EMAIL ADDRESS</small><strong>{{ email or 'Not available' }}</strong></div><div class="txt" style="flex:0 0 auto"><small>STATUS</small><strong class="verified">{% if email_verified %}Verified{% else %}Not verified{% endif %}</strong></div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><div class="txt"><small>USERNAME</small><strong>{{ username }}</strong></div></div>
+    </section>
+    <div class="actions"><a class="btn primary" href="{{ url_for('change_email') }}">Change Email Address</a><a class="btn secondary" href="{{ url_for('forgot_password') }}">Reset Password by Email</a></div>
+</main>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js'));}</script>
+<div style="position:fixed;right:18px;bottom:18px;z-index:9999;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a href="{{ url_for('edit_profile') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Edit Profile</a><a href="{{ url_for('notifications_page') }}" style="background:#062d63;color:white;text-decoration:none;padding:10px 13px;border-radius:999px;font:700 12px Arial;box-shadow:0 4px 15px #0003">Notifications</a></div></body>
+</html>

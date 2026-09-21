@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#062d63">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UFH Security">
+
+    <link
+        rel="manifest"
+        href="{{ url_for('static_files', filename='manifest.json') }}"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="{{ url_for('static_files', filename='icon-192.png') }}"
+    >
+
+    <title>SOS Submitted | UFH Security</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f7fb;
+
+            color: #10284f;
+
+            padding-bottom:
+                calc(
+                    85px +
+                    env(safe-area-inset-bottom)
+                );
+        }
+
+
+        /* ==========================================
+           HERO
+        ========================================== */
+
+        .hero {
+
+            min-height: 320px;
+
+            overflow: hidden;
+
+            border-radius:
+                0 0 35px 35px;
+
+            background-image:
+
+                linear-gradient(
+                    155deg,
+                    rgba(2,29,66,0.98),
+                    rgba(4,44,94,0.94) 52%,
+                    rgba(4,75,143,0.76)
+                ),
+
+                url(
+                    "{{ url_for('static_files', filename='alice-campus.png') }}"
+                );
+
+            background-size: cover;
+
+            background-position: center;
+        }
+
+
+        /* ==========================================
+           APP HEADER
+        ========================================== */
+
+        .app-header {
+
+            padding:
+
+                calc(
+                    15px +
+                    env(safe-area-inset-top)
+                )
+
+                20px
+
+                10px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+
+        .logo-box {
+
+            width: 53px;
+
+            height: 53px;
+
+            border-radius: 15px;
+
+            background: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            box-shadow:
+                0 6px 20px
+                rgba(0,0,0,0.16);
+        }
+
+
+        .logo-box img {
+
+            width: 44px;
+
+            height: 44px;
+
+            object-fit: contain;
+        }
+
+
+        .brand-text strong {
+
+            display: block;
+
+            color: white;
+
+            font-size: 17px;
+        }
+
+
+        .brand-text span {
+
+            display: block;
+
+            margin-top: 4px;
+
+            color:
+                rgba(255,255,255,0.72);
+
+            font-size: 11px;
+        }
+
+
+        .home-button {
+
+            width: 44px;
+
+            height: 44px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.14);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.22);
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            text-decoration: none;
+        }
+
+
+        .home-button svg {
+
+            width: 22px;
+
+            height: 22px;
+        }
+
+
+        /* ==========================================
+           HERO TEXT
+        ========================================== */
+
+        .hero-content {
+
+            padding:
+                27px
+                20px
+                58px;
+        }
+
+
+        .hero-label {
+
+            color: #ffc928;
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .hero-content h1 {
+
+            color: white;
+
+            font-size: 31px;
+
+            line-height: 1.15;
+        }
+
+
+        .hero-content h1 span {
+
+            color: #ffc928;
+        }
+
+
+        .hero-content p {
+
+            margin-top: 10px;
+
+            max-width: 340px;
+
+            color:
+                rgba(255,255,255,0.82);
+
+            font-size: 12px;
+
+            line-height: 1.55;
+        }
+
+
+        /* ==========================================
+           MAIN
+        ========================================== */
+
+        main {
+
+            position: relative;
+
+            z-index: 5;
+
+            margin-top: -45px;
+
+            padding:
+                0
+                17px
+                30px;
+        }
+
+
+        /* ==========================================
+           SUCCESS CARD
+        ========================================== */
+
+        .success-card {
+
+            background: white;
+
+            border:
+                1px solid #e1e8f1;
+
+            border-top:
+                6px solid #d90429;
+
+            border-radius: 23px;
+
+            padding:
+                27px
+                20px;
+
+            text-align: center;
+
+            box-shadow:
+                0 12px 30px
+                rgba(20,45,80,0.11);
+        }
+
+
+        .success-icon {
+
+            width: 82px;
+
+            height: 82px;
+
+            margin:
+                0 auto
+                18px;
+
+            border-radius: 50%;
+
+            background: #fff0f2;
+
+            color: #d90429;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            box-shadow:
+                0 0 0 9px
+                rgba(217,4,41,0.06);
+        }
+
+
+        .success-icon svg {
+
+            width: 42px;
+
+            height: 42px;
+        }
+
+
+        .success-card h2 {
+
+            color: #062d63;
+
+            font-size: 21px;
+
+            line-height: 1.3;
+        }
+
+
+        .success-status {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            margin-top: 11px;
+
+            padding:
+                7px
+                12px;
+
+            border-radius: 30px;
+
+            background: #fde8eb;
+
+            color: #c7192c;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            letter-spacing: 0.6px;
+        }
+
+
+        .success-status svg {
+
+            width: 13px;
+
+            height: 13px;
+        }
+
+
+        .success-card p {
+
+            margin:
+                15px
+                auto
+                0;
+
+            max-width: 390px;
+
+            color: #718096;
+
+            font-size: 11px;
+
+            line-height: 1.6;
+        }
+
+
+        /* ==========================================
+           SECURITY NOTICE
+        ========================================== */
+
+        .security-notice {
+
+            margin-top: 15px;
+
+            padding: 15px;
+
+            border-radius: 17px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #edf5ff,
+                    #f7fbff
+                );
+
+            border:
+                1px solid #d6e7fb;
+
+            display: flex;
+
+            gap: 12px;
+
+            text-align: left;
+        }
+
+
+        .notice-icon {
+
+            width: 42px;
+
+            height: 42px;
+
+            min-width: 42px;
+
+            border-radius: 13px;
+
+            background: #0751a8;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .notice-icon svg {
+
+            width: 22px;
+
+            height: 22px;
+        }
+
+
+        .notice-text strong {
+
+            display: block;
+
+            color: #062d63;
+
+            font-size: 11px;
+        }
+
+
+        .notice-text p {
+
+            margin-top: 4px;
+
+            color: #65778b;
+
+            font-size: 9px;
+
+            line-height: 1.5;
+        }
+
+
+        /* ==========================================
+           ACTIONS
+        ========================================== */
+
+        .section-title {
+
+            margin:
+                24px
+                3px
+                11px;
+        }
+
+
+        .section-title h3 {
+
+            color: #062d63;
+
+            font-size: 17px;
+        }
+
+
+        .section-title p {
+
+            margin-top: 4px;
+
+            color: #8190a2;
+
+            font-size: 10px;
+        }
+
+
+        .action-card {
+
+            min-height: 68px;
+
+            margin-bottom: 11px;
+
+            padding: 13px 15px;
+
+            background: white;
+
+            border:
+                1px solid #e1e8f1;
+
+            border-radius: 18px;
+
+            color: #062d63;
+
+            text-decoration: none;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+
+            box-shadow:
+                0 6px 18px
+                rgba(20,45,80,0.06);
+        }
+
+
+        .action-icon {
+
+            width: 44px;
+
+            height: 44px;
+
+            min-width: 44px;
+
+            border-radius: 13px;
+
+            background: #eaf3ff;
+
+            color: #0751a8;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .action-icon svg {
+
+            width: 22px;
+
+            height: 22px;
+        }
+
+
+        .action-text {
+
+            flex: 1;
+        }
+
+
+        .action-text strong {
+
+            display: block;
+
+            color: #062d63;
+
+            font-size: 12px;
+        }
+
+
+        .action-text span {
+
+            display: block;
+
+            margin-top: 4px;
+
+            color: #8391a2;
+
+            font-size: 9px;
+        }
+
+
+        .action-arrow {
+
+            width: 19px;
+
+            height: 19px;
+
+            color: #8391a2;
+        }
+
+
+        /* ==========================================
+           EMERGENCY CALL
+        ========================================== */
+
+        .emergency-call {
+
+            margin-top: 16px;
+
+            min-height: 67px;
+
+            padding: 13px 15px;
+
+            border-radius: 18px;
+
+            background: #fff8ed;
+
+            border:
+                1px solid #ffe1b8;
+
+            text-decoration: none;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+        }
+
+
+        .call-icon {
+
+            width: 44px;
+
+            height: 44px;
+
+            min-width: 44px;
+
+            border-radius: 13px;
+
+            background: #fff0d9;
+
+            color: #c96500;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .call-icon svg {
+
+            width: 22px;
+
+            height: 22px;
+        }
+
+
+        .call-text {
+
+            flex: 1;
+        }
+
+
+        .call-text strong {
+
+            display: block;
+
+            color: #8d4b00;
+
+            font-size: 11px;
+        }
+
+
+        .call-text span {
+
+            display: block;
+
+            margin-top: 4px;
+
+            color: #9c7144;
+
+            font-size: 9px;
+        }
+
+
+        /* ==========================================
+           BOTTOM NAV
+        ========================================== */
+
+        .bottom-nav {
+
+            position: fixed;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            z-index: 100;
+
+            min-height: 72px;
+
+            padding:
+                8px
+                8px
+                calc(
+                    8px +
+                    env(safe-area-inset-bottom)
+                );
+
+            background:
+                rgba(255,255,255,0.98);
+
+            border-top:
+                1px solid #e4eaf2;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            box-shadow:
+                0 -8px 25px
+                rgba(20,40,70,0.07);
+        }
+
+
+        .bottom-nav a {
+
+            min-height: 53px;
+
+            color: #8390a1;
+
+            text-decoration: none;
+
+            font-size: 10px;
+
+            font-weight: 600;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 4px;
+        }
+
+
+        .bottom-nav svg {
+
+            width: 22px;
+
+            height: 22px;
+        }
+
+
+        .bottom-nav .nav-sos {
+
+            color: #d90429;
+
+            font-weight: 800;
+        }
+
+
+        .sos-circle {
+
+            width: 45px;
+
+            height: 45px;
+
+            margin-top: -25px;
+
+            margin-bottom: -4px;
+
+            border-radius: 50%;
+
+            background: #d90429;
+
+            color: white;
+
+            border: 4px solid white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            box-shadow:
+                0 5px 16px
+                rgba(217,4,41,0.30);
+        }
+
+
+        /* ==========================================
+           DESKTOP
+        ========================================== */
+
+        @media(min-width: 751px) {
+
+            body {
+
+                padding-bottom: 40px;
+            }
+
+
+            .hero {
+
+                max-width: 900px;
+
+                margin:
+                    30px
+                    auto
+                    0;
+
+                border-radius: 25px;
+            }
+
+
+            main {
+
+                max-width: 650px;
+
+                margin:
+                    -45px
+                    auto
+                    40px;
+            }
+
+
+            .bottom-nav {
+
+                display: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================
+     HERO
+========================================== -->
+
+<section class="hero">
+
+
+    <header class="app-header">
+
+
+        <div class="brand">
+
+
+            <div class="logo-box">
+
+                <img
+                    src="{{ url_for('static_files', filename='ufh-logo.png') }}"
+                    alt="University of Fort Hare"
+                >
+
+            </div>
+
+
+            <div class="brand-text">
+
+                <strong>
+                    UFH Security
+                </strong>
+
+                <span>
+                    Alice Campus
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="/student-dashboard"
+            class="home-button"
+            aria-label="Student dashboard"
+        >
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path d="M3 11l9-8 9 8"></path>
+
+                <path d="M5 10v10h14V10"></path>
+
+            </svg>
+
+        </a>
+
+    </header>
+
+
+
+    <div class="hero-content">
+
+        <div class="hero-label">
+            EMERGENCY ALERT
+        </div>
+
+
+        <h1>
+            SOS <span>Submitted</span>
+        </h1>
+
+
+        <p>
+            Your emergency alert has been recorded
+            by the UFH Campus Security Management System.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- ==========================================
+     MAIN
+========================================== -->
+
+<main>
+
+
+    <!-- SUCCESS -->
+
+    <section class="success-card">
+
+
+        <div class="success-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path d="M8 17h8"></path>
+
+                <path
+                    d="M7 17v-5a5 5 0 0 1 10 0v5"
+                ></path>
+
+                <path d="M5 21h14"></path>
+
+                <path d="M12 2v3"></path>
+
+                <path d="M4.2 5.2l2.1 2.1"></path>
+
+                <path d="M19.8 5.2l-2.1 2.1"></path>
+
+            </svg>
+
+        </div>
+
+
+        <h2>
+            Emergency SOS Submitted
+        </h2>
+
+
+        <div class="success-status">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.3"
+            >
+                <path d="M5 12l4 4L19 6"></path>
+            </svg>
+
+            HIGH-PRIORITY INCIDENT RECORDED
+
+        </div>
+
+
+        <p>
+            Your emergency request has been recorded
+            as a high-priority incident.
+        </p>
+
+
+        <div class="security-notice">
+
+            <div class="notice-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+
+                    <path
+                        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                    ></path>
+
+                    <path d="M9 12l2 2 4-4"></path>
+
+                </svg>
+
+            </div>
+
+
+            <div class="notice-text">
+
+                <strong>
+                    Campus Security Notified
+                </strong>
+
+                <p>
+                    Campus security personnel can now
+                    see the incident on their security
+                    dashboard.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ACTIONS -->
+
+    <div class="section-title">
+
+        <h3>
+            What would you like to do?
+        </h3>
+
+        <p>
+            Continue using UFH Security
+        </p>
+
+    </div>
+
+
+
+    <!-- MY REPORTS -->
+
+    <a
+        href="/my-reports"
+        class="action-card"
+    >
+
+        <div class="action-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path d="M8 6h13"></path>
+
+                <path d="M8 12h13"></path>
+
+                <path d="M8 18h13"></path>
+
+                <path d="M3 6h.01"></path>
+
+                <path d="M3 12h.01"></path>
+
+                <path d="M3 18h.01"></path>
+
+            </svg>
+
+        </div>
+
+
+        <div class="action-text">
+
+            <strong>
+                View My Reports
+            </strong>
+
+            <span>
+                View the SOS incident and track its status
+            </span>
+
+        </div>
+
+
+        <svg
+            class="action-arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+
+            <path d="M9 18l6-6-6-6"></path>
+
+        </svg>
+
+    </a>
+
+
+
+    <!-- DASHBOARD -->
+
+    <a
+        href="/student-dashboard"
+        class="action-card"
+    >
+
+        <div class="action-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path d="M3 11l9-8 9 8"></path>
+
+                <path d="M5 10v10h14V10"></path>
+
+            </svg>
+
+        </div>
+
+
+        <div class="action-text">
+
+            <strong>
+                Student Dashboard
+            </strong>
+
+            <span>
+                Return to your UFH Security home screen
+            </span>
+
+        </div>
+
+
+        <svg
+            class="action-arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+
+            <path d="M9 18l6-6-6-6"></path>
+
+        </svg>
+
+    </a>
+
+
+
+    <!-- EMERGENCY CONTACTS -->
+
+    <a
+        href="/emergency-contacts"
+        class="emergency-call"
+    >
+
+        <div class="call-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2
+                    19.79 19.79 0 0 1-8.63-3.07
+                    19.5 19.5 0 0 1-6-6
+                    19.79 19.79 0 0 1-3.07-8.67
+                    A2 2 0 0 1 4.11 2h3
+                    a2 2 0 0 1 2 1.72
+                    12.84 12.84 0 0 0 .7 2.81
+                    2 2 0 0 1-.45 2.11
+                    L8.09 9.91
+                    a16 16 0 0 0 6 6
+                    l1.27-1.27
+                    a2 2 0 0 1 2.11-.45
+                    12.84 12.84 0 0 0 2.81.7
+                    A2 2 0 0 1 22 16.92z"
+                ></path>
+
+            </svg>
+
+        </div>
+
+
+        <div class="call-text">
+
+            <strong>
+                Need immediate assistance?
+            </strong>
+
+            <span>
+                Open campus and national emergency contacts
+            </span>
+
+        </div>
+
+
+        <svg
+            class="action-arrow"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+
+            <path d="M9 18l6-6-6-6"></path>
+
+        </svg>
+
+    </a>
+
+
+</main>
+
+
+
+<!-- ==========================================
+     BOTTOM NAVIGATION
+========================================== -->
+
+<nav class="bottom-nav">
+
+
+    <!-- HOME -->
+
+    <a href="/student-dashboard">
+
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+
+            <path d="M3 11l9-8 9 8"></path>
+
+            <path d="M5 10v10h14V10"></path>
+
+        </svg>
+
+        <span>
+            Home
+        </span>
+
+    </a>
+
+
+
+    <!-- REPORTS -->
+
+    <a href="/my-reports">
+
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+
+            <path
+                d="M9 5H6a2 2 0 0 0-2 2v13
+                a2 2 0 0 0 2 2h12
+                a2 2 0 0 0 2-2V7"
+            ></path>
+
+            <path d="M8 12h8"></path>
+
+            <path d="M8 16h6"></path>
+
+        </svg>
+
+        <span>
+            Reports
+        </span>
+
+    </a>
+
+
+
+    <!-- SOS -->
+
+    <a
+        href="/sos"
+        class="nav-sos"
+    >
+
+        <div class="sos-circle">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path d="M8 17h8"></path>
+
+                <path
+                    d="M7 17v-5a5 5 0 0 1 10 0v5"
+                ></path>
+
+                <path d="M5 21h14"></path>
+
+            </svg>
+
+        </div>
+
+        <span>
+            SOS
+        </span>
+
+    </a>
+
+
+
+    <!-- ACCOUNT -->
+
+    <a href="/account">
+
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+
+            <circle
+                cx="12"
+                cy="8"
+                r="4"
+            ></circle>
+
+            <path
+                d="M4 21a8 8 0 0 1 16 0"
+            ></path>
+
+        </svg>
+
+        <span>
+            Account
+        </span>
+
+    </a>
+
+</nav>
+
+
+
+<!-- ==========================================
+     SERVICE WORKER
+========================================== -->
+
+<script>
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker.register(
+                    "/static/service-worker.js"
+                );
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
