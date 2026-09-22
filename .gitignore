@@ -16,3 +16,7 @@ campus_security.db
 # User-uploaded incident evidence
 uploads/evidence/*
 !uploads/evidence/.gitkeep
+
+*.db-journal
+*.db-wal
+*.db-shm

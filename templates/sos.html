@@ -2398,7 +2398,7 @@
                 </button>
 
 
-            <input type="hidden" name="latitude" class="gps-latitude"><input type="hidden" name="longitude" class="gps-longitude"></form>
+            </form>
 
 
             <a
@@ -2950,7 +2950,7 @@
                 </button>
 
 
-            <input type="hidden" name="latitude" class="gps-latitude"><input type="hidden" name="longitude" class="gps-longitude"></form>
+            </form>
 
 
         </section>
@@ -3232,8 +3232,6 @@
 
                 const longitude =
                     position.coords.longitude;
-                document.querySelectorAll('.gps-latitude').forEach(el => el.value = latitude);
-                document.querySelectorAll('.gps-longitude').forEach(el => el.value = longitude);
 
 
                 const accuracy =

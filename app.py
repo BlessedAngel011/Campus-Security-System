@@ -10,8 +10,6 @@ from flask import (
 
 from flask_mail import Mail, Message
 
-from werkzeug.utils import secure_filename
-
 from werkzeug.security import (
     check_password_hash,
     generate_password_hash
@@ -22,9 +20,6 @@ import os
 import hashlib
 import secrets
 import time
-import math
-import uuid
-import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -763,16 +758,10 @@ def register():
 
     if request.method == "POST":
 
-        first_name = request.form.get("first_name", "").strip()
-        last_name = request.form.get("last_name", "").strip()
-        full_name = request.form.get("full_name", "").strip()
-        if first_name or last_name:
-            full_name = (first_name + " " + last_name).strip()
-        elif full_name:
-            name_parts = full_name.split()
-            first_name = name_parts[0] if name_parts else ""
-            last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
-        phone_number = request.form.get("phone_number", "").strip()
+        full_name = request.form.get(
+            "full_name",
+            ""
+        ).strip()
 
         student_number = request.form.get(
             "student_number",
@@ -986,27 +975,19 @@ def register():
                 (
                     username,
                     full_name,
-                    first_name,
-                    last_name,
                     student_number,
-                    student_staff_number,
-                    phone_number,
                     email,
                     email_verified,
                     password,
                     role,
                     disabled
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     username,
                     full_name,
-                    first_name,
-                    last_name,
                     student_number,
-                    student_number,
-                    phone_number,
                     email,
                     0,
                     hashed_password,
@@ -2357,11 +2338,9 @@ def report_incident():
                 description,
                 priority,
                 status,
-                is_anonymous,
-                latitude,
-                longitude
+                is_anonymous
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 user_id,
@@ -2380,9 +2359,7 @@ def report_incident():
 
                 "Pending",
 
-                is_anonymous,
-                request.form.get("latitude") or None,
-                request.form.get("longitude") or None
+                is_anonymous
             )
         )
 
@@ -2391,28 +2368,7 @@ def report_incident():
 
         connection.commit()
 
-        # Optional evidence uploads (images, video, PDF/documents).
-        upload_dir = os.path.join(BASE_DIR, "uploads", "evidence")
-        os.makedirs(upload_dir, exist_ok=True)
-        allowed_ext = {"png","jpg","jpeg","gif","webp","pdf","doc","docx","mp4","mov","avi"}
-        for evidence_file in request.files.getlist("evidence"):
-            if not evidence_file or not evidence_file.filename:
-                continue
-            safe_original = secure_filename(evidence_file.filename)
-            ext = safe_original.rsplit(".", 1)[-1].lower() if "." in safe_original else ""
-            if ext not in allowed_ext:
-                continue
-            stored_name = f"{incident_id}_{uuid.uuid4().hex}.{ext}"
-            stored_path = os.path.join(upload_dir, stored_name)
-            evidence_file.save(stored_path)
-            cursor.execute("""INSERT INTO incident_evidence
-                (incident_id,user_id,original_name,stored_name,mime_type,file_size)
-                VALUES (?,?,?,?,?,?)""", (incident_id,user_id,safe_original,stored_name,evidence_file.mimetype,os.path.getsize(stored_path)))
-        connection.commit()
         connection.close()
-
-        create_notification(user_id, "Report received", f"Incident #{incident_id} was received with {priority} priority.", "INCIDENT", incident_id)
-        audit_event("INCIDENT_CREATED", "incident", incident_id, f"priority={priority}; anonymous={is_anonymous}")
 
         send_incident_confirmation(
             user_id,
@@ -2535,38 +2491,150 @@ def my_reports():
 
 
 # =========================================================
-# CAMPUS SOS - DEDICATED EMERGENCY ALERTS + GPS
+# CAMPUS SOS
 # =========================================================
 
-@app.route("/sos", methods=["GET", "POST"])
+@app.route(
+    "/sos",
+    methods=["GET", "POST"]
+)
 def sos():
-    if not login_required(): return redirect(url_for("login"))
+
+    if not login_required():
+
+        return redirect(
+            url_for("login")
+        )
+
+
     if session.get("role") != "Student":
-        return redirect(url_for("admin" if session.get("role") == "Admin" else "dashboard"))
+
+        if session.get("role") == "Admin":
+
+            return redirect(
+                url_for("admin")
+            )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+
     if request.method == "POST":
-        user_id=session.get("user_id")
-        location=request.form.get("location","").strip()
-        latitude=request.form.get("latitude","").strip() or None
-        longitude=request.form.get("longitude","").strip() or None
-        if not location and not (latitude and longitude):
-            return render_template("sos.html", username=session.get("username"), role=session.get("role"), error="Allow GPS access or enter your location manually.")
-        if not location and latitude and longitude:
-            location=f"GPS: {float(latitude):.6f}, {float(longitude):.6f}"
-        con=sqlite3.connect(DATABASE_PATH); cur=con.cursor()
-        cur.execute("SELECT COALESCE(full_name,username), COALESCE(student_staff_number,student_number,username) FROM users WHERE id=?",(user_id,))
-        profile=cur.fetchone() or (session.get("username"),session.get("username"))
-        cur.execute("""INSERT INTO incidents(user_id,full_name,student_number,incident_type,location,description,priority,status,is_anonymous,latitude,longitude)
-                       VALUES(?,?,?,?,?,?,?,?,0,?,?)""",(user_id,profile[0],profile[1],"Emergency SOS",location,"Emergency assistance requested.","High","Pending",latitude,longitude))
-        incident_id=cur.lastrowid
-        cur.execute("""INSERT INTO emergency_alerts(user_id,incident_id,location_text,latitude,longitude,status)
-                       VALUES(?,?,?,?,?,'ACTIVE')""",(user_id,incident_id,location,latitude,longitude))
-        emergency_id=cur.lastrowid; con.commit(); con.close()
-        create_notification(user_id,"SOS received",f"Emergency alert #{emergency_id} is ACTIVE. Security has been alerted.","EMERGENCY",emergency_id)
-        notify_security_users("New emergency SOS",f"Emergency #{emergency_id} at {location}. Open Emergency Control to assign an officer.","EMERGENCY",emergency_id)
-        audit_event("SOS_CREATED","emergency",emergency_id,location)
-        send_sos_confirmation(user_id,incident_id); send_security_alert(incident_id,"Emergency SOS",location,"High")
-        return render_template("sos_success.html",incident_id=incident_id,location=location,username=session.get("username"))
-    return render_template("sos.html",username=session.get("username"),role=session.get("role"))
+
+        user_id = session.get(
+            "user_id"
+        )
+
+        username = session.get(
+            "username"
+        )
+
+
+        location = request.form.get(
+            "location",
+            ""
+        ).strip()
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+
+        if not location:
+
+            return render_template(
+                "sos.html",
+                username=username,
+                role=session.get(
+                    "role"
+                ),
+                error=(
+                    "Please provide your location."
+                )
+            )
+
+
+        if not description:
+
+            description = (
+                "Emergency assistance requested."
+            )
+
+
+        connection = sqlite3.connect(
+            DATABASE_PATH
+        )
+
+        cursor = connection.cursor()
+
+
+        cursor.execute("""
+            INSERT INTO incidents
+            (
+                user_id,
+                full_name,
+                student_number,
+                incident_type,
+                location,
+                description,
+                priority,
+                status
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            user_id,
+            username,
+            username,
+            "Emergency SOS",
+            location,
+            description,
+            "High",
+            "Pending"
+        ))
+
+
+        connection.commit()
+
+        incident_id = (
+            cursor.lastrowid
+        )
+
+
+        connection.close()
+
+        send_sos_confirmation(
+            user_id,
+            incident_id
+        )
+
+        send_security_alert(
+            incident_id,
+            "Emergency SOS",
+            location,
+            "High"
+        )
+
+
+        return render_template(
+            "sos_success.html",
+            incident_id=incident_id,
+            location=location,
+            username=username
+        )
+
+
+    return render_template(
+        "sos.html",
+        username=session.get(
+            "username"
+        ),
+        role=session.get(
+            "role"
+        )
+    )
+
 
 # =========================================================
 # EMERGENCY CONTACTS
@@ -2961,9 +3029,12 @@ def update_status(incident_id):
     connection.close()
 
     if incident[2] != new_status:
-        send_status_update_email(incident[0], incident_id, incident[1], new_status)
-        create_notification(incident[0], "Incident status updated", f"Incident #{incident_id} is now {new_status}.", "STATUS", incident_id)
-        audit_event("INCIDENT_STATUS_CHANGED", "incident", incident_id, f"{incident[2]} -> {new_status}")
+        send_status_update_email(
+            incident[0],
+            incident_id,
+            incident[1],
+            new_status
+        )
 
     return redirect(url_for("dashboard"))
 
@@ -3525,178 +3596,6 @@ def logout():
         url_for("home")
     )
 
-
-
-# =========================================================
-# INTEGRATED FEATURES: NOTIFICATIONS, OFFICERS, EMERGENCIES,
-# EVIDENCE, MAP, ANALYTICS AND AUDIT LOGGING
-# =========================================================
-
-def db_rows(query, params=()):
-    con=sqlite3.connect(DATABASE_PATH); con.row_factory=sqlite3.Row
-    rows=con.execute(query,params).fetchall(); con.close(); return rows
-
-def create_notification(user_id,title,message,category="GENERAL",related_id=None):
-    if not user_id: return
-    con=sqlite3.connect(DATABASE_PATH); con.execute("INSERT INTO notifications(user_id,title,message,category,related_id) VALUES(?,?,?,?,?)",(user_id,title,message,category,related_id)); con.commit(); con.close()
-
-def notify_security_users(title,message,category="GENERAL",related_id=None):
-    for row in db_rows("SELECT id FROM users WHERE role='Security Officer' AND disabled=0"):
-        create_notification(row["id"],title,message,category,related_id)
-
-def audit_event(action,entity_type=None,entity_id=None,details=None):
-    try:
-        con=sqlite3.connect(DATABASE_PATH); con.execute("INSERT INTO audit_logs(user_id,username,action,entity_type,entity_id,details,ip_address) VALUES(?,?,?,?,?,?,?)",(session.get("user_id"),session.get("username"),action,entity_type,entity_id,details,request.remote_addr)); con.commit(); con.close()
-    except Exception: pass
-
-def haversine_km(lat1,lon1,lat2,lon2):
-    r=6371.0; p1=math.radians(lat1); p2=math.radians(lat2); dp=math.radians(lat2-lat1); dl=math.radians(lon2-lon1)
-    a=math.sin(dp/2)**2+math.cos(p1)*math.cos(p2)*math.sin(dl/2)**2
-    return r*2*math.atan2(math.sqrt(a),math.sqrt(1-a))
-
-@app.context_processor
-def notification_context():
-    count=0
-    if session.get("user_id"):
-        rows=db_rows("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND is_read=0",(session["user_id"],)); count=rows[0]["c"] if rows else 0
-    return {"notification_unread_count":count}
-
-@app.route("/notifications")
-def notifications_page():
-    if not login_required(): return redirect(url_for("login"))
-    notes=db_rows("SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT 100",(session["user_id"],))
-    return render_template("notifications.html",notifications=notes,username=session.get("username"),role=session.get("role"))
-
-@app.route("/notifications/read-all",methods=["POST"])
-def notifications_read_all():
-    if not login_required(): return redirect(url_for("login"))
-    con=sqlite3.connect(DATABASE_PATH); con.execute("UPDATE notifications SET is_read=1 WHERE user_id=?",(session["user_id"],)); con.commit(); con.close(); return redirect(url_for("notifications_page"))
-
-@app.route("/security/officer-status",methods=["GET","POST"])
-def officer_status():
-    if not security_required(): return ("Access denied",403)
-    con=sqlite3.connect(DATABASE_PATH); cur=con.cursor(); cur.execute("INSERT OR IGNORE INTO security_officers(user_id) VALUES(?)",(session["user_id"],))
-    if request.method=="POST":
-        availability=request.form.get("availability","OFF_DUTY")
-        if availability not in {"AVAILABLE","BUSY","OFF_DUTY"}: availability="OFF_DUTY"
-        lat=request.form.get("latitude") or None; lon=request.form.get("longitude") or None
-        cur.execute("UPDATE security_officers SET availability=?,latitude=?,longitude=?,location_updated_at=CURRENT_TIMESTAMP WHERE user_id=?",(availability,lat,lon,session["user_id"])); con.commit(); audit_event("OFFICER_STATUS_CHANGED","officer",session["user_id"],availability)
-    row=cur.execute("SELECT * FROM security_officers WHERE user_id=?",(session["user_id"],)).fetchone(); con.close()
-    return render_template("officer_status.html",officer=row,username=session.get("username"),role=session.get("role"))
-
-@app.route("/security/emergencies")
-def emergency_control():
-    if not security_required(): return ("Access denied",403)
-    emergencies=db_rows("""SELECT e.*,u.username,u.full_name,so.user_id officer_user_id,ou.username officer_username
-        FROM emergency_alerts e JOIN users u ON u.id=e.user_id
-        LEFT JOIN security_officers so ON so.id=e.assigned_officer_id LEFT JOIN users ou ON ou.id=so.user_id
-        ORDER BY CASE e.status WHEN 'ACTIVE' THEN 1 WHEN 'ASSIGNED' THEN 2 WHEN 'RESPONDING' THEN 3 ELSE 4 END,e.id DESC""")
-    officers=db_rows("""SELECT so.*,u.username,u.full_name FROM security_officers so JOIN users u ON u.id=so.user_id WHERE u.disabled=0 ORDER BY so.availability,u.username""")
-    enriched=[]
-    for e in emergencies:
-        d=dict(e); candidates=[]
-        if e["latitude"] is not None and e["longitude"] is not None:
-            for o in officers:
-                if o["availability"]=="AVAILABLE" and o["latitude"] is not None and o["longitude"] is not None:
-                    candidates.append((haversine_km(e["latitude"],e["longitude"],o["latitude"],o["longitude"]),dict(o)))
-        candidates.sort(key=lambda x:x[0]); d["nearest"]=[{"distance":round(x[0],2),**x[1]} for x in candidates[:5]]; enriched.append(d)
-    return render_template("emergencies.html",emergencies=enriched,officers=officers,username=session.get("username"),role=session.get("role"))
-
-@app.route("/security/emergency/<int:emergency_id>/assign",methods=["POST"])
-def assign_emergency(emergency_id):
-    if not security_required(): return ("Access denied",403)
-    officer_id=request.form.get("officer_id",type=int)
-    con=sqlite3.connect(DATABASE_PATH); cur=con.cursor(); cur.execute("SELECT user_id FROM security_officers WHERE id=? AND availability='AVAILABLE'",(officer_id,)); off=cur.fetchone()
-    if off:
-        cur.execute("SELECT user_id, incident_id FROM emergency_alerts WHERE id=? AND status='ACTIVE'",(emergency_id,)); emergency=cur.fetchone()
-        if emergency:
-            cur.execute("UPDATE emergency_alerts SET assigned_officer_id=?,status='ASSIGNED',assigned_at=CURRENT_TIMESTAMP WHERE id=?",(officer_id,emergency_id))
-            cur.execute("UPDATE security_officers SET availability='BUSY' WHERE id=?",(officer_id,))
-            if emergency[1]: cur.execute("UPDATE incidents SET status='In Progress' WHERE id=?",(emergency[1],))
-            con.commit()
-            create_notification(off[0],"Emergency assigned",f"Emergency #{emergency_id} has been assigned to you.","EMERGENCY",emergency_id)
-            create_notification(emergency[0],"Officer assigned",f"A security officer has been assigned to emergency #{emergency_id}.","EMERGENCY",emergency_id)
-            audit_event("OFFICER_ASSIGNED","emergency",emergency_id,f"officer_id={officer_id}")
-    con.close(); return redirect(url_for("emergency_control"))
-
-@app.route("/security/emergency/<int:emergency_id>/status",methods=["POST"])
-def emergency_status(emergency_id):
-    if not security_required(): return ("Access denied",403)
-    status=request.form.get("status","")
-    if status not in {"RESPONDING","RESOLVED"}: return ("Invalid status",400)
-    con=sqlite3.connect(DATABASE_PATH); cur=con.cursor(); cur.execute("SELECT e.user_id,e.assigned_officer_id,e.incident_id,so.user_id FROM emergency_alerts e LEFT JOIN security_officers so ON so.id=e.assigned_officer_id WHERE e.id=?",(emergency_id,)); e=cur.fetchone()
-    if not e: con.close(); return ("Not found",404)
-    if not e[1]: con.close(); return ("Assign an officer first",400)
-    if e[3] != session.get("user_id"): con.close(); return ("Only the assigned officer can update this emergency",403)
-    stamp="responding_at" if status=="RESPONDING" else "resolved_at"
-    cur.execute(f"UPDATE emergency_alerts SET status=?,{stamp}=CURRENT_TIMESTAMP WHERE id=?",(status,emergency_id))
-    if e[2]: cur.execute("UPDATE incidents SET status=? WHERE id=?",("Resolved" if status=="RESOLVED" else "In Progress",e[2]))
-    if status=="RESOLVED": cur.execute("UPDATE security_officers SET availability='AVAILABLE' WHERE id=?",(e[1],))
-    con.commit(); con.close()
-    create_notification(e[0],"Emergency update",f"Emergency #{emergency_id} is now {status}.","EMERGENCY",emergency_id)
-    audit_event("EMERGENCY_STATUS_CHANGED","emergency",emergency_id,status)
-    return redirect(url_for("emergency_control"))
-
-@app.route("/evidence/<int:evidence_id>")
-def evidence_file(evidence_id):
-    if not login_required(): return redirect(url_for("login"))
-    rows=db_rows("SELECT * FROM incident_evidence WHERE id=?",(evidence_id,))
-    if not rows: return ("Not found",404)
-    e=rows[0]
-    if session.get("role")=="Student":
-        own=db_rows("SELECT id FROM incidents WHERE id=? AND user_id=?",(e["incident_id"],session["user_id"]))
-        if not own: return ("Access denied",403)
-    return send_from_directory(os.path.join(BASE_DIR,"uploads","evidence"),e["stored_name"],as_attachment=True,download_name=e["original_name"])
-
-@app.route("/campus-map")
-def campus_map():
-    if not login_required(): return redirect(url_for("login"))
-    if session.get("role") == "Student":
-        incidents=db_rows("SELECT id,incident_type,location,priority,status,latitude,longitude,date_reported FROM incidents WHERE user_id=? AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY id DESC LIMIT 250",(session["user_id"],))
-        emergencies=db_rows("SELECT id,location_text,status,latitude,longitude,created_at FROM emergency_alerts WHERE user_id=? AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY id DESC LIMIT 100",(session["user_id"],))
-    else:
-        incidents=db_rows("SELECT id,incident_type,location,priority,status,latitude,longitude,date_reported FROM incidents WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY id DESC LIMIT 250")
-        emergencies=db_rows("SELECT id,location_text,status,latitude,longitude,created_at FROM emergency_alerts WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY id DESC LIMIT 100")
-    locations=db_rows("SELECT * FROM campus_locations ORDER BY name")
-    return render_template("campus_map.html",incidents=[dict(x) for x in incidents],emergencies=[dict(x) for x in emergencies],locations=[dict(x) for x in locations],username=session.get("username"),role=session.get("role"))
-
-@app.route("/admin/analytics")
-def admin_analytics():
-    if not admin_required(): return ("Access denied",403)
-    by_type=db_rows("SELECT incident_type label,COUNT(*) value FROM incidents GROUP BY incident_type ORDER BY value DESC")
-    by_location=db_rows("SELECT location label,COUNT(*) value FROM incidents GROUP BY location ORDER BY value DESC LIMIT 10")
-    by_priority=db_rows("SELECT priority label,COUNT(*) value FROM incidents GROUP BY priority")
-    by_status=db_rows("SELECT status label,COUNT(*) value FROM incidents GROUP BY status")
-    emergencies=db_rows("SELECT status label,COUNT(*) value FROM emergency_alerts GROUP BY status")
-    return render_template("analytics.html",by_type=by_type,by_location=by_location,by_priority=by_priority,by_status=by_status,emergency_stats=emergencies,username=session.get("username"),role=session.get("role"))
-
-@app.route("/admin/audit-logs")
-def audit_logs():
-    if not admin_required(): return ("Access denied",403)
-    logs=db_rows("SELECT * FROM audit_logs ORDER BY id DESC LIMIT 300")
-    return render_template("audit_logs.html",logs=logs,username=session.get("username"),role=session.get("role"))
-
-
-@app.route("/account/profile", methods=["GET","POST"])
-def edit_profile():
-    if not login_required(): return redirect(url_for("login"))
-    con=sqlite3.connect(DATABASE_PATH); con.row_factory=sqlite3.Row; cur=con.cursor()
-    if request.method=="POST":
-        first=request.form.get("first_name","").strip(); last=request.form.get("last_name","").strip(); number=request.form.get("student_staff_number","").strip().upper(); phone=request.form.get("phone_number","").strip()
-        if not first or not last or not number:
-            profile=cur.execute("SELECT * FROM users WHERE id=?",(session["user_id"],)).fetchone(); con.close(); return render_template("edit_profile.html",profile=profile,error="First name, last name and student/staff number are required.")
-        try:
-            cur.execute("UPDATE users SET first_name=?,last_name=?,full_name=?,student_staff_number=?,student_number=?,phone_number=? WHERE id=?",(first,last,(first+' '+last).strip(),number,number,phone,session["user_id"])); con.commit(); audit_event("PROFILE_UPDATED","user",session["user_id"],"Profile details updated")
-        except sqlite3.IntegrityError:
-            profile=cur.execute("SELECT * FROM users WHERE id=?",(session["user_id"],)).fetchone(); con.close(); return render_template("edit_profile.html",profile=profile,error="That student/staff number is already in use.")
-    profile=cur.execute("SELECT * FROM users WHERE id=?",(session["user_id"],)).fetchone(); con.close(); return render_template("edit_profile.html",profile=profile,success="Profile saved." if request.method=="POST" else None)
-
-@app.route("/incident/<int:incident_id>/evidence")
-def incident_evidence(incident_id):
-    if not login_required(): return redirect(url_for("login"))
-    if session.get("role")=="Student" and not db_rows("SELECT id FROM incidents WHERE id=? AND user_id=?",(incident_id,session["user_id"])): return ("Access denied",403)
-    files=db_rows("SELECT * FROM incident_evidence WHERE incident_id=? ORDER BY id DESC",(incident_id,))
-    return render_template("incident_evidence.html",files=files,incident_id=incident_id,username=session.get("username"),role=session.get("role"))
 
 # =========================================================
 # START APPLICATION
