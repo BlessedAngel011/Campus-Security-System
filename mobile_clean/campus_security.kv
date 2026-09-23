@@ -1,0 +1,1711 @@
+#:import dp kivy.metrics.dp
+
+<Label>:
+    color: 0.035, 0.105, 0.20, 1
+
+
+# Shared text-entry accessibility settings. This also applies to the two
+# multiline description fields used by SOS and incident reporting.
+<TextInput>:
+    foreground_color: 0.025, 0.10, 0.22, 1
+    hint_text_color: 0.30, 0.37, 0.46, 1
+    cursor_color: 0.0, 0.38, 0.92, 1
+    cursor_width: dp(3)
+    selection_color: 0.15, 0.48, 0.90, 0.35
+
+
+<AppScrollView@ScrollView>:
+    do_scroll_x: False
+    do_scroll_y: True
+    scroll_type: ["bars", "content"]
+    bar_width: dp(12)
+    bar_color: 0.025, 0.176, 0.388, 0.9
+    bar_inactive_color: 0.55, 0.62, 0.70, 0.5
+    scroll_wheel_distance: dp(80)
+    smooth_scroll_end: 10
+
+
+<PrimaryButton@Button>:
+    size_hint_y: None
+    height: dp(52)
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: 1, 1, 1, 1
+    font_size: "16sp"
+    bold: True
+    canvas.before:
+        Color:
+            rgba: (0.02, 0.13, 0.30, 1) if self.state == "down" else (0.025, 0.176, 0.388, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(13)]
+
+
+<OutlineButton@Button>:
+    size_hint_y: None
+    height: dp(48)
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: 0.025, 0.176, 0.388, 1
+    font_size: "15sp"
+    bold: True
+    canvas.before:
+        Color:
+            rgba: (0.88, 0.93, 0.98, 1) if self.state == "down" else (0.95, 0.97, 0.99, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(13)]
+        Color:
+            rgba: 0.78, 0.84, 0.91, 1
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(13))
+            width: 1
+
+
+<FormInput@TextInput>:
+    size_hint_y: None
+    height: dp(50)
+    padding: dp(14), dp(14)
+    multiline: False
+    background_normal: ""
+    background_active: ""
+    background_color: 0, 0, 0, 0
+    foreground_color: 0.025, 0.10, 0.22, 1
+    hint_text_color: 0.30, 0.37, 0.46, 1
+    cursor_color: 0.0, 0.38, 0.92, 1
+    cursor_width: dp(3)
+    selection_color: 0.15, 0.48, 0.90, 0.35
+    font_size: "15sp"
+    canvas.before:
+        Color:
+            rgba: 0.96, 0.97, 0.99, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+        Color:
+            rgba: (0.0, 0.38, 0.92, 1) if self.focus else (0.70, 0.77, 0.86, 1)
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(12))
+            width: 1.8 if self.focus else 1
+
+
+<DashboardCard@Button>:
+    size_hint_y: None
+    height: dp(62)
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: 0.025, 0.176, 0.388, 1
+    bold: True
+    font_size: "15sp"
+    halign: "left"
+    valign: "middle"
+    text_size: self.width - dp(36), self.height
+    padding: dp(18), 0
+
+    canvas.before:
+        Color:
+            rgba: (0.91, 0.94, 0.98, 1) if self.state == "down" else (1, 1, 1, 1)
+
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(13)]
+
+        Color:
+            rgba: 0.83, 0.88, 0.94, 1
+
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(13))
+            width: 1
+
+
+<EmergencyButton@Button>:
+    size_hint_y: None
+    height: dp(150)
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: 1, 1, 1, 1
+    bold: True
+    font_size: "26sp"
+    halign: "center"
+    valign: "middle"
+    text_size: self.size
+
+    canvas.before:
+        Color:
+            rgba: (0.64, 0.03, 0.08, 1) if self.state == "down" else (0.79, 0.055, 0.11, 1)
+
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(22)]
+
+        Color:
+            rgba: 1, 0.34, 0.38, 1
+
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(22))
+            width: 1.5
+
+
+<LoginScreen>:
+    name: "login"
+
+    canvas.before:
+        Color:
+            rgba: 0.025, 0.176, 0.388, 1
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    AppScrollView:
+        do_scroll_x: False
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: max(self.minimum_height, root.height)
+            padding: dp(24)
+            spacing: dp(18)
+
+            Widget:
+                size_hint_y: None
+                height: dp(30)
+
+            AsyncImage:
+                source: "https://www.ufh.ac.za/wp-content/uploads/2024/08/Frame-427321864.png"
+                size_hint_y: None
+                height: dp(85)
+                fit_mode: "contain"
+
+            RelativeLayout:
+                size_hint_y: None
+                height: dp(145)
+
+                AsyncImage:
+                    source: "https://www.ufh.ac.za/wp-content/uploads/2024/11/UFH-Buildings-1-of-18-1024x683.webp"
+                    fit_mode: "cover"
+
+                Label:
+                    text: "ALICE  •  BHISHO  •  EAST LONDON"
+                    size_hint: 1, None
+                    height: dp(34)
+                    pos_hint: {"x": 0, "y": 0}
+                    bold: True
+                    font_size: "11sp"
+                    color: 1, 1, 1, 1
+                    canvas.before:
+                        Color:
+                            rgba: 0.02, 0.10, 0.22, 0.82
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Label:
+                text: "Campus Security"
+                size_hint_y: None
+                height: dp(42)
+                font_size: "28sp"
+                bold: True
+                color: 1, 1, 1, 1
+
+            Label:
+                text: "Users and Security Officers"
+                size_hint_y: None
+                height: dp(42)
+                color: 0.78, 0.88, 1, 1
+                font_size: "15sp"
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(22)
+                spacing: dp(12)
+
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 1
+
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(18)]
+
+                Label:
+                    text: "Sign In"
+                    size_hint_y: None
+                    height: dp(42)
+                    color: 0.025, 0.176, 0.388, 1
+                    font_size: "24sp"
+                    bold: True
+
+                Label:
+                    text: "Student/staff number"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: login_number
+                    hint_text: "Enter student/staff number"
+
+                Label:
+                    text: "Password"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: login_password
+                    hint_text: "Enter password"
+                    password: True
+                    on_text_validate: root.submit_login()
+
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(55) if self.text else 0
+                    color: (0.1, 0.55, 0.27, 1) if "successfully" in self.text else (0.75, 0.08, 0.14, 1)
+                    text_size: self.width, None
+                    halign: "center"
+                    valign: "middle"
+
+                PrimaryButton:
+                    text: "Please wait..." if root.loading else "Sign In"
+                    disabled: root.loading
+                    on_release: root.submit_login()
+
+                OutlineButton:
+                    text: "Register a User"
+                    disabled: root.loading
+
+                    on_release:
+                        root.status_message = ""
+                        app.root.transition.direction = "left"
+                        app.root.current = "register"
+
+            Widget:
+                size_hint_y: None
+                height: dp(24)
+
+
+<RegisterScreen>:
+    name: "register"
+
+    canvas.before:
+        Color:
+            rgba: 0.94, 0.96, 0.98, 1
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: 1, 1, 1, 1
+                font_size: "25sp"
+
+                on_release:
+                    root.status_message = ""
+                    app.root.transition.direction = "right"
+                    app.root.current = "login"
+
+            Label:
+                text: "Register a User"
+                bold: True
+                font_size: "20sp"
+                color: 1, 1, 1, 1
+
+            Widget:
+                size_hint_x: None
+                width: dp(48)
+
+        AppScrollView:
+            do_scroll_x: False
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(24)
+                spacing: dp(10)
+
+                Label:
+                    text: "User Information"
+                    size_hint_y: None
+                    height: dp(45)
+                    color: 0.025, 0.176, 0.388, 1
+                    font_size: "25sp"
+                    bold: True
+
+                Label:
+                    text: "Student/staff number"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_number
+                    hint_text: "Enter student/staff number"
+
+                Label:
+                    text: "User type"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                Spinner:
+                    id: register_role
+                    text: "Student"
+                    values: ("Student", "Staff")
+                    size_hint_y: None
+                    height: dp(50)
+                    background_normal: ""
+                    background_color: 0.96, 0.97, 0.99, 1
+                    color: 0.08, 0.16, 0.25, 1
+
+                Label:
+                    text: "First name"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_first_name
+                    hint_text: "Enter first name"
+
+                Label:
+                    text: "Last name"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_last_name
+                    hint_text: "Enter last name"
+
+                Label:
+                    text: "Phone number"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_phone
+                    hint_text: "Enter phone number"
+                    input_filter: "int"
+
+                Label:
+                    text: "Campus"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                Spinner:
+                    id: register_campus
+                    text: "Alice Campus"
+                    values: ("Alice Campus", "East London Campus", "Bhisho Campus")
+                    size_hint_y: None
+                    height: dp(50)
+                    background_normal: ""
+                    background_color: 0.96, 0.97, 0.99, 1
+                    color: 0.08, 0.16, 0.25, 1
+
+                Label:
+                    text: "Password"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_password
+                    hint_text: "At least 8 characters"
+                    password: True
+
+                Label:
+                    text: "Confirm password"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_confirm_password
+                    hint_text: "Enter password again"
+                    password: True
+
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(55) if self.text else 0
+                    color: 0.75, 0.08, 0.14, 1
+                    text_size: self.width, None
+                    halign: "center"
+                    valign: "middle"
+
+                PrimaryButton:
+                    text: "Please wait..." if root.loading else "Register User"
+                    disabled: root.loading
+                    on_release: root.submit_registration()
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(24)
+
+
+<UserDashboardScreen>:
+    name: "user_dashboard"
+
+    canvas.before:
+        Color:
+            rgba: 0.94, 0.96, 0.98, 1
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(82)
+            padding: dp(20), dp(12)
+
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            BoxLayout:
+                orientation: "vertical"
+
+                Label:
+                    text: root.welcome_text
+                    bold: True
+                    font_size: "20sp"
+                    color: 1, 1, 1, 1
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                Label:
+                    text: root.account_type + " Dashboard"
+                    font_size: "13sp"
+                    color: 0.78, 0.88, 1, 1
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+            Button:
+                text: "Sign Out"
+                size_hint_x: None
+                width: dp(88)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: 1, 1, 1, 1
+                on_release: app.logout()
+
+        AppScrollView:
+            do_scroll_x: False
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(20)
+                spacing: dp(10)
+
+                RelativeLayout:
+                    size_hint_y: None
+                    height: dp(120)
+                    AsyncImage:
+                        source: "https://www.ufh.ac.za/wp-content/uploads/2024/11/UFH-Libary-1-of-1-1024x683.webp"
+                        fit_mode: "cover"
+                    Label:
+                        text: "Your safety. Our priority."
+                        size_hint: 1, None
+                        height: dp(38)
+                        pos_hint: {"x": 0, "y": 0}
+                        bold: True
+                        color: 1, 1, 1, 1
+                        canvas.before:
+                            Color:
+                                rgba: 0.02, 0.10, 0.22, 0.80
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+
+                Label:
+                    text: "Emergency Assistance"
+                    size_hint_y: None
+                    height: dp(38)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "20sp"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                EmergencyButton:
+                    text: root.sos_button_text
+                    disabled: root.sos_loading
+                    on_release: root.emergency_button_pressed()
+
+                Label:
+                    text: root.sos_status if root.sos_status else "Press 3 times within 5 seconds to send an emergency alert"
+                    size_hint_y: None
+                    height: dp(45)
+                    color: (0.1, 0.5, 0.25, 1) if "successfully" in self.text else (0.42, 0.47, 0.54, 1)
+                    font_size: "12sp"
+                    text_size: self.width, None
+                    halign: "center"
+
+                Label:
+                    text: "Campus Security Services"
+                    size_hint_y: None
+                    height: dp(40)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "19sp"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                DashboardCard:
+                    text: "Report an Incident"
+                    on_release: root.open_feature("Report an Incident")
+
+                DashboardCard:
+                    text: "My Reports"
+                    on_release: root.open_feature("My Reports")
+
+                DashboardCard:
+                    text: "Emergency Contacts"
+                    on_release: root.open_feature("Emergency Contacts")
+
+                DashboardCard:
+                    text: "Notifications"
+                    on_release: root.open_feature("Notifications")
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(16)
+
+
+<OfficerDashboardScreen>:
+    name: "officer_dashboard"
+
+    canvas.before:
+        Color:
+            rgba: 0.94, 0.96, 0.98, 1
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(82)
+            padding: dp(20), dp(12)
+
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            BoxLayout:
+                orientation: "vertical"
+
+                Label:
+                    text: root.welcome_text
+                    bold: True
+                    font_size: "18sp"
+                    color: 1, 1, 1, 1
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                Label:
+                    text: "Security Operations"
+                    font_size: "13sp"
+                    color: 0.78, 0.88, 1, 1
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+            Button:
+                text: "Sign Out"
+                size_hint_x: None
+                width: dp(88)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: 1, 1, 1, 1
+                on_release: app.logout()
+
+        AppScrollView:
+            do_scroll_x: False
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(20)
+                spacing: dp(10)
+
+                RelativeLayout:
+                    size_hint_y: None
+                    height: dp(120)
+                    AsyncImage:
+                        source: "https://www.ufh.ac.za/wp-content/uploads/2024/12/Bisho-campus-image.webp"
+                        fit_mode: "cover"
+                    Label:
+                        text: "UFH Security Operations"
+                        size_hint: 1, None
+                        height: dp(38)
+                        pos_hint: {"x": 0, "y": 0}
+                        bold: True
+                        color: 1, 1, 1, 1
+                        canvas.before:
+                            Color:
+                                rgba: 0.02, 0.10, 0.22, 0.80
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+
+                Label:
+                    text: "Officer Status"
+                    size_hint_y: None
+                    height: dp(40)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "20sp"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                DashboardCard:
+                    text: "Set Available and Share GPS"
+                    on_release: root.set_availability("AVAILABLE")
+
+                DashboardCard:
+                    text: "Set Busy"
+                    on_release: root.set_availability("BUSY")
+
+                DashboardCard:
+                    text: "Go Off Duty"
+                    on_release: root.set_availability("OFF_DUTY")
+
+                DashboardCard:
+                    text: "Refresh My GPS Location"
+                    on_release: root.capture_officer_location()
+
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(34) if self.text else 0
+                    color: 0.1, 0.45, 0.25, 1
+
+                Label:
+                    text: "Security Operations"
+                    size_hint_y: None
+                    height: dp(42)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "20sp"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                DashboardCard:
+                    text: "Available Emergency Work"
+                    on_release: root.open_alerts()
+
+
+                DashboardCard:
+                    text: "Incident Reports"
+                    on_release: root.open_feature("Incident Reports")
+
+                DashboardCard:
+                    text: "Notifications"
+                    on_release: root.open_feature("Notifications")
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(16)
+
+
+<EmergencyScreen>:
+    name: "emergency"
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_color: 0, 0, 0, 0
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "user_dashboard"
+
+            Label:
+                text: "Emergency SOS"
+                bold: True
+                font_size: "21sp"
+
+            Widget:
+                size_hint_x: None
+                width: dp(48)
+
+        AppScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            scroll_type: ["bars", "content"]
+            bar_width: dp(8)
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(22)
+                spacing: dp(12)
+
+                Label:
+                    text: "Send your live location to Campus Security"
+                    size_hint_y: None
+                    height: dp(52)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "19sp"
+
+                Label:
+                    text: "Emergency type"
+                    size_hint_y: None
+                    height: dp(24)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                Spinner:
+                    id: emergency_type
+                    text: "General Emergency"
+                    values: ("General Emergency", "Medical Emergency", "Assault", "Fire", "Theft", "Other")
+                    size_hint_y: None
+                    height: dp(52)
+
+                Label:
+                    text: "Description (optional)"
+                    size_hint_y: None
+                    height: dp(24)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                TextInput:
+                    id: emergency_description
+                    hint_text: "Briefly explain what is happening"
+                    size_hint_y: None
+                    height: dp(105)
+                    multiline: True
+                    padding: dp(12)
+
+                OutlineButton:
+                    text: "Capture My GPS Location"
+                    on_release: root.capture_location()
+
+                Label:
+                    text: root.location_text
+                    size_hint_y: None
+                    height: dp(38)
+                    color: 0.17, 0.24, 0.34, 1
+
+                EmergencyButton:
+                    text: "SEND\nSOS ALERT"
+                    disabled: root.loading
+                    on_release: root.send_alert()
+
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(58) if self.text else 0
+                    color: (0.1, 0.5, 0.25, 1) if "success" in self.text.lower() or "captured" in self.text.lower() else (0.75, 0.08, 0.14, 1)
+                    text_size: self.width, None
+                    halign: "center"
+
+
+<OfficerAlertsScreen>:
+    name: "officer_alerts"
+
+    canvas.before:
+        Color:
+            rgba: 0.94, 0.96, 0.98, 1
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: 1, 1, 1, 1
+                font_size: "25sp"
+
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "officer_dashboard"
+
+            Label:
+                text: "Available Emergency Work"
+                bold: True
+                font_size: "19sp"
+                color: 1, 1, 1, 1
+
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(78)
+                background_normal: ""
+                background_down: ""
+                background_color: 0.12, 0.34, 0.60, 1
+                color: 1, 1, 1, 1
+                on_release: root.refresh_alerts()
+
+        AppScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            scroll_type: ["bars", "content"]
+            bar_width: dp(7)
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(18)
+                spacing: dp(12)
+
+                Label:
+                    text: "Active Emergency Cases"
+                    size_hint_y: None
+                    height: dp(42)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "20sp"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+
+                Label:
+                    text: root.alerts_text
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(30)
+                    text_size: self.width, None
+                    halign: "left"
+                    valign: "top"
+                    color: 0.08, 0.16, 0.25, 1
+
+                    canvas.before:
+                        Color:
+                            rgba: 1, 1, 1, 1
+
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+
+                Label:
+                    text: "Select the emergency case"
+                    size_hint_y: None
+                    height: dp(28)
+                    color: 0.12, 0.19, 0.29, 1
+                    bold: True
+                    halign: "left"
+                    text_size: self.size
+
+                Spinner:
+                    id: available_alert
+                    text: "Select emergency case"
+                    values: root.case_values
+                    size_hint_y: None
+                    height: dp(54)
+                    background_normal: ""
+                    background_color: 1, 1, 1, 1
+                    color: 0.025, 0.176, 0.388, 1
+
+                Label:
+                    text: "Select the action"
+                    size_hint_y: None
+                    height: dp(28)
+                    color: 0.12, 0.19, 0.29, 1
+                    bold: True
+                    halign: "left"
+                    text_size: self.size
+
+                Spinner:
+                    id: alert_status
+                    text: "ACKNOWLEDGED"
+                    values: ["ACKNOWLEDGED", "RESPONDING", "RESOLVED"]
+                    size_hint_y: None
+                    height: dp(54)
+                    background_normal: ""
+                    background_color: 1, 1, 1, 1
+                    color: 0.025, 0.176, 0.388, 1
+
+                PrimaryButton:
+                    text: "Update Emergency Status"
+                    disabled: root.loading
+                    on_release: root.update_status()
+
+                OutlineButton:
+                    text: "Open User Location in Maps"
+                    on_release: root.open_map()
+
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(55) if self.text else 0
+                    text_size: self.width, None
+                    halign: "center"
+                    valign: "middle"
+                    color: (0.1, 0.5, 0.25, 1) if "updated" in self.text.lower() else (0.75, 0.08, 0.14, 1)
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(20)
+
+
+<OfficerIncidentsScreen>:
+    name: "officer_incidents"
+
+    canvas.before:
+        Color:
+            rgba: 0.94, 0.96, 0.98, 1
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: 1, 1, 1, 1
+                font_size: "25sp"
+
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "officer_dashboard"
+
+            Label:
+                text: "Available Incident Cases"
+                bold: True
+                font_size: "19sp"
+                color: 1, 1, 1, 1
+
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(78)
+                background_normal: ""
+                background_down: ""
+                background_color: 0.12, 0.34, 0.60, 1
+                color: 1, 1, 1, 1
+                on_release: root.refresh_incidents()
+
+        AppScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            scroll_type: ["bars", "content"]
+            bar_width: dp(8)
+            scroll_wheel_distance: dp(60)
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(20)
+                spacing: dp(12)
+    
+                BoxLayout:
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: self.minimum_height
+                    padding: dp(18)
+                    spacing: dp(12)
+    
+                    Label:
+                        text: "Incident Reports Requiring Attention"
+                        size_hint_y: None
+                        height: dp(42)
+                        color: 0.025, 0.176, 0.388, 1
+                        bold: True
+                        font_size: "20sp"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+    
+                    Label:
+                        text: root.incidents_text
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(30)
+                        text_size: self.width, None
+                        halign: "left"
+                        valign: "top"
+                        color: 0.08, 0.16, 0.25, 1
+    
+                        canvas.before:
+                            Color:
+                                rgba: 1, 1, 1, 1
+    
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(12)]
+    
+                    Label:
+                        text: "Select the incident case"
+                        size_hint_y: None
+                        height: dp(28)
+                        color: 0.12, 0.19, 0.29, 1
+                        bold: True
+                        halign: "left"
+                        text_size: self.size
+    
+                    Spinner:
+                        id: available_incident
+                        text: "Select available incident case"
+                        values: root.incident_values
+                        size_hint_y: None
+                        height: dp(54)
+                        background_normal: ""
+                        background_color: 1, 1, 1, 1
+                        color: 0.025, 0.176, 0.388, 1
+    
+                    Label:
+                        text: "Change case status"
+                        size_hint_y: None
+                        height: dp(28)
+                        color: 0.12, 0.19, 0.29, 1
+                        bold: True
+                        halign: "left"
+                        text_size: self.size
+    
+                    Spinner:
+                        id: officer_incident_status
+                        text: "UNDER_INVESTIGATION"
+                        values: ["REPORTED","UNDER_INVESTIGATION", "RESOLVED","CLOSED"]
+                        size_hint_y: None
+                        height: dp(54)
+                        background_normal: ""
+                        background_color: 1, 1, 1, 1
+                        color: 0.025, 0.176, 0.388, 1
+    
+                    PrimaryButton:
+                        text: "Update Incident Status"
+                        disabled: root.loading
+                        on_release: root.update_incident()
+    
+                    Label:
+                        text: "Proof of a solved case"
+                        size_hint_y: None
+                        height: dp(35)
+                        color: 0.025, 0.176, 0.388, 1
+                        bold: True
+                        font_size: "17sp"
+                        halign: "left"
+                        text_size: self.size
+    
+                    Label:
+                        text: "Mark the selected case as RESOLVED before uploading a photo or document showing that the case was solved."
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(12)
+                        text_size: self.width, None
+                        color: 0.25, 0.32, 0.42, 1
+                        halign: "left"
+                        valign: "top"
+    
+                    PrimaryButton:
+                        text: "Show Proof of Solved Case"
+                        on_release: root.choose_evidence()
+    
+                    Label:
+                        text: root.status_message
+                        size_hint_y: None
+                        height: dp(60) if self.text else 0
+                        text_size: self.width, None
+                        halign: "center"
+                        valign: "middle"
+                        color: ( 0.1, 0.5, 0.25, 1) if ( "updated" in self.text.lower()or "successfully" in self.text.lower()) else (0.75, 0.08, 0.14, 1)
+    
+                    Widget:
+                        size_hint_y: None
+                        height: dp(20)
+    
+
+<OfficerNotificationsScreen>:
+    name: "officer_notifications"
+
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_color: 0, 0, 0, 0
+                font_size: "25sp"
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "officer_dashboard"
+
+            Label:
+                text: "Officer Notifications"
+                bold: True
+                font_size: "20sp"
+
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(75)
+                on_release: root.refresh_notifications()
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(18)
+            spacing: dp(8)
+
+            AppScrollView:
+                Label:
+                    text: root.notifications_text
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(30)
+                    text_size: self.width, None
+                    halign: "left"
+                    valign: "top"
+                    color: 0.08, 0.16, 0.25, 1
+
+            Label:
+                text: root.status_message
+                size_hint_y: None
+                height: dp(38) if self.text else 0
+                color: 0.75, 0.08, 0.14, 1
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(52)
+                spacing: dp(8)
+
+                FormInput:
+                    id: officer_notification_id
+                    hint_text: "Notification number"
+                    input_filter: "int"
+
+                PrimaryButton:
+                    text: "Mark as Read"
+                    size_hint_x: 0.45
+                    on_release: root.mark_read()
+
+
+<ReportIncidentScreen>:
+    name: "report_incident"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_color: 0, 0, 0, 0
+                font_size: "25sp"
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "user_dashboard"
+            Label:
+                text: "Report an Incident"
+                bold: True
+                font_size: "20sp"
+            Widget:
+                size_hint_x: None
+                width: dp(48)
+        AppScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            scroll_type: ["bars", "content"]
+            bar_width: dp(8)
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(22)
+                spacing: dp(10)
+                Label:
+                    text: "Incident Information"
+                    size_hint_y: None
+                    height: dp(45)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "23sp"
+                Label:
+                    text: "Incident type"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+                Spinner:
+                    id: report_type
+                    text: "Theft"
+                    values: ("Theft", "Assault", "Harassment", "Vandalism", "Suspicious Activity", "Lost Property", "Other")
+                    size_hint_y: None
+                    height: dp(50)
+                Label:
+                    text: "Campus location"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+                Spinner:
+                    id: report_location
+                    text: "Loading locations..."
+                    values: root.location_values
+                    size_hint_y: None
+                    height: dp(50)
+                Label:
+                    text: "Severity"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+                Spinner:
+                    id: report_severity
+                    text: "MEDIUM"
+                    values: ("LOW", "MEDIUM", "HIGH", "CRITICAL")
+                    size_hint_y: None
+                    height: dp(50)
+                Label:
+                    text: "Description"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+                TextInput:
+                    id: report_description
+                    hint_text: "Explain what happened"
+                    size_hint_y: None
+                    height: dp(130)
+                    multiline: True
+                    padding: dp(12)
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(50) if self.text else 0
+                    color: (0.1, 0.5, 0.25, 1) if "successfully" in self.text else (0.75, 0.08, 0.14, 1)
+                    text_size: self.width, None
+                    halign: "center"
+                PrimaryButton:
+                    text: "Submitting..." if root.loading else "Submit Incident Report"
+                    disabled: root.loading
+                    on_release: root.submit_report()
+
+
+<MyReportsScreen>:
+    name: "my_reports"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_color: 0, 0, 0, 0
+                font_size: "25sp"
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "user_dashboard"
+            Label:
+                text: "My Reports"
+                bold: True
+                font_size: "20sp"
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(75)
+                on_release: root.refresh_reports()
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(8)
+            Label:
+                text: root.status_message
+                size_hint_y: None
+                height: dp(35) if self.text else 0
+                color: 0.75, 0.08, 0.14, 1
+            AppScrollView:
+                Label:
+                    text: root.reports_text
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(30)
+                    text_size: self.width, None
+                    halign: "left"
+                    valign: "top"
+                    color: 0.08, 0.16, 0.25, 1
+
+
+<EmergencyContactsScreen>:
+    name: "emergency_contacts"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_color: 0, 0, 0, 0
+                font_size: "25sp"
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "user_dashboard"
+            Label:
+                text: "Emergency Contacts"
+                bold: True
+                font_size: "20sp"
+            Widget:
+                size_hint_x: None
+                width: dp(48)
+        AppScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            scroll_type: ["bars", "content"]
+            bar_width: dp(8)
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(20)
+                spacing: dp(12)
+                Label:
+                    text: "UFH Alice Campus"
+                    size_hint_y: None
+                    height: dp(42)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "21sp"
+                DashboardCard:
+                    text: "Campus Security  |  040 602 2243"
+                    on_release: root.call_number("0406022243")
+                DashboardCard:
+                    text: "Campus Security Mobile  |  082 659 6779"
+                    on_release: root.call_number("0826596779")
+                DashboardCard:
+                    text: "Gender-Based Violence  |  072 864 5864"
+                    on_release: root.call_number("0728645864")
+                Label:
+                    text: "National Emergency Services"
+                    size_hint_y: None
+                    height: dp(42)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "19sp"
+                DashboardCard:
+                    text: "Mobile Emergency  |  112"
+                    on_release: root.call_number("112")
+                DashboardCard:
+                    text: "Police Flying Squad  |  10111"
+                    on_release: root.call_number("10111")
+                DashboardCard:
+                    text: "Government Ambulance  |  10177"
+                    on_release: root.call_number("10177")
+
+                Label:
+                    text: "My Emergency Contacts"
+                    size_hint_y: None
+                    height: dp(45)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "20sp"
+
+                Label:
+                    text: "Add people you trust, such as a parent, guardian or friend."
+                    size_hint_y: None
+                    height: dp(38)
+                    color: 0.35, 0.4, 0.48, 1
+                    text_size: self.width, None
+                    halign: "center"
+
+                FormInput:
+                    id: contact_name
+                    hint_text: "Contact name"
+
+                FormInput:
+                    id: contact_phone
+                    hint_text: "Phone number"
+
+                PrimaryButton:
+                    text: "Save Emergency Contact"
+                    on_release: root.save_personal_contact()
+
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: dp(45) if self.text else 0
+                    color: (0.1, 0.5, 0.25, 1) if "saved" in self.text or "cleared" in self.text else (0.75, 0.08, 0.14, 1)
+                    text_size: self.width, None
+                    halign: "center"
+
+                Label:
+                    text: root.personal_contacts_text
+                    size_hint_y: None
+                    height: max(dp(50), self.texture_size[1] + dp(20))
+                    color: 0.08, 0.16, 0.25, 1
+                    text_size: self.width, None
+                    halign: "left"
+                    valign: "middle"
+
+                Spinner:
+                    id: personal_call_number
+                    text: "Select a saved contact"
+                    values: root.personal_contact_values
+                    size_hint_y: None
+                    height: dp(50)
+
+                OutlineButton:
+                    text: "Call Personal Contact"
+                    on_release: root.call_personal_contact()
+
+                OutlineButton:
+                    text: "Clear Personal Contacts"
+                    on_release: root.clear_personal_contacts()
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(25)
+
+
+<UserNotificationsScreen>:
+    name: "user_notifications"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint_y: None
+            height: dp(68)
+            padding: dp(12), dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0.025, 0.176, 0.388, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Button:
+                text: "<"
+                size_hint_x: None
+                width: dp(48)
+                background_color: 0, 0, 0, 0
+                font_size: "25sp"
+                on_release:
+                    app.root.transition.direction = "right"
+                    app.root.current = "user_dashboard"
+            Label:
+                text: "Notifications"
+                bold: True
+                font_size: "20sp"
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(75)
+                on_release: root.refresh_notifications()
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(8)
+            Label:
+                text: root.status_message
+                size_hint_y: None
+                height: dp(35) if self.text else 0
+                color: 0.75, 0.08, 0.14, 1
+            AppScrollView:
+                Label:
+                    text: root.notifications_text
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(30)
+                    text_size: self.width, None
+                    halign: "left"
+                    valign: "top"
+                    color: 0.08, 0.16, 0.25, 1
+            BoxLayout:
+                size_hint_y: None
+                height: dp(52)
+                spacing: dp(8)
+                FormInput:
+                    id: notification_id
+                    hint_text: "Notification number"
+                    input_filter: "int"
+                PrimaryButton:
+                    text: "Mark as Read"
+                    size_hint_x: 0.45
+                    on_release: root.mark_read()
+
+
+ScreenManager:
+    LoginScreen:
+    RegisterScreen:
+    UserDashboardScreen:
+    OfficerDashboardScreen:
+    EmergencyScreen:
+    OfficerAlertsScreen:
+    OfficerIncidentsScreen:
+    OfficerNotificationsScreen:
+    ReportIncidentScreen:
+    MyReportsScreen:
+    EmergencyContactsScreen:
+    UserNotificationsScreen:

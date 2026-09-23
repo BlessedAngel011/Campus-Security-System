@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UFH Campus Security | Administrator</title>
+  <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="workloads.css">
+</head>
+<body>
+  <section id="loginPage" class="login-page">
+    <div class="login-visual">
+      <div class="visual-shade"></div>
+      <div class="brand">
+        <img src="https://www.ufh.ac.za/wp-content/uploads/2024/08/Frame-427321864.png" alt="University of Fort Hare">
+        <span>Campus Security</span>
+      </div>
+      <div class="hero-copy">
+        <span class="eyebrow">Administrator portal</span>
+        <h1>Protecting our campus community.</h1>
+        <p>Monitor emergencies, coordinate security officers and manage incidents from one secure workspace.</p>
+      </div>
+      <div class="photo-credit">Alice Campus · University of Fort Hare</div>
+    </div>
+    <div class="login-panel">
+      <form id="detailsForm" class="login-card">
+        <div class="mobile-logo"><img src="https://www.ufh.ac.za/wp-content/uploads/2024/08/Frame-427321864.png" alt="UFH"></div>
+        <span class="eyebrow blue">Secure access</span>
+        <h2>Administrator sign in</h2>
+        <p class="muted">Use the employee number and university email registered in the administrators table.</p>
+        <label>Employee number<input id="employeeNumber" required autocomplete="username" placeholder="e.g. ADM001"></label>
+        <label>University email<input id="universityEmail" required type="email" autocomplete="email" placeholder="name@ufh.ac.za"></label>
+        <button class="primary" type="submit">Send verification code</button>
+        <p id="loginMessage" class="message" aria-live="polite"></p>
+      </form>
+      <form id="codeForm" class="login-card hidden">
+        <button id="backToDetails" class="text-button" type="button">← Change details</button>
+        <span class="eyebrow blue">Identity verification</span>
+        <h2>Enter your 6-digit code</h2>
+        <p class="muted">The code expires after 10 minutes.</p>
+        <label>Verification code<input id="verificationCode" required maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="000000"></label>
+        <button class="primary" type="submit">Open administrator portal</button>
+        <p id="codeMessage" class="message" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <section id="dashboardPage" class="app hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><img src="https://www.ufh.ac.za/wp-content/uploads/2024/08/Frame-427321864.png" alt="UFH"><div><b>Campus Security</b><small>Administrator</small></div></div>
+      <nav>
+        <button class="nav-item active" data-view="overview"><span>⌂</span>Overview</button>
+        <button class="nav-item" data-view="emergencies"><span>!</span>Emergencies<b id="emergencyBadge" class="badge">0</b></button>
+        <button class="nav-item" data-view="incidents"><span>◇</span>Incident reports</button>
+        <button class="nav-item" data-view="officers"><span>♜</span>Security officers</button>
+        <button class="nav-item" data-view="users"><span>◎</span>Users</button>
+      </nav>
+      <div class="sidebar-footer"><div class="admin-avatar" id="adminInitials">AD</div><div><b id="adminName">Administrator</b><small id="adminCampus">UFH</small></div><button id="logoutButton" title="Sign out">↗</button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><button id="menuButton" class="menu-button">☰</button><div><small id="todayLabel"></small><h2 id="pageTitle">Security overview</h2></div><button id="refreshButton" class="secondary">Refresh data</button></header>
+      <div id="globalMessage" class="global-message hidden"></div>
+
+      <section id="overviewView" class="view active">
+        <div class="welcome"><div><span class="eyebrow">Live command centre</span><h1 id="welcomeName">Good day, Administrator</h1><p>Here is the current safety picture across the UFH campus community.</p></div><div class="pulse"><i></i>System online</div></div>
+        <div class="stats">
+          <article><div class="stat-icon red">!</div><div><small>Active emergencies</small><strong id="statEmergencies">0</strong><span>Needs attention</span></div></article>
+          <article><div class="stat-icon amber">◇</div><div><small>Open incidents</small><strong id="statIncidents">0</strong><span>New reports</span></div></article>
+          <article><div class="stat-icon green">♜</div><div><small>Security officers</small><strong id="statOfficers">0</strong><span>Registered team</span></div></article>
+          <article><div class="stat-icon blue">◎</div><div><small>System users</small><strong id="statUsers">0</strong><span>Students and staff</span></div></article>
+        </div>
+        <div class="overview-grid">
+          <article class="panel"><div class="panel-head"><div><h3>Recent emergencies</h3><p>Latest emergency activations</p></div><button class="link-button" data-open="emergencies">View all</button></div><div id="recentEmergencies" class="activity-list"></div></article>
+          <article class="campus-card"><div class="campus-shade"></div><div><span>UFH Protection Services</span><h3>Safety across every campus</h3><p>Alice · Bhisho · East London</p></div></article>
+        </div>
+      </section>
+
+      <section id="emergenciesView" class="view"><div class="section-head"><div><h1>Emergency alerts</h1><p>Monitor alerts sent by students and staff.</p></div></div><div class="panel table-panel"><div class="toolbar"><input data-search="emergencyTable" placeholder="Search emergencies..."><select id="emergencyFilter"><option value="">All statuses</option><option>SENT</option><option>ACKNOWLEDGED</option><option>RESPONDING</option><option>RESOLVED</option><option>FALSE_ALERT</option></select></div><div class="table-wrap"><table id="emergencyTable"><thead><tr><th>ID</th><th>User</th><th>Contact</th><th>Location</th><th>Status</th><th>Created</th></tr></thead><tbody></tbody></table></div></div></section>
+      <section id="incidentsView" class="view"><div class="section-head"><div><h1>Incident reports</h1><p>Review all safety reports and their progress.</p></div></div><div class="panel table-panel"><div class="toolbar"><input data-search="incidentTable" placeholder="Search incidents..."></div><div class="table-wrap"><table id="incidentTable"><thead><tr><th>ID</th><th>Type</th><th>Reporter</th><th>Campus location</th><th>Severity</th><th>Status</th><th>Reported</th></tr></thead><tbody></tbody></table></div></div></section>
+        <section id="officersView" class="view">
+
+            <div class="section-head">
+                <div>
+                    <h1>Security officers</h1>
+
+                    <p>
+                        Register officers and see the emergency and
+                        incident cases each officer is handling.
+                    </p>
+                </div>
+
+                <button
+                        id="addOfficerButton"
+                        class="primary compact">
+                    + Add security officer
+                </button>
+            </div>
+
+            <div
+                    id="officerCards"
+                    class="officer-grid">
+            </div>
+
+        </section>
+      <section id="usersView" class="view"><div class="section-head"><div><h1>Students and staff</h1><p>View registered mobile application users.</p></div></div><div class="panel table-panel"><div class="toolbar"><input data-search="userTable" placeholder="Search users..."></div><div class="table-wrap"><table id="userTable"><thead><tr><th>User</th><th>Student/staff no.</th><th>Role</th><th>Campus</th><th>Phone</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div></div></section>
+    </main>
+  </section>
+
+  <div id="officerModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><div><h2>Add security officer</h2><p>Creates the officer profile and mobile login account.</p></div><button id="closeModal">×</button></div><form id="officerForm"><div class="form-grid"><label>First name<input name="firstName" required></label><label>Last name<input name="lastName" required></label><label>Employee number<input name="employeeNumber" required></label><label>Phone number<input name="phoneNumber" placeholder="082 000 0000"></label><label>Campus<select name="campusId" id="campusSelect" required></select></label><label>Temporary password<input name="password" type="password" minlength="6" required></label></div><p id="officerMessage" class="message"></p><div class="modal-actions"><button type="button" id="cancelModal" class="secondary">Cancel</button><button type="submit" class="primary compact">Create officer account</button></div></form></div></div>
+  <div id="workloadModal" class="modal hidden">
+
+      <div class="modal-card workload-modal-card">
+
+          <div class="modal-head">
+
+              <div>
+                  <h2 id="workloadOfficerName">
+                      Officer workload
+                  </h2>
+
+                  <p id="workloadOfficerDetails"></p>
+              </div>
+
+              <button
+                      id="closeWorkloadModal"
+                      type="button">
+                  ×
+              </button>
+
+          </div>
+
+          <div
+                  id="workloadCaseList"
+                  class="workload-case-list">
+          </div>
+
+          <div class="modal-actions">
+
+              <button
+                      id="closeWorkloadButton"
+                      type="button"
+                      class="secondary">
+                  Close
+              </button>
+
+          </div>
+
+      </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

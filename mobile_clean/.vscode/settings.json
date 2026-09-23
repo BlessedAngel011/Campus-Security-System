@@ -1,0 +1,17 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "warning",
+        "reportMissingModuleSource": "warning",
+        "reportMissingTypeStubs": "none",
+        "reportUnknownVariableType": "none",
+        "reportUnknownMemberType": "none",
+        "reportUnknownArgumentType": "none",
+        "reportUnknownParameterType": "none",
+        "reportOptionalMemberAccess": "none",
+        "reportOptionalCall": "none",
+        "reportAttributeAccessIssue": "none"
+    }
+}
