@@ -19,7 +19,11 @@ public class CorsConfig {
         // Development frontend origins.
         // Change/add the frontend address when the UI is created.
         configuration.setAllowedOriginPatterns(
-                List.of("http://localhost:*"));
+                List.of(
+                        "http://localhost:*",
+                        "http://127.0.0.1:*",
+                        "https://campus-security-system-production-925d.up.railway.app"
+                ));
 
         configuration.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
