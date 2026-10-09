@@ -27,6 +27,9 @@ public class Administrator {
     @Column(name = "university_email", nullable = false, unique = true)
     private String universityEmail;
 
+    @Column(name = "personal_email", unique = true)
+    private String personalEmail;
+
     @Column(name = "phone_number")
     private String phoneNumber;
 
@@ -84,6 +87,10 @@ public class Administrator {
     public void setUniversityEmail(String universityEmail) {
         this.universityEmail = universityEmail;
     }
+
+    public String getPersonalEmail() { return personalEmail; }
+
+    public void setPersonalEmail(String personalEmail) { this.personalEmail = personalEmail; }
 
     public String getPhoneNumber() {
         return phoneNumber;

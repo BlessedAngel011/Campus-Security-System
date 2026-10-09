@@ -5,7 +5,7 @@ package.domain = za.ac.ufh
 source.dir = .
 source.include_exts = py,kv,png,jpg,jpeg,webp,json,atlas,ttf
 version = 1.0.1
-requirements = python3,kivy==2.3.1,requests,python-dotenv,plyer
+requirements = python3==3.11.9,hostpython3==3.11.9,kivy==2.3.1,requests,python-dotenv,plyer,pyjnius
 orientation = portrait
 fullscreen = 0
 
@@ -15,7 +15,7 @@ android.ndk_api = 23
 android.accept_sdk_license = True
 android.allow_cleartext = True
 android.permissions = android.permission.INTERNET,android.permission.ACCESS_FINE_LOCATION,android.permission.ACCESS_COARSE_LOCATION,android.permission.READ_MEDIA_IMAGES
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 [buildozer]
 log_level = 2

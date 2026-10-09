@@ -23,6 +23,8 @@ public class UserController {
             @RequestParam String firstName,
             @RequestParam String lastName,
             @RequestParam(required = false) String phoneNumber,
+            @RequestParam String email,
+            @RequestParam String personalEmail,
             @RequestParam String password,
             @RequestParam String roleName,
             @RequestParam Integer campusId) {
@@ -31,6 +33,8 @@ public class UserController {
 
             User user = userService.registerUser(
                     studentStaffNumber,
+                    email,
+                    personalEmail,
                     password,
                     firstName,
                     lastName,
@@ -47,6 +51,30 @@ public class UserController {
                     .badRequest()
                     .body(e.getMessage());
         }
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String email, @RequestParam String code) {
+        try { userService.verifyRegistration(email, code); return ResponseEntity.ok(java.util.Map.of("message", "Email verified successfully.")); }
+        catch (RuntimeException e) { return ResponseEntity.badRequest().body(e.getMessage()); }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestParam String email) {
+        try { userService.resendRegistrationCode(email); return ResponseEntity.ok(java.util.Map.of("message", "A new verification code has been sent.")); }
+        catch (RuntimeException e) { return ResponseEntity.badRequest().body(e.getMessage()); }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        try { userService.requestPasswordReset(email); } catch (RuntimeException ignored) { }
+        return ResponseEntity.ok(java.util.Map.of("message", "If this personal email is registered, a password reset code has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String code, @RequestParam String newPassword) {
+        try { userService.resetPassword(email, code, newPassword); return ResponseEntity.ok(java.util.Map.of("message", "Password reset successfully.")); }
+        catch (RuntimeException e) { return ResponseEntity.badRequest().body(e.getMessage()); }
     }
 
     @PostMapping("/login")

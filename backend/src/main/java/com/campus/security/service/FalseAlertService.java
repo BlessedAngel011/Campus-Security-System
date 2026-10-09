@@ -73,7 +73,7 @@ public class FalseAlertService {
         currentCount++;
         user.setFalseAlertCount(currentCount);
 
-        if (currentCount >= 3) {
+        if (currentCount > 3) {
             user.setEmergencyButtonEnabled(false);
             sendDisabledNotification(user);
         }
@@ -96,7 +96,7 @@ public class FalseAlertService {
                 "EMERGENCY_BUTTON_DISABLED");
         notification.setMessage(
                 "Your emergency button has been disabled because "
-                        + "you submitted false alerts 3 times.");
+                        + "more than 3 emergency alerts were confirmed false.");
         notification.setRead(false);
         notification.setCreatedAt(LocalDateTime.now());
 

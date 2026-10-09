@@ -10,15 +10,31 @@ import java.util.List;
 public interface IncidentReportRepository
         extends JpaRepository<IncidentReport, Integer> {
 
-    List<IncidentReport> findByUser(User user);
+    List<IncidentReport> findByUser(
+            User user
+    );
+
+    List<IncidentReport> findByUserOrderByReportedAtDesc(
+            User user
+    );
 
     List<IncidentReport> findByIncidentStatus(
             IncidentReport.IncidentStatus status
     );
 
+    List<IncidentReport> findByIncidentStatusAndAssignedOfficerIsNull(
+            IncidentReport.IncidentStatus status
+    );
+
+    List<IncidentReport>
+    findByIncidentStatusNotInOrderByReportedAtDesc(
+            List<IncidentReport.IncidentStatus> statuses
+    );
+
     List<IncidentReport> findAllByOrderByReportedAtDesc();
 
-    List<IncidentReport> findByAssignedOfficerOrderByReportedAtDesc(
+    List<IncidentReport>
+    findByAssignedOfficerOrderByReportedAtDesc(
             SecurityOfficer assignedOfficer
     );
 }

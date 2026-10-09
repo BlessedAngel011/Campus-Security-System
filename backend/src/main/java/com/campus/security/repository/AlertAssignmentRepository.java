@@ -25,6 +25,8 @@ public interface AlertAssignmentRepository
             SecurityOfficer officer
     );
 
+    Optional<AlertAssignment> findTopByEmergencyAlertOrderByAssignedAtDesc(EmergencyAlert emergencyAlert);
+
     Optional<AlertAssignment> findByEmergencyAlertAndOfficer(
             EmergencyAlert emergencyAlert,
             SecurityOfficer officer

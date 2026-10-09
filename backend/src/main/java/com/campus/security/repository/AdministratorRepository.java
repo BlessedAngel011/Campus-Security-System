@@ -9,6 +9,7 @@ public interface AdministratorRepository
         extends JpaRepository<Administrator, Integer> {
 
     Optional<Administrator> findByUniversityEmail(String universityEmail);
+    Optional<Administrator> findByPersonalEmail(String personalEmail);
 
     Optional<Administrator> findByEmployeeNumber(String employeeNumber);
 }

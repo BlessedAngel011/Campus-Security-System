@@ -57,8 +57,7 @@ public class AdminController {
                     );
 
             return ResponseEntity.ok(Map.of(
-                    "message", "Verification code created.",
-                    "verificationCode", code.getVerificationCode(),
+                    "message", "Verification code sent to the administrator email.",
                     "expiresAt", code.getExpiresAt()));
 
         } catch (RuntimeException e) {
@@ -115,6 +114,31 @@ public class AdminController {
 
     @GetMapping("/officers")
     public ResponseEntity<?> officers() { return ResponseEntity.ok(adminService.getOfficers()); }
+
+    @GetMapping("/administrators")
+    public ResponseEntity<?> administrators() {
+        return ResponseEntity.ok(adminService.getAdministrators());
+    }
+
+    @PostMapping("/administrators")
+    public ResponseEntity<?> createAdministrator(
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String employeeNumber,
+            @RequestParam String universityEmail,
+            @RequestParam String personalEmail,
+            @RequestParam(required=false) String phoneNumber,
+            @RequestParam Integer campusId) {
+        try {
+            Administrator admin = adminService.createAdministrator(
+                    firstName, lastName, employeeNumber, universityEmail, personalEmail, phoneNumber, campusId);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Administrator created. A verification code was sent to the administrator personal Gmail address.",
+                    "administrator", admin));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/officers")
     public ResponseEntity<?> createOfficer(@RequestParam String firstName,

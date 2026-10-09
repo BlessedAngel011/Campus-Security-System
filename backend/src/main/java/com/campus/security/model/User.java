@@ -39,6 +39,12 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "personal_email", unique = true)
+    private String personalEmail;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+
     // Phone number
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -178,6 +184,12 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getPersonalEmail() { return personalEmail; }
+    public void setPersonalEmail(String personalEmail) { this.personalEmail = personalEmail; }
+
+    public Boolean getEmailVerified() { return emailVerified; }
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
 
 
     // =========================

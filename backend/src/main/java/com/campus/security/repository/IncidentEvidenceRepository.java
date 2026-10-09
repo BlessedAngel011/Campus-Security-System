@@ -10,5 +10,6 @@ public interface IncidentEvidenceRepository
         extends JpaRepository<IncidentEvidence, Integer> {
 
     List<IncidentEvidence> findByIncidentReport(
-            IncidentReport incidentReport);
+            IncidentReport incidentReport
+    );
 }

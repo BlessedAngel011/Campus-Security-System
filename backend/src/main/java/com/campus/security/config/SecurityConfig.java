@@ -22,107 +22,232 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            SessionAuthenticationFilter sessionAuthenticationFilter)
+            SessionAuthenticationFilter authenticationFilter)
             throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
-                .addFilterBefore(
-                        sessionAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(auth -> auth
 
-                        // Public registration/login
+                .cors(cors -> {
+                })
+
+                .addFilterBefore(
+                        authenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
+                .authorizeHttpRequests(authorize -> authorize
+
+                        /*
+                         * Public mobile login and registration.
+                         */
                         .requestMatchers(
                                 "/api/users/register",
-                                "/api/users/login").permitAll()
+                                "/api/users/login",
+                                "/api/users/verify-email",
+                                "/api/users/resend-verification",
+                                "/api/users/forgot-password",
+                                "/api/users/reset-password"
+                        ).permitAll()
 
-                        // Public administrator website files. Authentication is
-                        // still required by the protected /api/admin/** routes.
+                        /*
+                         * Public administrator website resources.
+                         */
                         .requestMatchers(
                                 "/",
                                 "/admin",
                                 "/admin/",
                                 "/admin/**",
                                 "/favicon.ico",
-                                "/error").permitAll()
+                                "/error"
+                        ).permitAll()
 
-                        // Administrator verification is done before
-                        // the protected admin area.
+                        /*
+                         * Public administrator verification.
+                         */
                         .requestMatchers(
                                 "/api/admin/verify-details",
                                 "/api/admin/send-code",
-                                "/api/admin/confirm-code").permitAll()
+                                "/api/admin/confirm-code"
+                        ).permitAll()
 
-                        // Admin management
-                        .requestMatchers("/api/admin/**")
-                        .hasRole("ADMIN")
-
-                        // An administrator can add/manage officers.
-                        // A security officer can manage their own operational data.
+                        /*
+                         * Protected administrator API.
+                         */
                         .requestMatchers(
-                                "/api/officers",
-                                "/api/officers/verify/**")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
+                                "/api/admin/**"
+                        ).hasRole("ADMIN")
 
+                        /*
+                         * Public officer verification used when
+                         * creating or verifying an officer account.
+                         */
                         .requestMatchers(
-                                "/api/officers/*/availability",
-                                "/api/officers/*/location",
-                                "/api/officers/available",
+                                "/api/officers/verify/**"
+                        ).permitAll()
+
+                        /*
+                         * Officer profile, availability, GPS and
+                         * emergency assignments.
+                         *
+                         * Older SECURITY and OFFICER roles are
+                         * accepted for existing database records.
+                         */
+                        .requestMatchers(
                                 "/api/officers/me",
-                                "/api/officers/me/**")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
-
-                        // False-alert review is an admin function.
-                        .requestMatchers("/api/false-alerts/**")
-                        .hasRole("ADMIN")
-
-                        // Campus locations are used by the mobile incident form.
-                        .requestMatchers("/api/locations/**", "/api/locations")
-                        .hasAnyRole(
+                                "/api/officers/me/**"
+                        ).hasAnyRole(
                                 "ADMIN",
                                 "SECURITY_OFFICER",
-                                "STUDENT",
-                                "STAFF")
+                                "SECURITY",
+                                "OFFICER"
+                        )
 
-                        // Incident creation/viewing belongs to authenticated users.
-                        // Status changes and resolution are officer/admin functions.
+                        /*
+                         * Administrator and officer management
+                         * endpoints.
+                         */
+                        .requestMatchers(
+                                "/api/officers",
+                                "/api/officers/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER"
+                        )
+
+                        /*
+                         * False-alert management is only available
+                         * to administrators.
+                         */
+                        .requestMatchers(
+                                "/api/false-alerts/**"
+                        ).hasRole("ADMIN")
+
+                        /*
+                         * Campus locations can be viewed by all
+                         * authenticated application roles.
+                         */
+                        .requestMatchers(
+                                "/api/locations",
+                                "/api/locations/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER",
+                                "STUDENT",
+                                "STAFF"
+                        )
+
+                        /*
+                         * Unresolved incident reports for officers.
+                         */
+                        .requestMatchers(
+                                "/api/incidents/officer/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER"
+                        )
+
+                        /*
+                         * Incident status, proof and resolution
+                         * operations.
+                         */
                         .requestMatchers(
                                 "/api/incidents/*/status",
                                 "/api/incidents/*/resolve",
-                                "/api/incidents/*/evidence")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
+                                "/api/incidents/*/evidence",
+                                "/api/incidents/*/evidence/**",
+                                "/api/incidents/status/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER"
+                        )
 
+                        /*
+                         * Users can report incidents and retrieve
+                         * their own reports.
+                         */
                         .requestMatchers(
                                 "/api/incidents",
-                                "/api/incidents/my-reports")
-                        .hasAnyRole(
+                                "/api/incidents/my-reports"
+                        ).hasAnyRole(
                                 "ADMIN",
                                 "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER",
                                 "STUDENT",
-                                "STAFF")
+                                "STAFF"
+                        )
 
-                        .requestMatchers("/api/incidents/status/**")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
-
-                        .requestMatchers("/api/incidents/officer/**")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
-
-                        .requestMatchers("/api/notifications/officer/**")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
-
-                        // Emergency creation is available to authenticated users.
-                        .requestMatchers("/api/emergency/alert")
-                        .hasAnyRole(
+                        /*
+                         * Officer notification endpoints.
+                         */
+                        .requestMatchers(
+                                "/api/notifications/officer/**"
+                        ).hasAnyRole(
                                 "ADMIN",
                                 "SECURITY_OFFICER",
-                                "STUDENT",
-                                "STAFF")
+                                "SECURITY",
+                                "OFFICER"
+                        )
 
-                        // Emergency status changes are operational functions.
-                        .requestMatchers("/api/emergency/*/status")
-                        .hasAnyRole("ADMIN", "SECURITY_OFFICER")
+                        /*
+                         * User notification endpoints.
+                         */
+                        .requestMatchers(
+                                "/api/notifications/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER",
+                                "STUDENT",
+                                "STAFF"
+                        )
+
+                        /*
+                         * Students and staff can send an emergency.
+                         */
+                        .requestMatchers(
+                                "/api/emergency/alert"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER",
+                                "STUDENT",
+                                "STAFF"
+                        )
+
+                        /*
+                         * Officers can update emergencies assigned
+                         * to them.
+                         */
+                        .requestMatchers(
+                                "/api/emergency/*/status",
+                                "/api/emergency/officer/**"
+                        ).hasAnyRole(
+                                "ADMIN",
+                                "SECURITY_OFFICER",
+                                "SECURITY",
+                                "OFFICER"
+                        )
+
+                        /*
+                         * Logout, current user and any remaining
+                         * API require authentication.
+                         */
+                        .requestMatchers(
+                                "/api/users/logout",
+                                "/api/users/me"
+                        ).authenticated()
 
                         .anyRequest().authenticated()
                 );

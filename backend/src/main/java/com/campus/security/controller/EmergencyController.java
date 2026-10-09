@@ -17,13 +17,17 @@ public class EmergencyController {
     public EmergencyController(
             EmergencyService emergencyService,
             UserService userService) {
+
         this.emergencyService = emergencyService;
         this.userService = userService;
     }
 
-    private User getAuthenticatedUser(String authorization) {
+    private User getAuthenticatedUser(
+            String authorization) {
+
         if (authorization == null
                 || !authorization.startsWith("Bearer ")) {
+
             throw new RuntimeException(
                     "Authorization token is required.");
         }
@@ -34,23 +38,48 @@ public class EmergencyController {
 
     @PostMapping("/alert")
     public ResponseEntity<?> createEmergency(
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader("Authorization")
+            String authorization,
+
             @RequestParam Double latitude,
+
             @RequestParam Double longitude,
-            @RequestParam(required = false) String emergencyType,
-            @RequestParam(required = false) String description) {
+
+            @RequestParam(required = false)
+            String emergencyType,
+
+            @RequestParam(required = false)
+            String description) {
 
         try {
-            User user = getAuthenticatedUser(authorization);
+
+            User user =
+                    getAuthenticatedUser(
+                            authorization);
 
             return ResponseEntity.ok(
-                    emergencyService.createEmergencyAlert(
-                            user,
-                            latitude,
-                            longitude,
-                            emergencyType,
-                            description));
+                    emergencyService
+                            .createEmergencyAlert(
+                                    user,
+                                    latitude,
+                                    longitude,
+                                    emergencyType,
+                                    description));
 
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/officer/available")
+    public ResponseEntity<?> officerAvailable(
+            @RequestHeader("Authorization") String authorization) {
+        try {
+            User user = getAuthenticatedUser(authorization);
+            return ResponseEntity.ok(emergencyService.getOfficerActiveEmergencies(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -58,31 +87,78 @@ public class EmergencyController {
 
     @GetMapping("/{emergencyId}")
     public ResponseEntity<?> getEmergency(
-            @RequestHeader("Authorization") String authorization,
+            @RequestHeader("Authorization")
+            String authorization,
+
             @PathVariable Integer emergencyId) {
 
         try {
-            User user = getAuthenticatedUser(authorization);
+
+            User user =
+                    getAuthenticatedUser(
+                            authorization);
 
             return ResponseEntity.ok(
                     emergencyService.getEmergency(
-                            emergencyId, user));
+                            emergencyId,
+                            user));
 
         } catch (RuntimeException e) {
-            return ResponseEntity.status(403).body(e.getMessage());
+
+            return ResponseEntity
+                    .status(403)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{emergencyId}/location")
+    public ResponseEntity<?> updateEmergencyLocation(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable Integer emergencyId,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude) {
+        try {
+            User user = getAuthenticatedUser(authorization);
+            return ResponseEntity.ok(emergencyService.updateEmergencyLocation(
+                    emergencyId, user, latitude, longitude));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PutMapping("/{emergencyId}/status")
     public ResponseEntity<?> updateStatus(
+            @RequestHeader("Authorization") String authorization,
             @PathVariable Integer emergencyId,
-            @RequestParam EmergencyAlert.AlertStatus status) {
+
+            @RequestParam
+            EmergencyAlert.AlertStatus status) {
 
         try {
+
+            User user = getAuthenticatedUser(authorization);
             return ResponseEntity.ok(
                     emergencyService.updateEmergencyStatus(
-                            emergencyId, status));
+                            emergencyId, status, user));
 
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{emergencyId}/resolve-review")
+    public ResponseEntity<?> resolveWithReview(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable Integer emergencyId,
+            @RequestParam boolean falseAlert,
+            @RequestParam String review) {
+        try {
+            User user = getAuthenticatedUser(authorization);
+            return ResponseEntity.ok(emergencyService.resolveEmergencyWithReview(
+                    emergencyId, user, falseAlert, review));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

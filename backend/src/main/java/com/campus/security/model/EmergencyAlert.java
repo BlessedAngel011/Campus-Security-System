@@ -42,6 +42,15 @@ public class EmergencyAlert {
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 
+    @Column(name = "officer_review", length = 2000)
+    private String officerReview;
+
+    @Column(name = "confirmed_false")
+    private Boolean confirmedFalse = false;
+
+    @Transient
+    private SecurityOfficer assignedOfficer;
+
     public EmergencyAlert() {
     }
 
@@ -124,6 +133,14 @@ public class EmergencyAlert {
     public void setResolvedAt(LocalDateTime resolvedAt) {
         this.resolvedAt = resolvedAt;
     }
+
+    public String getOfficerReview() { return officerReview; }
+    public void setOfficerReview(String officerReview) { this.officerReview = officerReview; }
+    public Boolean getConfirmedFalse() { return confirmedFalse; }
+    public void setConfirmedFalse(Boolean confirmedFalse) { this.confirmedFalse = confirmedFalse; }
+
+    public SecurityOfficer getAssignedOfficer() { return assignedOfficer; }
+    public void setAssignedOfficer(SecurityOfficer assignedOfficer) { this.assignedOfficer = assignedOfficer; }
 
     public enum AlertStatus {
         SENT,

@@ -1,0 +1,31 @@
+# secrets
+.env
+*.env
+!.env.example
+backend/src/main/resources/application-local.properties
+
+# Java
+backend/target/
+*.log
+
+# Android / Python
+.buildozer/
+bin/
+__pycache__/
+*.pyc
+*.apk
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local backend copies / debug output
+backend/backend/
+backend/.idea_backup/
+backend/backend-error.txt
+
+# Firebase credentials
+firebase-service-account.json
+**/firebase-service-account.json

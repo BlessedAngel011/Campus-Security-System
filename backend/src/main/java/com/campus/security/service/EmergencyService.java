@@ -10,6 +10,9 @@ import com.campus.security.repository.EmergencyAlertRepository;
 import com.campus.security.repository.NotificationRepository;
 import com.campus.security.repository.OfficerLocationRepository;
 import com.campus.security.repository.SecurityOfficerRepository;
+import com.campus.security.repository.FalseAlertRepository;
+import com.campus.security.repository.UserRepository;
+import com.campus.security.model.FalseAlert;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,19 +26,25 @@ public class EmergencyService {
     private final SecurityOfficerRepository officerRepository;
     private final OfficerLocationRepository officerLocationRepository;
     private final NotificationRepository notificationRepository;
+    private final FalseAlertRepository falseAlertRepository;
+    private final UserRepository userRepository;
 
     public EmergencyService(
             EmergencyAlertRepository emergencyRepository,
             AlertAssignmentRepository assignmentRepository,
             SecurityOfficerRepository officerRepository,
             OfficerLocationRepository officerLocationRepository,
-            NotificationRepository notificationRepository) {
+            NotificationRepository notificationRepository,
+            FalseAlertRepository falseAlertRepository,
+            UserRepository userRepository) {
 
         this.emergencyRepository = emergencyRepository;
         this.assignmentRepository = assignmentRepository;
         this.officerRepository = officerRepository;
         this.officerLocationRepository = officerLocationRepository;
         this.notificationRepository = notificationRepository;
+        this.falseAlertRepository = falseAlertRepository;
+        this.userRepository = userRepository;
     }
 
     public EmergencyAlert createEmergencyAlert(
@@ -50,7 +59,7 @@ public class EmergencyService {
         if (!Boolean.TRUE.equals(
                 user.getEmergencyButtonEnabled())) {
             throw new RuntimeException(
-                    "Emergency button is disabled because you submitted false alerts 3 times.");
+                    "Emergency SOS access is suspended because more than 3 emergency alerts were confirmed false. Contact Campus Security/Admin.");
         }
 
         EmergencyAlert emergency = new EmergencyAlert();
@@ -70,7 +79,7 @@ public class EmergencyService {
 
         SecurityOfficer nearestOfficer =
                 findNearestAvailableOfficer(
-                        latitude, longitude);
+                        latitude, longitude, user);
 
         if (nearestOfficer != null) {
             assignEmergency(
@@ -97,7 +106,8 @@ public class EmergencyService {
 
     public SecurityOfficer findNearestAvailableOfficer(
             Double userLatitude,
-            Double userLongitude) {
+            Double userLongitude,
+            User emergencyUser) {
 
         List<SecurityOfficer> officers =
                 officerRepository.findByAvailabilityStatus(
@@ -107,6 +117,14 @@ public class EmergencyService {
         double shortestDistance = Double.MAX_VALUE;
 
         for (SecurityOfficer officer : officers) {
+
+            // Only dispatch officers assigned to the same campus as the user.
+            if (emergencyUser.getCampus() == null
+                    || officer.getCampus() == null
+                    || !emergencyUser.getCampus().getCampusId().equals(
+                            officer.getCampus().getCampusId())) {
+                continue;
+            }
 
             var location =
                     officerLocationRepository
@@ -168,13 +186,74 @@ public class EmergencyService {
         Notification notification = new Notification();
         notification.setOfficer(officer);
         notification.setNotificationType("EMERGENCY_ALERT");
+        String reporterName = ((emergency.getUser().getFirstName() == null ? "" : emergency.getUser().getFirstName())
+                + " " + (emergency.getUser().getLastName() == null ? "" : emergency.getUser().getLastName())).trim();
         notification.setMessage(
-                "Emergency alert received. "
-                        + "You are the nearest available security officer.");
+                "Emergency alert received. You are the nearest available security officer. "
+                        + "Reporter: " + (reporterName.isBlank() ? "Unknown" : reporterName)
+                        + ", number: " + (emergency.getUser().getStudentStaffNumber() == null ? "Not supplied" : emergency.getUser().getStudentStaffNumber())
+                        + ". Open Assigned Emergencies to accept the SOS and view the latest location.");
         notification.setRead(false);
         notification.setCreatedAt(LocalDateTime.now());
 
         notificationRepository.save(notification);
+    }
+
+    public EmergencyAlert resolveEmergencyWithReview(
+            Integer emergencyId, User currentUser, boolean falseAlert, String review) {
+        if (review == null || review.trim().length() < 10)
+            throw new RuntimeException("Write an officer review of at least 10 characters.");
+
+        EmergencyAlert emergency = getEmergency(emergencyId);
+        SecurityOfficer officer = officerRepository.findByEmployeeNumber(currentUser.getStudentStaffNumber())
+                .orElseThrow(() -> new RuntimeException("No security officer profile is linked to this account."));
+        assignmentRepository.findByEmergencyAlertAndOfficer(emergency, officer)
+                .orElseThrow(() -> new RuntimeException("This emergency is not assigned to you."));
+
+        emergency.setOfficerReview(review.trim());
+        emergency.setConfirmedFalse(falseAlert);
+        emergency.setResolvedAt(LocalDateTime.now());
+
+        User reporter = emergency.getUser();
+        if (falseAlert) {
+            if (!falseAlertRepository.existsByEmergencyAlertAndFalseAlertStatus(
+                    emergency, FalseAlert.FalseAlertStatus.CONFIRMED_FALSE)) {
+                FalseAlert record = new FalseAlert();
+                record.setEmergencyAlert(emergency);
+                record.setUser(reporter);
+                record.setReason(review.trim());
+                record.setFalseAlertStatus(FalseAlert.FalseAlertStatus.CONFIRMED_FALSE);
+                record.setCreatedAt(LocalDateTime.now());
+                falseAlertRepository.save(record);
+
+                int count = reporter.getFalseAlertCount() == null ? 0 : reporter.getFalseAlertCount();
+                count++;
+                reporter.setFalseAlertCount(count);
+                if (count > 3) {
+                    reporter.setEmergencyButtonEnabled(false);
+                    notifyUser(reporter, "EMERGENCY_BUTTON_SUSPENDED",
+                            "Your SOS button has been suspended after more than 3 confirmed false emergency alerts. Contact Campus Security/Admin.");
+                } else {
+                    notifyUser(reporter, "FALSE_EMERGENCY_WARNING",
+                            "An emergency alert was confirmed false. You now have " + count +
+                                    " false alert(s). More than 3 will suspend SOS access.");
+                }
+                userRepository.save(reporter);
+            }
+            emergency.setAlertStatus(EmergencyAlert.AlertStatus.FALSE_ALERT);
+        } else {
+            emergency.setAlertStatus(EmergencyAlert.AlertStatus.RESOLVED);
+            notifyUser(reporter, "EMERGENCY_RESOLVED",
+                    "Your emergency alert has been resolved by Campus Security.");
+        }
+        return emergencyRepository.save(emergency);
+    }
+
+    private void notifyUser(User user, String type, String message) {
+        Notification n = new Notification();
+        n.setUser(user); n.setNotificationType(type); n.setMessage(message);
+        n.setRead(false); n.setCreatedAt(LocalDateTime.now());
+        notificationRepository.save(n);
     }
 
     private double calculateDistance(
@@ -206,6 +285,17 @@ public class EmergencyService {
         return EARTH_RADIUS * c;
     }
 
+    public List<EmergencyAlert> getOfficerActiveEmergencies(User currentUser) {
+        SecurityOfficer officer = officerRepository.findByEmployeeNumber(currentUser.getStudentStaffNumber())
+                .orElseThrow(() -> new RuntimeException("No security officer profile is linked to this account."));
+        return assignmentRepository.findByOfficerOrderByAssignedAtDesc(officer).stream()
+                .map(AlertAssignment::getEmergencyAlert)
+                .filter(e -> e.getAlertStatus() != EmergencyAlert.AlertStatus.RESOLVED
+                        && e.getAlertStatus() != EmergencyAlert.AlertStatus.CANCELLED
+                        && e.getAlertStatus() != EmergencyAlert.AlertStatus.FALSE_ALERT)
+                .toList();
+    }
+
     public EmergencyAlert getEmergency(
             Integer emergencyId,
             User currentUser) {
@@ -227,24 +317,41 @@ public class EmergencyService {
                                 "Emergency alert not found."));
     }
 
+    public EmergencyAlert updateEmergencyLocation(
+            Integer emergencyId, User currentUser, Double latitude, Double longitude) {
+        validateCoordinates(latitude, longitude);
+        EmergencyAlert emergency = getEmergency(emergencyId);
+        if (!emergency.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new RuntimeException("Only the user who sent this SOS can update its location.");
+        }
+        if (emergency.getAlertStatus() == EmergencyAlert.AlertStatus.RESOLVED
+                || emergency.getAlertStatus() == EmergencyAlert.AlertStatus.FALSE_ALERT
+                || emergency.getAlertStatus() == EmergencyAlert.AlertStatus.CANCELLED) {
+            throw new RuntimeException("This emergency is already closed.");
+        }
+        emergency.setLatitude(latitude);
+        emergency.setLongitude(longitude);
+        return emergencyRepository.save(emergency);
+    }
+
     public EmergencyAlert updateEmergencyStatus(
             Integer emergencyId,
-            EmergencyAlert.AlertStatus status) {
-
-        if (status == null) {
-            throw new RuntimeException(
-                    "Emergency status is required.");
-        }
+            EmergencyAlert.AlertStatus status,
+            User currentUser) {
+        if (status == null) throw new RuntimeException("Emergency status is required.");
+        if (status == EmergencyAlert.AlertStatus.RESOLVED || status == EmergencyAlert.AlertStatus.FALSE_ALERT)
+            throw new RuntimeException("Complete the officer review before closing an emergency.");
 
         EmergencyAlert emergency = getEmergency(emergencyId);
+        SecurityOfficer officer = officerRepository.findByEmployeeNumber(currentUser.getStudentStaffNumber())
+                .orElseThrow(() -> new RuntimeException("No security officer profile is linked to this account."));
+        assignmentRepository.findByEmergencyAlertAndOfficer(emergency, officer)
+                .orElseThrow(() -> new RuntimeException("This emergency is not assigned to you."));
         emergency.setAlertStatus(status);
-
-        if (status ==
-                EmergencyAlert.AlertStatus.RESOLVED) {
-            emergency.setResolvedAt(LocalDateTime.now());
-        }
-
-        return emergencyRepository.save(emergency);
+        EmergencyAlert saved = emergencyRepository.save(emergency);
+        notifyUser(emergency.getUser(), "EMERGENCY_STATUS_CHANGED",
+                "Your emergency alert is now " + status.name().replace('_', ' ').toLowerCase() + ".");
+        return saved;
     }
 
     private boolean canViewEmergency(

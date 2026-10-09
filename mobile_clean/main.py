@@ -10,6 +10,7 @@ import requests
 from dotenv import load_dotenv
 
 from kivy.app import App
+from kivy.utils import platform
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -20,16 +21,124 @@ from kivy.properties import (
 )
 from kivy.storage.jsonstore import JsonStore
 from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 
+if platform == "android":
+    try:
+        from android.permissions import Permission, check_permission, request_permissions
+    except Exception:
+        Permission = None
+        check_permission = None
+        request_permissions = None
+else:
+    Permission = None
+    check_permission = None
+    request_permissions = None
+
 try:
-    from plyer import gps
-except ImportError:
-    gps = None
+    if platform == "android":
+        from jnius import PythonJavaClass, java_method, autoclass
+
+        AndroidLooper = autoclass("android.os.Looper")
+        AndroidLocationManager = autoclass("android.location.LocationManager")
+        AndroidContext = autoclass("android.content.Context")
+        AndroidPythonActivity = autoclass(
+            "org.kivy.android.PythonActivity"
+        )
+
+        class NativeAndroidLocationListener(PythonJavaClass):
+            __javainterfaces__ = [
+                "android/location/LocationListener"
+            ]
+
+            def __init__(self, callback):
+                super().__init__()
+                self.callback = callback
+
+            @java_method("(Landroid/location/Location;)V")
+            def onLocationChanged(self, location):
+                self.callback(location)
+
+            @java_method(
+                "(Ljava/util/List;)V",
+                name="onLocationChanged"
+            )
+            def onLocationChangedList(self, locations):
+                if locations is None:
+                    return
+
+                try:
+                    size = locations.size()
+                    if size <= 0:
+                        return
+
+                    location = locations.get(size - 1)
+                    self.callback(location)
+                except Exception:
+                    return
+
+            @java_method("(Ljava/lang/String;)V")
+            def onProviderEnabled(self, provider):
+                pass
+
+            @java_method("(Ljava/lang/String;)V")
+            def onProviderDisabled(self, provider):
+                pass
+
+except Exception:
+    NativeAndroidLocationListener = None
+    AndroidLooper = None
+    AndroidLocationManager = None
+    AndroidContext = None
+    AndroidPythonActivity = None
+if platform == "android":
+    try:
+        from jnius import autoclass, PythonJavaClass, java_method
+
+        PythonActivity = autoclass(
+            "org.kivy.android.PythonActivity"
+        )
+        Context = autoclass(
+            "android.content.Context"
+        )
+        LocationManager = autoclass(
+            "android.location.LocationManager"
+        )
+        Looper = autoclass(
+            "android.os.Looper"
+        )
+
+        NATIVE_GPS_AVAILABLE = True
+
+        # Native Android services used for urgent SOS assignment alerts.
+        AndroidVibrator = autoclass("android.os.Vibrator")
+        AndroidRingtoneManager = autoclass("android.media.RingtoneManager")
+
+    except Exception as e:
+        print("ANDROID GPS IMPORT ERROR:", repr(e))
+        PythonActivity = None
+        Context = None
+        LocationManager = None
+        Looper = None
+        PythonJavaClass = None
+        java_method = None
+        NATIVE_GPS_AVAILABLE = False
+else:
+    PythonActivity = None
+    Context = None
+    LocationManager = None
+    Looper = None
+    PythonJavaClass = None
+    java_method = None
+    NATIVE_GPS_AVAILABLE = False
+    AndroidVibrator = None
+    AndroidRingtoneManager = None
 
 
-load_dotenv()
+if platform != "android":
+    load_dotenv()
 
 # Desktop uses localhost by default. Before building the Android APK, change
 # backend_url in mobile_config.json to the Wi-Fi IPv4 address of the computer
@@ -53,8 +162,166 @@ BACKEND_URL = os.getenv(
 
 REQUEST_TIMEOUT = 15
 
-Window.size = (390, 760)
+if platform != "android":
+    Window.size = (390, 760)
+
+if platform == "android":
+    Window.softinput_mode = "below_target"
 Window.clearcolor = (0.94, 0.96, 0.98, 1)
+
+if platform == "android" and NATIVE_GPS_AVAILABLE:
+
+    class NativeLocationListener(PythonJavaClass):
+        """
+        Native Android LocationListener.
+
+        This is used only as a fallback when a recent last-known
+        location is not available.
+        """
+
+        __javainterfaces__ = [
+            "android/location/LocationListener"
+        ]
+
+        def __init__(self, callback):
+            super().__init__()
+            self.callback = callback
+
+        @java_method("(Landroid/location/Location;)V")
+        def onLocationChanged(self, location):
+            try:
+                latitude = location.getLatitude()
+                longitude = location.getLongitude()
+
+                Clock.schedule_once(
+                    lambda _dt,
+                    lat=float(latitude),
+                    lon=float(longitude):
+                    self.callback(lat, lon),
+                    0
+                )
+            except Exception:
+                pass
+
+        @java_method("(Ljava/lang/String;)V")
+        def onProviderEnabled(self, provider):
+            pass
+
+        @java_method("(Ljava/lang/String;)V")
+        def onProviderDisabled(self, provider):
+            pass
+
+        @java_method(
+            "(Ljava/lang/String;ILandroid/os/Bundle;)V"
+        )
+        def onStatusChanged(
+            self,
+            provider,
+            status,
+            extras
+        ):
+            pass
+
+
+class NativeGPS:
+    """Reliable Android location helper for SOS and officer positioning."""
+
+    def __init__(self):
+        self.location_manager = None
+        self.listener = None
+
+        if not NATIVE_GPS_AVAILABLE:
+            return
+
+        try:
+            activity = PythonActivity.mActivity
+            self.location_manager = activity.getSystemService(
+                Context.LOCATION_SERVICE
+            )
+        except Exception:
+            self.location_manager = None
+
+    def get_location(self, callback):
+        """Return the best recent location, otherwise request a fresh one."""
+        if self.location_manager is None:
+            raise RuntimeError("Android location service is unavailable.")
+
+        providers = (
+            LocationManager.GPS_PROVIDER,
+            LocationManager.NETWORK_PROVIDER,
+            LocationManager.PASSIVE_PROVIDER,
+        )
+
+        # Prefer the newest cached fix. This makes SOS much faster when the
+        # phone has recently obtained a location from Maps or Android itself.
+        known_locations = []
+        for provider in providers:
+            location = self._last_known(provider)
+            if location is not None:
+                known_locations.append(location)
+
+        if known_locations:
+            try:
+                location = max(known_locations, key=lambda item: item.getTime())
+            except Exception:
+                location = known_locations[0]
+
+            latitude = float(location.getLatitude())
+            longitude = float(location.getLongitude())
+            Clock.schedule_once(
+                lambda _dt, lat=latitude, lon=longitude: callback(lat, lon),
+                0
+            )
+            return
+
+        # No cached fix: listen to both network and GPS. Network location is
+        # often returned much faster indoors, while GPS provides a precise fix
+        # when satellites are available.
+        self.listener = NativeLocationListener(callback)
+        started = False
+        errors = []
+
+        for provider in (
+            LocationManager.NETWORK_PROVIDER,
+            LocationManager.GPS_PROVIDER,
+        ):
+            try:
+                if self.location_manager.isProviderEnabled(provider):
+                    self.location_manager.requestLocationUpdates(
+                        provider,
+                        1000,
+                        0.0,
+                        self.listener,
+                        Looper.getMainLooper()
+                    )
+                    started = True
+            except Exception as error:
+                errors.append(str(error))
+
+        if not started:
+            self.listener = None
+            detail = "; ".join(errors)
+            if detail:
+                raise RuntimeError(
+                    f"Location providers could not be started: {detail}"
+                )
+            raise RuntimeError(
+                "Phone Location is turned off. Enable Location/GPS and try again."
+            )
+
+    def _last_known(self, provider):
+        try:
+            return self.location_manager.getLastKnownLocation(provider)
+        except Exception:
+            return None
+
+    def stop(self):
+        if self.location_manager is not None and self.listener is not None:
+            try:
+                self.location_manager.removeUpdates(self.listener)
+            except Exception:
+                pass
+        self.listener = None
 
 
 class ApiClient:
@@ -104,6 +371,8 @@ class ApiClient:
         first_name: str,
         last_name: str,
         phone_number: str,
+        email: str,
+        personal_email: str,
         password: str,
         role_name: str,
         campus_id: int
@@ -117,6 +386,8 @@ class ApiClient:
                 "firstName": first_name,
                 "lastName": last_name,
                 "phoneNumber": phone_number,
+                "email": email,
+                "personalEmail": personal_email,
                 "password": password,
                 "roleName": role_name,
                 "campusId": campus_id
@@ -132,6 +403,26 @@ class ApiClient:
             return {
                 "message": "User registered successfully."
             }
+
+    def verify_email(self, email: str, code: str) -> dict[str, Any]:
+        response = requests.post(f"{self.backend_url}/api/users/verify-email", data={"email": email, "code": code}, timeout=REQUEST_TIMEOUT)
+        self._raise_for_error(response)
+        return response.json()
+
+    def resend_verification(self, email: str) -> dict[str, Any]:
+        response = requests.post(f"{self.backend_url}/api/users/resend-verification", data={"email": email}, timeout=REQUEST_TIMEOUT)
+        self._raise_for_error(response)
+        return response.json()
+
+    def forgot_password(self, email: str) -> dict[str, Any]:
+        response = requests.post(f"{self.backend_url}/api/users/forgot-password", data={"email": email}, timeout=REQUEST_TIMEOUT)
+        self._raise_for_error(response)
+        return response.json()
+
+    def reset_password(self, email: str, code: str, new_password: str) -> dict[str, Any]:
+        response = requests.post(f"{self.backend_url}/api/users/reset-password", data={"email": email, "code": code, "newPassword": new_password}, timeout=REQUEST_TIMEOUT)
+        self._raise_for_error(response)
+        return response.json()
 
     def get_current_user(self) -> dict[str, Any]:
         if not self.session_token:
@@ -187,6 +478,16 @@ class ApiClient:
                 "emergencyType": emergency_type,
                 "description": description
             },
+            timeout=REQUEST_TIMEOUT
+        )
+        self._raise_for_error(response)
+        return response.json()
+
+    def update_emergency_location(self, emergency_id: int, latitude: float, longitude: float) -> dict[str, Any]:
+        response = requests.put(
+            f"{self.backend_url}/api/emergency/{emergency_id}/location",
+            headers=self.authorization_headers(),
+            params={"latitude": latitude, "longitude": longitude},
             timeout=REQUEST_TIMEOUT
         )
         self._raise_for_error(response)
@@ -274,7 +575,7 @@ class ApiClient:
 
     def get_officer_incidents(self) -> list[dict[str, Any]]:
         response = requests.get(
-            f"{self.backend_url}/api/incidents/officer/all",
+            f"{self.backend_url}/api/incidents/officer/unresolved",
 
             headers=self.authorization_headers(),
             timeout=REQUEST_TIMEOUT
@@ -294,24 +595,27 @@ class ApiClient:
         self._raise_for_error(response)
         return response.json()
 
-    def upload_incident_evidence(
-        self, incident_id: int, file_path: str
+    def resolve_incident(
+        self, incident_id: int, validity: str, review: str
     ) -> dict[str, Any]:
-        with open(file_path, "rb") as evidence_file:
-            content_type = (
-                mimetypes.guess_type(file_path)[0]
-                or "application/octet-stream"
-            )
-            response = requests.post(
-                f"{self.backend_url}/api/incidents/{incident_id}/evidence",
-                headers=self.authorization_headers(),
-                files={"file": (
-                    os.path.basename(file_path),
-                    evidence_file,
-                    content_type
-                )},
-                timeout=30
-            )
+        response = requests.put(
+            f"{self.backend_url}/api/incidents/{incident_id}/resolve",
+            headers=self.authorization_headers(),
+            params={"validity": validity, "review": review},
+            timeout=REQUEST_TIMEOUT
+        )
+        self._raise_for_error(response)
+        return response.json()
+
+    def resolve_emergency_review(
+        self, emergency_id: int, false_alert: bool, review: str
+    ) -> dict[str, Any]:
+        response = requests.put(
+            f"{self.backend_url}/api/emergency/{emergency_id}/resolve-review",
+            headers=self.authorization_headers(),
+            params={"falseAlert": str(false_alert).lower(), "review": review},
+            timeout=REQUEST_TIMEOUT
+        )
         self._raise_for_error(response)
         return response.json()
 
@@ -618,6 +922,8 @@ class RegisterScreen(Screen):
         phone_number = (
             self.ids.register_phone.text.strip()
         )
+        email = self.ids.register_email.text.strip().lower()
+        personal_email = self.ids.register_personal_email.text.strip().lower()
 
         password = self.ids.register_password.text
 
@@ -635,6 +941,8 @@ class RegisterScreen(Screen):
             first_name,
             last_name,
             phone_number,
+            email,
+            personal_email,
             password,
             confirm_password
         ]):
@@ -647,6 +955,10 @@ class RegisterScreen(Screen):
             self.status_message = (
                 "Select Student or Staff."
             )
+            return
+
+        if not personal_email.endswith("@gmail.com"):
+            self.status_message = "Enter a valid personal Gmail address."
             return
 
         if len(password) < 8:
@@ -683,6 +995,8 @@ class RegisterScreen(Screen):
                 first_name,
                 last_name,
                 phone_number,
+                email,
+                personal_email,
                 password,
                 role_text.lower(),
                 campus_id
@@ -696,6 +1010,8 @@ class RegisterScreen(Screen):
         first_name: str,
         last_name: str,
         phone_number: str,
+        email: str,
+        personal_email: str,
         password: str,
         role_name: str,
         campus_id: int
@@ -709,6 +1025,8 @@ class RegisterScreen(Screen):
                 first_name=first_name,
                 last_name=last_name,
                 phone_number=phone_number,
+                email=email,
+                personal_email=personal_email,
                 password=password,
                 role_name=role_name,
                 campus_id=campus_id
@@ -717,7 +1035,7 @@ class RegisterScreen(Screen):
             Clock.schedule_once(
                 lambda _dt:
                 self._registration_success(
-                    student_staff_number
+                    student_staff_number, email, personal_email
                 ),
                 0
             )
@@ -762,7 +1080,9 @@ class RegisterScreen(Screen):
 
     def _registration_success(
         self,
-        student_staff_number: str
+        student_staff_number: str,
+        email: str,
+        personal_email: str
     ) -> None:
 
         self.loading = False
@@ -772,6 +1092,8 @@ class RegisterScreen(Screen):
         self.ids.register_first_name.text = ""
         self.ids.register_last_name.text = ""
         self.ids.register_phone.text = ""
+        self.ids.register_email.text = ""
+        self.ids.register_personal_email.text = ""
         self.ids.register_password.text = ""
         self.ids.register_confirm_password.text = ""
         self.ids.register_role.text = "Student"
@@ -784,12 +1106,11 @@ class RegisterScreen(Screen):
             student_staff_number
         )
 
-        login_screen.status_message = (
-            "User registered successfully. You may now sign in."
-        )
-
-        app.root.transition.direction = "right"
-        app.root.current = "login"
+        verify_screen = app.root.get_screen("verify_email")
+        verify_screen.email = email
+        verify_screen.status_message = f"A 6-digit OTP was sent to {personal_email}."
+        app.root.transition.direction = "left"
+        app.root.current = "verify_email"
 
     def _registration_failed(
         self,
@@ -800,8 +1121,59 @@ class RegisterScreen(Screen):
         self.status_message = message
 
 
+class VerifyEmailScreen(Screen):
+    email = StringProperty("")
+    status_message = StringProperty("")
+    loading = BooleanProperty(False)
+
+    def verify(self):
+        code = self.ids.verify_code.text.strip()
+        if len(code) != 6: self.status_message = "Enter the 6-digit OTP."; return
+        self.loading = True
+        threading.Thread(target=self._verify, args=(code,), daemon=True).start()
+    def _verify(self, code):
+        try:
+            App.get_running_app().api.verify_email(self.email, code)
+            Clock.schedule_once(lambda _dt: self._done(), 0)
+        except Exception as e:
+            Clock.schedule_once(lambda _dt, m=str(e): self._fail(m), 0)
+    def _done(self):
+        self.loading=False; self.ids.verify_code.text=""
+        login=App.get_running_app().root.get_screen("login")
+        login.status_message="Email verified successfully. You may now sign in."
+        App.get_running_app().root.current="login"
+    def _fail(self,m): self.loading=False; self.status_message=m
+    def resend(self):
+        try:
+            App.get_running_app().api.resend_verification(self.email); self.status_message="A new OTP was sent."
+        except Exception as e: self.status_message=str(e)
+
+class ForgotPasswordScreen(Screen):
+    status_message = StringProperty("")
+    code_sent = BooleanProperty(False)
+    def send_code(self):
+        email=self.ids.reset_email.text.strip().lower()
+        if not email.endswith("@gmail.com"): self.status_message="Enter your registered personal Gmail address."; return
+        try:
+            App.get_running_app().api.forgot_password(email); self.code_sent=True
+            self.status_message="If the email is registered, a reset OTP has been sent."
+        except Exception as e: self.status_message=str(e)
+    def reset(self):
+        email=self.ids.reset_email.text.strip().lower(); code=self.ids.reset_code.text.strip()
+        pw=self.ids.reset_password.text; confirm=self.ids.reset_confirm.text
+        if len(code)!=6: self.status_message="Enter the 6-digit OTP."; return
+        if len(pw)<8: self.status_message="Password must contain at least 8 characters."; return
+        if pw!=confirm: self.status_message="Passwords do not match."; return
+        try:
+            App.get_running_app().api.reset_password(email,code,pw)
+            login=App.get_running_app().root.get_screen("login"); login.status_message="Password reset successfully. Sign in with your new password."
+            self.ids.reset_code.text=""; self.ids.reset_password.text=""; self.ids.reset_confirm.text=""
+            App.get_running_app().root.current="login"
+        except Exception as e: self.status_message=str(e)
+
 class UserDashboardScreen(Screen):
     welcome_text = StringProperty("Welcome")
+    sos_suspended = BooleanProperty(False)
     account_type = StringProperty("User")
     sos_loading = BooleanProperty(False)
     sos_status = StringProperty("")
@@ -811,9 +1183,49 @@ class UserDashboardScreen(Screen):
     _sos_latitude = None
     _sos_longitude = None
     _sos_request_started = False
+    _sos_location_timeout_event = None
+
+    def on_pre_enter(self, *args) -> None:
+        threading.Thread(target=self._refresh_sos_access, daemon=True).start()
+
+    def _refresh_sos_access(self) -> None:
+        try:
+            user = App.get_running_app().api.get_current_user()
+            Clock.schedule_once(lambda _dt, u=user: self._apply_sos_access(u), 0)
+        except Exception:
+            pass
+
+    def _apply_sos_access(self, user) -> None:
+        App.get_running_app().current_user = user
+        self.sos_suspended = not bool(user.get("emergencyButtonEnabled", True))
+        if self.sos_suspended:
+            self.sos_button_text = "SOS SUSPENDED"
+            self.sos_status = "Emergency SOS access is suspended. Contact Campus Security/Admin."
+        elif self.sos_button_text == "SOS SUSPENDED":
+            self.sos_button_text = "EMERGENCY\nSOS"
+            self.sos_status = ""
+
+    def open_feature(self, feature_name: str) -> None:
+        """Open a student/staff dashboard feature without terminating the app."""
+        screens = {
+            "Report an Incident": "report_incident",
+            "My Reports": "my_reports",
+            "Emergency Contacts": "emergency_contacts",
+            "Notifications": "user_notifications",
+        }
+        screen_name = screens.get(feature_name)
+        if not screen_name:
+            self.sos_status = f"{feature_name} is unavailable."
+            return
+        app = App.get_running_app()
+        app.root.transition.direction = "left"
+        app.root.current = screen_name
 
     def emergency_button_pressed(self) -> None:
         """Require three presses within five seconds before activating SOS."""
+        if self.sos_suspended:
+            self.sos_status = "Emergency SOS access is suspended. Contact Campus Security/Admin."
+            return
         if self.sos_loading:
             return
 
@@ -849,248 +1261,216 @@ class UserDashboardScreen(Screen):
         self.sos_button_text = "EMERGENCY\nSOS"
         self.sos_status = "SOS was not activated. Press 3 times to send an alert."
 
+
     def send_sos(self) -> None:
         """Capture GPS and send the emergency without opening a form."""
         if self.sos_loading:
             return
 
-        if gps is None:
-            self.sos_status = "GPS support is unavailable. Install plyer first."
-            return
-
         self.sos_loading = True
         self._sos_request_started = False
+        self._sos_latitude = None
+        self._sos_longitude = None
         self.sos_status = "Getting your location and sending SOS..."
         self.sos_button_text = "GETTING LOCATION..."
 
-        # Dynamically request Android permissions. Using importlib prevents
-        # VS Code on Windows from reporting android.permissions as missing.
-        if os.name != "nt":
-            try:
-                android_permissions = importlib.import_module(
-                    "android.permissions"
-                )
-                android_permissions.request_permissions([
-                    android_permissions.Permission.ACCESS_FINE_LOCATION,
-                    android_permissions.Permission.ACCESS_COARSE_LOCATION
-                ])
-            except (ImportError, AttributeError):
-                pass
-
-        try:
-            gps.configure(
-                on_location=self._on_sos_location,
-                on_status=self._on_sos_gps_status
+        if platform != "android" or not NATIVE_GPS_AVAILABLE:
+            self._sos_failed(
+                "Emergency GPS requires the Android app with location permission enabled."
             )
-            gps.start(minTime=500, minDistance=0)
-        except Exception:
-            self.sos_loading = False
-            self.sos_button_text = "EMERGENCY\nSOS"
-            self.sos_status = (
-                "GPS is unavailable on this computer. "
-
-                "Live SOS location works on the Android phone build."
-            )
-
-    def _on_sos_location(self, **location) -> None:
-        if self._sos_request_started:
             return
-        self._sos_request_started = True
+
+        self._ensure_sos_location_permission()
+
+    def _ensure_sos_location_permission(self) -> None:
+        """Request Android location permission before accessing GPS."""
+        if check_permission is None or Permission is None:
+            self._start_native_sos_location()
+            return
+
+        fine = Permission.ACCESS_FINE_LOCATION
+        coarse = Permission.ACCESS_COARSE_LOCATION
+        if check_permission(fine) or check_permission(coarse):
+            self._start_native_sos_location()
+            return
+
+        if request_permissions is None:
+            self._sos_failed("Android location permission API is unavailable.")
+            return
+
+        request_permissions([fine, coarse], self._on_sos_permissions_result)
+
+    def _on_sos_permissions_result(self, permissions, grants) -> None:
+        granted = any(bool(value) for value in grants) if grants else False
+        if not granted:
+            self._sos_failed(
+                "Location permission was denied. Enable Location for UFH Campus Security in Android settings."
+            )
+            return
+        Clock.schedule_once(lambda _dt: self._start_native_sos_location(), 0)
+
+    def _start_native_sos_location(self) -> None:
+        """Start native Android GPS for the emergency SOS."""
+        if not self.sos_loading:
+            return
 
         try:
-            self._sos_latitude = float(location["lat"])
-            self._sos_longitude = float(location["lon"])
-            gps.stop()
+            self.sos_status = "Getting your current GPS/network location..."
+            self.native_sos_gps = NativeGPS()
+            self.native_sos_gps.get_location(self._on_sos_location)
+
+            if self._sos_location_timeout_event is not None:
+                self._sos_location_timeout_event.cancel()
+            self._sos_location_timeout_event = Clock.schedule_once(
+                self._sos_location_timed_out, 12
+            )
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error): self._sos_failed(message), 0
+            self._sos_failed(
+                f"Could not get your GPS location: {error}"
             )
+
+    def _sos_location_timed_out(self, _dt) -> None:
+        """Stop waiting if Android cannot provide a location fix."""
+        self._sos_location_timeout_event = None
+        if not self.sos_loading or self._sos_request_started:
             return
-
-        threading.Thread(
-            target=self._send_sos_request,
-            daemon=True
-        ).start()
-
-    def _on_sos_gps_status(self, status_type, status_message) -> None:
-        Clock.schedule_once(
-            lambda _dt: setattr(self, "sos_status", str(status_message)), 0
+        self._sos_failed(
+            "Could not get your location within 12 seconds. "
+            "Make sure Phone Location is ON, allow location permission, "
+            "and try again near a window or outdoors."
         )
 
+    def _on_sos_location(
+        self,
+        latitude: float,
+        longitude: float
+    ) -> None:
+        """Receive native Android GPS coordinates and start the SOS request."""
+        if self._sos_request_started:
+            return
+
+        if self._sos_location_timeout_event is not None:
+            self._sos_location_timeout_event.cancel()
+            self._sos_location_timeout_event = None
+
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+
+            if not (
+                -90 <= latitude <= 90
+                and -180 <= longitude <= 180
+            ):
+                self._sos_failed(
+                    "The phone returned invalid GPS coordinates."
+                )
+                return
+
+            self._sos_latitude = latitude
+            self._sos_longitude = longitude
+            self._sos_request_started = True
+
+            if hasattr(self, "native_sos_gps"):
+                self.native_sos_gps.stop()
+
+            self.sos_status = "Location found. Sending emergency alert..."
+            self.sos_button_text = "SENDING SOS..."
+
+            threading.Thread(
+                target=self._send_sos_request,
+                daemon=True
+            ).start()
+        except Exception as error:
+            self._sos_failed(str(error))
+
     def _send_sos_request(self) -> None:
+        """Send GPS to the backend; the session identifies the registered user."""
         try:
             result = App.get_running_app().api.create_emergency(
                 self._sos_latitude,
                 self._sos_longitude,
                 "GENERAL_EMERGENCY",
-                "One-tap emergency SOS from the mobile application."
+                "Emergency SOS from the mobile application."
             )
             emergency_id = result.get("emergencyId", "")
             Clock.schedule_once(
-                lambda _dt: self._sos_sent(emergency_id), 0
+                lambda _dt, alert_id=emergency_id: self._sos_sent(alert_id),
+                0
             )
         except Exception as error:
             Clock.schedule_once(
-                lambda _dt, message=str(error): self._sos_failed(message), 0
+                lambda _dt, message=str(error): self._sos_failed(message),
+                0
             )
 
     def _sos_sent(self, emergency_id) -> None:
+        """Display successful SOS confirmation."""
         self.sos_loading = False
         self._sos_request_started = False
         self.sos_button_text = "EMERGENCY\nSOS"
         self.sos_status = f"SOS sent successfully. Alert #{emergency_id}"
+        self.active_emergency_id = int(emergency_id) if str(emergency_id).isdigit() else None
+        if getattr(self, "_live_location_event", None) is not None:
+            self._live_location_event.cancel()
+        if self.active_emergency_id is not None:
+            self._live_location_event = Clock.schedule_interval(self._share_active_emergency_location, 15)
         App.get_running_app().show_message(
             "Emergency Alert Sent",
-            "Your location and account details were sent to Campus Security."
+            "Your current location and registered account details were sent "
+            "to Campus Security."
         )
 
-    def _sos_failed(self, message: str) -> None:
+    def _share_active_emergency_location(self, _dt) -> None:
+        """Refresh the active SOS location while the app remains open."""
+        emergency_id = getattr(self, "active_emergency_id", None)
+        if not emergency_id or platform != "android" or not NATIVE_GPS_AVAILABLE:
+            return
         try:
-            gps.stop()
+            tracker = NativeGPS()
+            self._active_location_tracker = tracker
+            tracker.get_location(self._on_active_emergency_location)
         except Exception:
             pass
+
+    def _on_active_emergency_location(self, latitude: float, longitude: float) -> None:
+        emergency_id = getattr(self, "active_emergency_id", None)
+        if not emergency_id:
+            return
+        try:
+            latitude, longitude = float(latitude), float(longitude)
+            if hasattr(self, "_active_location_tracker"):
+                self._active_location_tracker.stop()
+            threading.Thread(
+                target=self._send_active_emergency_location,
+                args=(emergency_id, latitude, longitude), daemon=True
+            ).start()
+        except Exception:
+            pass
+
+    def _send_active_emergency_location(self, emergency_id: int, latitude: float, longitude: float) -> None:
+        try:
+            App.get_running_app().api.update_emergency_location(
+                emergency_id, latitude, longitude
+            )
+        except Exception:
+            pass
+
+    def _sos_failed(self, message: str) -> None:
+        """Reset the SOS interface after an error."""
+        if self._sos_location_timeout_event is not None:
+            self._sos_location_timeout_event.cancel()
+            self._sos_location_timeout_event = None
+
+        try:
+            if hasattr(self, "native_sos_gps"):
+                self.native_sos_gps.stop()
+        except Exception:
+            pass
+
         self.sos_loading = False
         self._sos_request_started = False
         self.sos_button_text = "EMERGENCY\nSOS"
-        self.sos_status = message
-
-    def open_feature(
-        self,
-        feature_name: str
-    ) -> None:
-
-        screen_names = {
-            "Report an Incident": "report_incident",
-            "My Reports": "my_reports",
-            "Emergency Contacts": "emergency_contacts",
-            "Notifications": "user_notifications"
-        }
-        screen_name = screen_names.get(feature_name)
-        if not screen_name:
-            return
-        app = App.get_running_app()
-        app.root.transition.direction = "left"
-        app.root.current = screen_name
-
-
-class ReportIncidentScreen(Screen):
-    loading = BooleanProperty(False)
-    status_message = StringProperty("")
-    location_values = ListProperty([])
-    location_ids = {}
-
-    def on_pre_enter(self, *args) -> None:
-        if not self.location_values:
-            threading.Thread(target=self._load_locations, daemon=True).start()
-
-    def _load_locations(self) -> None:
-        try:
-            locations = App.get_running_app().api.get_locations()
-            mapping = {
-                item.get("locationName", f"Location {item.get('locationId')}"):
-                item.get("locationId") for item in locations
-            }
-            Clock.schedule_once(lambda _dt: self._locations_loaded(mapping), 0)
-        except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error): setattr(
-                    self, "status_message", message
-                ), 0
-            )
-
-    def _locations_loaded(self, mapping: dict) -> None:
-
-        self.location_ids = mapping
-        self.location_values = list(mapping.keys())
-        if self.location_values:
-            self.ids.report_location.text = self.location_values[0]
-
-    def submit_report(self) -> None:
-        if self.loading:
-            return
-        location_id = self.location_ids.get(self.ids.report_location.text)
-        incident_type = self.ids.report_type.text
-        description = self.ids.report_description.text.strip()
-        severity = self.ids.report_severity.text
-        if location_id is None:
-            self.status_message = "Select a valid campus location."
-            return
-        if not description:
-            self.status_message = "Enter a description of the incident."
-            return
-        self.loading = True
-        self.status_message = "Submitting incident report..."
-        threading.Thread(
-            target=self._submit_request,
-            args=(location_id, incident_type, description, severity),
-            daemon=True
-        ).start()
-
-    def _submit_request(self, location_id, incident_type, description, severity):
-        try:
-            result = App.get_running_app().api.create_incident(
-                location_id, incident_type, description, severity
-            )
-            Clock.schedule_once(
-                lambda _dt: self._submitted(result.get("incidentId")), 0
-            )
-        except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error): self._failed(message), 0
-            )
-
-    def _submitted(self, incident_id) -> None:
-        self.loading = False
-        self.ids.report_description.text = ""
-        self.status_message = f"Report #{incident_id} submitted successfully."
-
-    def _failed(self, message: str) -> None:
-        self.loading = False
-        self.status_message = message
-
-
-class MyReportsScreen(Screen):
-    reports_text = StringProperty("Loading reports...")
-    status_message = StringProperty("")
-
-    def on_pre_enter(self, *args) -> None:
-        self.refresh_reports()
-
-
-    def refresh_reports(self) -> None:
-        self.status_message = "Loading reports..."
-        threading.Thread(target=self._load_reports, daemon=True).start()
-
-    def _load_reports(self) -> None:
-        try:
-            reports = App.get_running_app().api.get_my_reports()
-            lines = []
-            for report in reversed(reports):
-                location = report.get("location") or {}
-                lines.append(
-                    f"REPORT #{report.get('incidentId')}\n"
-                    f"Type: {report.get('incidentType')}\n"
-                    f"Location: {location.get('locationName', 'Unknown')}\n"
-                    f"Status: {str(report.get('incidentStatus', '')).replace('_', ' ').title()}\n"
-                    f"Reported: {str(report.get('reportedAt', '')).replace('T', ' ')[:16]}\n"
-                    f"Description: {report.get('description')}"
-                )
-            text = "\n\n--------------------\n\n".join(lines)
-            Clock.schedule_once(
-                lambda _dt: self._loaded(text or "You have not submitted any reports."), 0
-            )
-        except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error): self._failed(message), 0
-            )
-
-    def _loaded(self, text: str) -> None:
-        self.reports_text = text
-        self.status_message = ""
-
-    def _failed(self, message: str) -> None:
-        self.reports_text = "Could not load reports."
-        self.status_message = message
+        self.sos_status = str(message)
 
 
 class EmergencyContactsScreen(Screen):
@@ -1243,6 +1623,7 @@ class OfficerDashboardScreen(Screen):
     )
     status_message = StringProperty("")
     duty_status = StringProperty("Off Duty")
+    active_emergency_count = StringProperty("Assigned Emergencies")
 
     def set_availability(self, status: str) -> None:
         self.status_message = "Updating availability..."
@@ -1271,43 +1652,68 @@ class OfficerDashboardScreen(Screen):
             self.capture_officer_location()
 
     def capture_officer_location(self) -> None:
-        if gps is None:
-            self.status_message = "GPS support is unavailable on this device."
-            return
-        self.status_message = "Capturing officer GPS location..."
-        try:
-            gps.configure(
-                on_location=self._on_officer_location,
-                on_status=self._on_officer_gps_status
-
-            )
-            gps.start(minTime=1000, minDistance=0)
-        except Exception:
+        if not NATIVE_GPS_AVAILABLE:
             self.status_message = (
-                "GPS is unavailable on this computer. "
-                "It will work in the Android build."
+                "Native Android GPS is unavailable."
+            )
+            return
+
+        self.status_message = (
+            "Capturing officer GPS location..."
+        )
+
+        try:
+            self.native_gps = NativeGPS()
+
+            self.native_gps.get_location(
+                self._on_officer_location
             )
 
-    def _on_officer_location(self, **location) -> None:
+        except Exception as error:
+            self.status_message = (
+                f"Could not get GPS location: {error}"
+            )
+
+    def _on_officer_location(
+        self,
+        latitude: float,
+        longitude: float
+    ) -> None:
+        self.status_message = "Officer GPS location captured."
+
         try:
-            latitude = float(location["lat"])
-            longitude = float(location["lon"])
-            gps.stop()
+            latitude = float(latitude)
+            longitude = float(longitude)
+
+            if not (
+                -90 <= latitude <= 90
+                and -180 <= longitude <= 180
+            ):
+                self.status_message = (
+                    "Invalid GPS coordinates received."
+                )
+                return
+
+            self.officer_latitude = latitude
+            self.officer_longitude = longitude
+
+            self.status_message = (
+                f"GPS location captured: "
+                f"{latitude:.6f}, {longitude:.6f}"
+            )
+
             threading.Thread(
                 target=self._send_officer_location,
-                args=(latitude, longitude), daemon=True
+                args=(latitude, longitude),
+                daemon=True
             ).start()
+
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error): setattr(
-                    self, "status_message", message
-                ), 0
+            self.status_message = (
+                f"Could not process GPS location: {error}"
             )
 
-    def _on_officer_gps_status(self, status_type, status_message) -> None:
-        Clock.schedule_once(
-            lambda _dt: setattr(self, "status_message", str(status_message)), 0
-        )
+
 
     def _send_officer_location(self, latitude: float, longitude: float) -> None:
         try:
@@ -1341,6 +1747,7 @@ class OfficerDashboardScreen(Screen):
 
         screens = {
             "Assigned Alerts": "officer_alerts",
+            "Assigned Emergencies": "officer_alerts",
             "Incident Reports": "officer_incidents",
             "Notifications": "officer_notifications"
         }
@@ -1350,7 +1757,295 @@ class OfficerDashboardScreen(Screen):
         app = App.get_running_app()
         app.root.transition.direction = "left"
         app.root.current = screen_name
+class ReportIncidentScreen(Screen):
+    location_values = ListProperty(["Loading locations..."])
+    status_message = StringProperty("")
+    loading = BooleanProperty(False)
 
+    def on_pre_enter(self, *args):
+        self.status_message = ""
+        self.load_locations()
+
+    def load_locations(self):
+        def worker():
+            try:
+                locations = App.get_running_app().api.get_locations()
+
+                if not locations:
+                    raise Exception("No campus locations were returned.")
+
+                values = []
+
+                for location in locations:
+                    if isinstance(location, dict):
+                        name = (
+                            location.get("name")
+                            or location.get("locationName")
+                            or location.get("campusName")
+                            or location.get("description")
+                        )
+                    else:
+                        name = str(location)
+
+                    if name:
+                        values.append(str(name))
+
+                if not values:
+                    raise Exception("No valid campus locations were found.")
+
+                Clock.schedule_once(
+                    lambda _dt, items=values:
+                    self._set_locations(items),
+                    0
+                )
+
+            except Exception as error:
+                Clock.schedule_once(
+                    lambda _dt, message=str(error):
+                    self._location_error(message),
+                    0
+                )
+
+        threading.Thread(
+            target=worker,
+            daemon=True
+        ).start()
+
+    def _set_locations(self, values):
+        self.location_values = values
+
+        if "report_location" in self.ids:
+            self.ids.report_location.text = values[0]
+
+        self.status_message = ""
+
+    def _location_error(self, message):
+        self.location_values = ["Location unavailable"]
+
+        if "report_location" in self.ids:
+            self.ids.report_location.text = "Location unavailable"
+
+        self.status_message = (
+            f"Could not load campus locations: {message}"
+        )
+
+    def submit_report(self):
+        if self.loading:
+            return
+
+        incident_type = self.ids.report_type.text.strip()
+        location = self.ids.report_location.text.strip()
+        severity = self.ids.report_severity.text.strip()
+        description = self.ids.report_description.text.strip()
+
+        if not incident_type:
+            self.status_message = "Please select an incident type."
+            return
+
+        if not location or location in (
+            "Loading locations...",
+            "Location unavailable"
+        ):
+            self.status_message = "Please select a campus location."
+            return
+
+        if not severity:
+            self.status_message = "Please select the incident severity."
+            return
+
+        if not description:
+            self.status_message = "Please describe what happened."
+            return
+
+        if len(description) < 5:
+            self.status_message = (
+                "Please provide a little more detail about the incident."
+            )
+            return
+
+        self.loading = True
+        self.status_message = "Submitting incident report..."
+
+        threading.Thread(
+            target=self._submit_report,
+            args=(
+                incident_type,
+                location,
+                severity,
+                description
+            ),
+            daemon=True
+        ).start()
+
+    def _submit_report(
+        self,
+        incident_type,
+        location,
+        severity,
+        description
+    ):
+        try:
+            result = App.get_running_app().api.create_incident(
+                incident_type,
+                location,
+                severity,
+                description
+            )
+
+            Clock.schedule_once(
+                lambda _dt, response=result:
+                self._report_submitted(response),
+                0
+            )
+
+        except Exception as error:
+            Clock.schedule_once(
+                lambda _dt, message=str(error):
+                self._report_failed(message),
+                0
+            )
+
+    def _report_submitted(self, result):
+        self.loading = False
+
+        incident_id = ""
+
+        if isinstance(result, dict):
+            incident_id = (
+                result.get("incidentId")
+                or result.get("id")
+                or result.get("reportId")
+                or ""
+            )
+
+        if incident_id:
+            self.status_message = (
+                f"Incident reported successfully. "
+                f"Report #{incident_id}"
+            )
+        else:
+            self.status_message = (
+                "Incident reported successfully."
+            )
+
+        self.ids.report_description.text = ""
+
+        App.get_running_app().show_message(
+            "Incident Reported",
+            "Your incident report was submitted successfully."
+        )
+
+    def _report_failed(self, message):
+        self.loading = False
+        self.status_message = (
+            f"Could not submit incident report: {message}"
+        )
+class MyReportsScreen(Screen):
+    reports_text = StringProperty("")
+    status_message = StringProperty("")
+
+    def on_pre_enter(self, *args):
+        self.refresh_reports()
+
+    def refresh_reports(self):
+        self.status_message = "Loading your reports..."
+
+        threading.Thread(
+            target=self._load_reports,
+            daemon=True
+        ).start()
+
+    def _load_reports(self):
+        try:
+            reports = App.get_running_app().api.get_my_reports()
+
+            Clock.schedule_once(
+                lambda _dt, items=reports:
+                self._display_reports(items),
+                0
+            )
+
+        except Exception as error:
+            Clock.schedule_once(
+                lambda _dt, message=str(error):
+                self._reports_error(message),
+                0
+            )
+
+    def _display_reports(self, reports):
+        if not reports:
+            self.reports_text = (
+                "You have not submitted any incident reports yet."
+            )
+            self.status_message = ""
+            return
+
+        lines = []
+
+        for index, report in enumerate(reports, start=1):
+            if not isinstance(report, dict):
+                continue
+
+            report_id = (
+                report.get("incidentId")
+                or report.get("id")
+                or report.get("reportId")
+                or index
+            )
+
+            incident_type = (
+                report.get("incidentType")
+                or report.get("type")
+                or "Unknown"
+            )
+
+            location = (
+                report.get("locationName")
+                or report.get("location")
+                or "Unknown"
+            )
+
+            severity = (
+                report.get("severity")
+                or "Unknown"
+            )
+
+            description = (
+                report.get("description")
+                or "No description"
+            )
+
+            status = (
+                report.get("status")
+                or "Unknown"
+            )
+
+            date_reported = (
+                report.get("dateReported")
+                or report.get("createdAt")
+                or report.get("reportedAt")
+                or "Unknown"
+            )
+
+            lines.append(
+                f"Report #{report_id}\n"
+                f"Incident: {incident_type}\n"
+                f"Location: {location}\n"
+                f"Severity: {severity}\n"
+                f"Status: {status}\n"
+                f"Date: {date_reported}\n"
+                f"Description: {description}\n"
+                f"{'-' * 45}\n"
+            )
+
+        self.reports_text = "\n".join(lines)
+        self.status_message = ""
+
+    def _reports_error(self, message):
+        self.status_message = (
+            f"Could not load your reports: {message}"
+        )
+        self.reports_text = ""
 
 class EmergencyScreen(Screen):
     latitude = None
@@ -1365,44 +2060,61 @@ class EmergencyScreen(Screen):
         self.latitude = None
         self.longitude = None
         self.location_text = "Location not captured"
+
         if self.ids:
             self.ids.emergency_type.text = "General Emergency"
             self.ids.emergency_description.text = ""
 
-    def capture_location(self) -> None:
-        if gps is None:
-            self.status_message = "Install plyer to use GPS: pip install plyer"
-            return
-        self.status_message = "Getting your GPS location..."
+    def _on_location(
+        self,
+        latitude: float,
+        longitude: float
+    ) -> None:
         try:
-            gps.configure(on_location=self._on_location,
-                          on_status=self._on_gps_status)
-            gps.start(minTime=1000, minDistance=0)
-        except Exception:
-            self.status_message = (
-                "GPS is not available on this computer. "
-                "Run the mobile build on an Android phone."
+            self.latitude = float(latitude)
+            self.longitude = float(longitude)
+
+            if not (
+                -90 <= self.latitude <= 90
+                and -180 <= self.longitude <= 180
+            ):
+                self.status_message = (
+                    "The phone returned invalid GPS coordinates."
+                )
+                return
+
+            if hasattr(self, "native_gps"):
+                self.native_gps.stop()
+
+            self.location_text = (
+                f"Location captured: "
+                f"{self.latitude:.6f}, "
+                f"{self.longitude:.6f}"
             )
 
-    def _on_location(self, **kwargs) -> None:
-        self.latitude = float(kwargs["lat"])
-        self.longitude = float(kwargs["lon"])
-        try:
-            gps.stop()
-        except Exception:
-            pass
+            self.status_message = (
+                "GPS location captured successfully."
+            )
 
-        Clock.schedule_once(lambda _dt: self._show_location(), 0)
+            Clock.schedule_once(
+                lambda _dt: self._show_location(),
+                0
+            )
+
+        except Exception as error:
+            self.status_message = (
+                f"Could not process GPS location: {error}"
+            )
+
 
     def _show_location(self) -> None:
         self.location_text = (
-            f"GPS: {self.latitude:.6f}, {self.longitude:.6f}"
+            f"GPS: {self.latitude:.6f}, "
+            f"{self.longitude:.6f}"
         )
-        self.status_message = "Location captured. You can send the alert."
 
-    def _on_gps_status(self, status_type, status_message) -> None:
-        Clock.schedule_once(
-            lambda _dt: setattr(self, "status_message", str(status_message)), 0
+        self.status_message = (
+            "Location captured. You can send the alert."
         )
 
     def send_alert(self) -> None:
@@ -1448,17 +2160,15 @@ class EmergencyScreen(Screen):
 
 
 class OfficerAlertsScreen(Screen):
-    alerts_text = StringProperty(
-        "Open this page to load available emergency cases."
-    )
-
+    alerts_text = StringProperty("Loading assigned emergencies...")
     status_message = StringProperty("")
     loading = BooleanProperty(False)
     case_values = ListProperty([])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.alerts_by_label: dict[str, dict[str, Any]] = {}
+        self.alerts_by_label = {}
+        self.selected_alert = None
 
     def on_pre_enter(self, *args) -> None:
         self.refresh_alerts()
@@ -1466,632 +2176,274 @@ class OfficerAlertsScreen(Screen):
     def refresh_alerts(self) -> None:
         if self.loading:
             return
-
         self.loading = True
-        self.status_message = "Loading available emergency work..."
-
-        threading.Thread(
-            target=self._load_alerts,
-            daemon=True
-        ).start()
+        self.status_message = "Loading your assigned emergencies..."
+        threading.Thread(target=self._load_alerts, daemon=True).start()
 
     def _load_alerts(self) -> None:
         try:
-            app = App.get_running_app()
-            alerts = app.api.get_available_emergencies()
-
-            mapping: dict[str, dict[str, Any]] = {}
-            display_blocks: list[str] = []
-
-            for alert in alerts:
-                user = alert.get("user") or {}
-
-                emergency_type = str(
-                    alert.get("emergencyType")
-                    or "Emergency"
-                ).replace("_", " ").title()
-
-                first_name = user.get("firstName") or ""
-                last_name = user.get("lastName") or ""
-
-                person_name = (
-                    f"{first_name} {last_name}"
-                ).strip()
-
-                if not person_name:
-                    person_name = "Unknown user"
-
-                label = (
-
-                    f"{emergency_type} — {person_name}"
-                )
-
-                # Keep dropdown labels unique without asking the
-                # officer to type or remember an ID.
-                if label in mapping:
-                    label = (
-                        f"{label} "
-                        f"({alert.get('emergencyId')})"
-                    )
-
-                mapping[label] = alert
-
-                latitude = alert.get("latitude")
-                longitude = alert.get("longitude")
-
-                if (
-                    latitude is not None
-                    and longitude is not None
-                ):
-                    gps_text = f"{latitude}, {longitude}"
-                else:
-                    gps_text = "Location not supplied"
-
-                display_blocks.append(
-                    f"{emergency_type}\n"
-                    f"User: {person_name}\n"
-                    f"Student/staff number: "
-                    f"{user.get('studentStaffNumber') or 'Not supplied'}\n"
-                    f"Phone: "
-                    f"{user.get('phoneNumber') or 'Not supplied'}\n"
-                    f"Location: {gps_text}\n"
-                    f"Status: "
-                    f"{alert.get('alertStatus') or 'SENT'}\n"
-                    f"Description: "
-                    f"{alert.get('description') or 'None'}"
-                )
-
-            if display_blocks:
-                display_text = (
-                    "\n\n------------------------------\n\n"
-                ).join(display_blocks)
-            else:
-                display_text = (
-                    "There are currently no active "
-                    "emergency cases."
-                )
-
-            Clock.schedule_once(
-                lambda _dt: self._alerts_loaded(
-                    display_text,
-                    mapping
-                ),
-                0
-            )
-
-
+            alerts = App.get_running_app().api.get_available_emergencies()
+            Clock.schedule_once(lambda _dt, items=alerts: self._render_alerts(items), 0)
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error):
-                self._request_failed(message),
-                0
-            )
+            Clock.schedule_once(lambda _dt, m=str(error): self._request_failed(m), 0)
 
-    def _alerts_loaded(
-        self,
-        display_text: str,
-        mapping: dict[str, dict[str, Any]]
-    ) -> None:
+    def _render_alerts(self, alerts) -> None:
         self.loading = False
         self.status_message = ""
-        self.alerts_text = display_text
-        self.alerts_by_label = mapping
-        self.case_values = list(mapping.keys())
+        box = self.ids.emergency_case_list
+        box.clear_widgets()
+        self.alerts_by_label = {}
+        self.case_values = []
+        if not alerts:
+            self.alerts_text = "No active emergencies are currently assigned to you."
+            self.ids.selected_emergency.text = "No emergency selected."
+            self.selected_alert = None
+            return
+        self.alerts_text = "Tap an emergency below to view the person, accept it, respond, or close it."
+        for alert in alerts:
+            user = alert.get("user") or {}
+            name = f"{user.get('firstName','')} {user.get('lastName','')}".strip() or "Unknown user"
+            etype = str(alert.get("emergencyType") or "Emergency").replace("_", " ").title()
+            status = str(alert.get("alertStatus") or "SENT").replace("_", " ")
+            number = user.get("studentStaffNumber") or "Not supplied"
+            phone = user.get("phoneNumber") or "Not supplied"
+            lat, lon = alert.get("latitude"), alert.get("longitude")
+            gps = f"{lat}, {lon}" if lat is not None and lon is not None else "Not available"
+            text = (f"SOS #{alert.get('emergencyId')}  •  {etype}\n"
+                    f"{name}  |  {number}\n"
+                    f"Phone: {phone}\n"
+                    f"Status: {status}\n"
+                    f"Latest location: {gps}")
+            btn = Button(text=text, size_hint_y=None, height=205, halign="left", valign="middle",
+                         font_size="15sp", padding=(18, 14), background_normal="",
+                         background_color=(1,1,1,1), color=(0.04,0.15,0.27,1))
+            btn.bind(size=lambda w, _v: setattr(w, "text_size", (max(w.width-36,1), max(w.height-24,1))))
+            btn.bind(on_release=lambda _b, item=alert: self.select_alert(item))
+            box.add_widget(btn)
 
-        if self.case_values:
-            self.ids.available_alert.text = (
-                self.case_values[0]
-            )
-        else:
-            self.ids.available_alert.text = (
-                "No active emergency cases"
-            )
-
-    def get_selected_alert(
-        self
-    ) -> dict[str, Any] | None:
-
-        selected_label = (
-            self.ids.available_alert.text
+    def select_alert(self, alert) -> None:
+        self.selected_alert = alert
+        user = alert.get("user") or {}
+        name = f"{user.get('firstName','')} {user.get('lastName','')}".strip() or "Unknown user"
+        created = str(alert.get("createdAt") or "").replace("T", " ")[:19]
+        lat, lon = alert.get("latitude"), alert.get("longitude")
+        self.ids.selected_emergency.text = (
+            f"Selected SOS #{alert.get('emergencyId')}\n"
+            f"Person: {name}\n"
+            f"Student/staff no.: {user.get('studentStaffNumber') or 'Not supplied'}\n"
+            f"Phone: {user.get('phoneNumber') or 'Not supplied'}\n"
+            f"Email: {user.get('email') or 'Not supplied'}\n"
+            f"Sent: {created or 'Not supplied'}\n"
+            f"Latest GPS: {lat}, {lon}\n"
+            f"Description: {alert.get('description') or 'Emergency SOS'}"
         )
+        self.status_message = "Emergency selected."
 
-        selected_alert = (
-            self.alerts_by_label.get(selected_label)
-        )
-
-        if not selected_alert:
-            self.status_message = (
-                "Select an available emergency case."
-            )
+    def get_selected_alert(self):
+        if not self.selected_alert:
+            self.status_message = "Select an assigned emergency first."
             return None
+        return self.selected_alert
 
-        return selected_alert
-
-    def update_status(self) -> None:
+    def accept_emergency(self) -> None:
         alert = self.get_selected_alert()
+        if not alert: return
+        self._start_status_update(alert, "ACKNOWLEDGED")
 
-        if not alert:
-            return
+    def start_responding(self) -> None:
+        alert = self.get_selected_alert()
+        if not alert: return
+        self._start_status_update(alert, "RESPONDING")
 
-        emergency_id = alert.get("emergencyId")
+    def _start_status_update(self, alert, status) -> None:
+        self.loading = True
+        self.status_message = "Updating emergency..."
+        threading.Thread(target=self._status_request,
+                         args=(int(alert["emergencyId"]), status), daemon=True).start()
 
-
-        if emergency_id is None:
-            self.status_message = (
-                "The selected case has no emergency ID."
-            )
-            return
-
-        status = self.ids.alert_status.text
-
-        self.status_message = (
-            "Updating emergency case..."
-        )
-
-        threading.Thread(
-            target=self._update_status_request,
-            args=(int(emergency_id), status),
-            daemon=True
-        ).start()
-
-    def _update_status_request(
-        self,
-        emergency_id: int,
-        status: str
-    ) -> None:
+    def _status_request(self, emergency_id, status) -> None:
         try:
-            app = App.get_running_app()
-
-            app.api.update_emergency_status(
-                emergency_id,
-                status
-            )
-
-            Clock.schedule_once(
-                lambda _dt:
-                self._status_updated(status),
-                0
-            )
-
+            App.get_running_app().api.update_emergency_status(emergency_id, status)
+            Clock.schedule_once(lambda _dt: self._status_updated(status), 0)
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error):
-                self._request_failed(message),
-                0
-            )
+            Clock.schedule_once(lambda _dt, m=str(error): self._request_failed(m), 0)
 
-    def _status_updated(self, status: str) -> None:
-        readable_status = (
-            status.replace("_", " ").title()
-        )
-
-        self.status_message = (
-            f"Case updated to {readable_status}."
-        )
-
+    def _status_updated(self, status) -> None:
+        self.loading = False
+        self.status_message = f"Emergency updated to {status.replace('_',' ')}."
         self.refresh_alerts()
 
+    def resolve_emergency(self) -> None:
+        alert = self.get_selected_alert()
+        if not alert: return
+        validity = self.ids.emergency_validity.text
+        review = self.ids.emergency_review.text.strip()
+        if validity not in ("GENUINE_EMERGENCY", "FALSE_EMERGENCY"):
+            self.status_message = "Choose Genuine Emergency or False Emergency."
+            return
+        if len(review) < 10:
+            self.status_message = "Write a short officer review of at least 10 characters."
+            return
+        self.loading = True
+        threading.Thread(target=self._resolve_request,
+                         args=(int(alert["emergencyId"]), validity == "FALSE_EMERGENCY", review),
+                         daemon=True).start()
+
+    def _resolve_request(self, emergency_id, false_alert, review) -> None:
+        try:
+            App.get_running_app().api.resolve_emergency_review(emergency_id, false_alert, review)
+            Clock.schedule_once(lambda _dt: self._resolved(false_alert), 0)
+        except Exception as error:
+            Clock.schedule_once(lambda _dt, m=str(error): self._request_failed(m), 0)
+
+    def _resolved(self, false_alert) -> None:
+        self.loading = False
+        self.selected_alert = None
+        self.ids.emergency_review.text = ""
+        self.ids.emergency_validity.text = "Select emergency validity"
+        self.status_message = "Emergency closed as FALSE." if false_alert else "Emergency closed as GENUINE."
+        self.refresh_alerts()
 
     def open_map(self) -> None:
         alert = self.get_selected_alert()
-
-        if not alert:
+        if not alert: return
+        lat, lon = alert.get("latitude"), alert.get("longitude")
+        if lat is None or lon is None:
+            self.status_message = "No GPS location is available for this emergency."
             return
+        webbrowser.open(f"https://www.google.com/maps/search/?api=1&query={lat},{lon}")
+        self.status_message = "Opening the latest emergency location in Maps."
 
-        latitude = alert.get("latitude")
-        longitude = alert.get("longitude")
-
-        if latitude is None or longitude is None:
-            self.status_message = (
-                "This emergency case has no GPS location."
-            )
-            return
-
-        maps_url = (
-            "https://www.google.com/maps/search/"
-            "?api=1&query="
-            f"{latitude},{longitude}"
-        )
-
-        webbrowser.open(maps_url)
-
-        self.status_message = (
-            "Opening the user location in Maps..."
-        )
-
-    def _request_failed(self, message: str) -> None:
+    def _request_failed(self, message) -> None:
         self.loading = False
         self.status_message = message
-  
 
 
 class OfficerIncidentsScreen(Screen):
-    incidents_text = StringProperty(
-        "Open this page to load available incident cases."
-    )
-
+    incidents_text = StringProperty("Loading incident cases...")
     status_message = StringProperty("")
-    selected_evidence_path = StringProperty("")
-    incident_values = ListProperty([])
     loading = BooleanProperty(False)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.incidents_by_label: dict[
-            str,
-            dict[str, Any]
-        ] = {}
+    selected_incident = None
 
     def on_pre_enter(self, *args) -> None:
         self.refresh_incidents()
 
     def refresh_incidents(self) -> None:
-
         if self.loading:
             return
-
         self.loading = True
-        self.status_message = (
-            "Loading available incident cases..."
-        )
-
-        threading.Thread(
-            target=self._load_incidents,
-            daemon=True
-        ).start()
+        self.status_message = "Loading incident cases..."
+        threading.Thread(target=self._load_incidents, daemon=True).start()
 
     def _load_incidents(self) -> None:
         try:
-            app = App.get_running_app()
-            incidents = (
-                app.api.get_officer_incidents()
-            )
-
-            # Closed cases are no longer active work.
-            available_incidents = [
-                incident
-                for incident in incidents
-                if incident.get("incidentStatus")
-                != "CLOSED"
-            ]
-
-            mapping: dict[
-                str,
-                dict[str, Any]
-            ] = {}
-
-            display_blocks: list[str] = []
-
-            for incident in available_incidents:
-                user = incident.get("user") or {}
-                location = (
-                    incident.get("location") or {}
-                )
-
-                incident_type = (
-                    incident.get("incidentType")
-                    or "Incident"
-                )
-
-                location_name = (
-                    location.get("locationName")
-                    or "Unknown location"
-                )
-
-                label = (
-                    f"{incident_type} — "
-                    f"{location_name}"
-                )
-
-
-                # Keep duplicate labels unique internally.
-                if label in mapping:
-                    label = (
-                        f"{label} "
-                        f"({incident.get('incidentId')})"
-                    )
-
-                mapping[label] = incident
-
-                first_name = (
-                    user.get("firstName") or ""
-                )
-
-                last_name = (
-                    user.get("lastName") or ""
-                )
-
-                reporter_name = (
-                    f"{first_name} {last_name}"
-                ).strip()
-
-                if not reporter_name:
-                    reporter_name = "Unknown user"
-
-                status = str(
-                    incident.get("incidentStatus")
-                    or "REPORTED"
-                ).replace("_", " ").title()
-
-                severity = (
-                    incident.get("severity")
-                    or "MEDIUM"
-                )
-
-                display_blocks.append(
-                    f"{incident_type}\n"
-                    f"Severity: {severity}\n"
-                    f"Status: {status}\n"
-                    f"Location: {location_name}\n"
-                    f"Reported by: {reporter_name}\n"
-                    f"Student/staff number: "
-                    f"{user.get('studentStaffNumber') or 'Not supplied'}\n"
-                    f"Description: "
-                    f"{incident.get('description') or 'No description'}"
-                )
-
-            if display_blocks:
-                display_text = (
-                    "\n\n------------------------------\n\n"
-                ).join(display_blocks)
-            else:
-                display_text = (
-                    "There are currently no "
-                    "available incident cases."
-
-                )
-
-            Clock.schedule_once(
-                lambda _dt:
-                self._incidents_loaded(
-                    display_text,
-                    mapping
-                ),
-                0
-            )
-
+            incidents = App.get_running_app().api.get_officer_incidents()
+            active = [i for i in incidents if i.get("incidentStatus") not in ("RESOLVED", "CLOSED")]
+            Clock.schedule_once(lambda _dt, items=active: self._render_incidents(items), 0)
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error):
-                self._request_failed(message),
-                0
-            )
+            Clock.schedule_once(lambda _dt, m=str(error): self._request_failed(m), 0)
 
-    def _incidents_loaded(
-        self,
-        display_text: str,
-        mapping: dict[str, dict[str, Any]]
-    ) -> None:
+    def _render_incidents(self, incidents) -> None:
         self.loading = False
         self.status_message = ""
-        self.incidents_text = display_text
-        self.incidents_by_label = mapping
-        self.incident_values = list(mapping.keys())
-
-        if self.incident_values:
-            self.ids.available_incident.text = (
-                self.incident_values[0]
+        box = self.ids.incident_case_list
+        box.clear_widgets()
+        if not incidents:
+            self.incidents_text = "No unresolved incident reports."
+            return
+        self.incidents_text = "Tap a case below to select it."
+        for incident in incidents:
+            user = incident.get("user") or {}
+            loc = incident.get("location") or {}
+            officer = incident.get("assignedOfficer") or {}
+            assigned = "Unassigned"
+            if officer:
+                assigned = f"{officer.get('firstName','')} {officer.get('lastName','')}".strip() or "Assigned"
+            text = (
+                f"{incident.get('incidentType') or 'Incident'} — {loc.get('locationName') or 'Unknown location'}\n"
+                f"{incident.get('severity') or 'MEDIUM'} | {str(incident.get('incidentStatus') or 'REPORTED').replace('_',' ')}\n"
+                f"Reported by: {user.get('firstName','')} {user.get('lastName','')}\n"
+                f"Assigned: {assigned}"
             )
-        else:
-            self.ids.available_incident.text = (
-                "No available incident cases"
+            btn = Button(
+                text=text, size_hint_y=None, height=180,
+                halign="left", valign="middle", font_size="16sp",
+                padding=(18, 14), background_normal="",
+                background_color=(1, 1, 1, 1), color=(0.04, 0.15, 0.27, 1)
             )
+            btn.bind(size=lambda widget, _value: setattr(
+                widget, "text_size", (max(widget.width - 36, 1), max(widget.height - 24, 1))
+            ))
+            btn.bind(on_release=lambda _b, item=incident: self.select_incident(item))
+            box.add_widget(btn)
 
-    def get_selected_incident(
-        self
-    ) -> dict[str, Any] | None:
-
-        selected_label = (
-            self.ids.available_incident.text
+    def select_incident(self, incident) -> None:
+        self.selected_incident = incident
+        loc = incident.get("location") or {}
+        officer = incident.get("assignedOfficer") or {}
+        assigned = "Unassigned" if not officer else f"{officer.get('firstName','')} {officer.get('lastName','')}".strip()
+        self.ids.selected_case.text = (
+            f"Selected: {incident.get('incidentType') or 'Incident'} at {loc.get('locationName') or 'Unknown'}\n"
+            f"Status: {str(incident.get('incidentStatus') or 'REPORTED').replace('_',' ')} | Assigned: {assigned}\n"
+            f"{incident.get('description') or 'No description'}"
         )
-
-        incident = (
-            self.incidents_by_label.get(
-                selected_label
-            )
-        )
-
-        if not incident:
-            self.status_message = (
-                "Select an available incident case."
-
-            )
-            return None
-
-        return incident
+        self.status_message = "Case selected."
 
     def update_incident(self) -> None:
-        incident = self.get_selected_incident()
-
-        if not incident:
+        if not self.selected_incident:
+            self.status_message = "Select a case first."
             return
 
-        incident_id = incident.get("incidentId")
+        status = self.ids.officer_incident_status.text
+        incident_id = int(self.selected_incident["incidentId"])
 
-        if incident_id is None:
-            self.status_message = (
-                "The selected case has no incident ID."
-            )
+        if status == "RESOLVED":
+            validity = self.ids.case_validity.text
+            review = self.ids.officer_review.text.strip()
+            if validity not in ("GENUINE", "FALSE_REPORT"):
+                self.status_message = "Choose whether the case was GENUINE or FALSE / FAKE."
+                return
+            if len(review) < 10:
+                self.status_message = "Write a short officer review of at least 10 characters."
+                return
+            self.loading = True
+            threading.Thread(
+                target=self._resolve_request,
+                args=(incident_id, validity, review),
+                daemon=True
+            ).start()
             return
 
-        status = (
-            self.ids.officer_incident_status.text
-        )
-
-        self.status_message = (
-            "Updating incident case..."
-        )
-
+        self.loading = True
         threading.Thread(
-            target=self._update_incident_request,
-            args=(int(incident_id), status),
-            daemon=True
+            target=self._update_request, args=(incident_id, status), daemon=True
         ).start()
 
-    def _update_incident_request(
-        self,
-        incident_id: int,
-        status: str
-    ) -> None:
+    def _update_request(self, incident_id, status) -> None:
         try:
-            app = App.get_running_app()
-
-            app.api.update_incident_status(
-                incident_id,
-                status
-            )
-
-            Clock.schedule_once(
-                lambda _dt:
-                self._incident_updated(status),
-                0
-            )
-
+            App.get_running_app().api.update_incident_status(incident_id, status)
+            Clock.schedule_once(lambda _dt: self._updated(f"Case updated to {status.replace('_',' ')}. You are now assigned to it."), 0)
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error):
+            Clock.schedule_once(lambda _dt, m=str(error): self._request_failed(m), 0)
 
-                self._request_failed(message),
-                0
-            )
-
-    def _incident_updated(
-        self,
-        status: str
-    ) -> None:
-        readable_status = (
-            status.replace("_", " ").title()
-        )
-
-        self.status_message = (
-            f"Case updated to {readable_status}."
-        )
-
-        self.refresh_incidents()
-
-    def choose_evidence(self) -> None:
-        incident = self.get_selected_incident()
-
-        if not incident:
-            return
-
-        incident_status = (
-            incident.get("incidentStatus")
-        )
-
-        if incident_status not in (
-            "RESOLVED",
-            "CLOSED"
-        ):
-            self.status_message = (
-                "Mark this case as RESOLVED "
-                "before adding proof."
-            )
-            return
-
+    def _resolve_request(self, incident_id, validity, review) -> None:
         try:
-            plyer_module = (
-                importlib.import_module("plyer")
-            )
-
-            plyer_module.filechooser.open_file(
-                on_selection=(
-                    self._evidence_selected
-                )
-            )
-
-        except Exception:
-            self.status_message = (
-                "File selection is unavailable "
-                "on this device."
-            )
-
-    def _evidence_selected(
-        self,
-        selection
-    ) -> None:
-        if not selection:
-            return
-
-        self.selected_evidence_path = (
-            selection[0]
-        )
-
-        # Upload immediately after selection.
-        self.upload_evidence()
-
-    def upload_evidence(self) -> None:
-        incident = self.get_selected_incident()
-
-        if not incident:
-            return
-
-        incident_id = incident.get("incidentId")
-
-        if (
-            incident_id is None
-            or not self.selected_evidence_path
-        ):
-            self.status_message = (
-                "Select a solved case and "
-                "its proof file."
-            )
-            return
-
-        self.status_message = (
-            "Uploading proof of solved case..."
-        )
-
-        threading.Thread(
-            target=self._upload_evidence_request,
-            args=(
-                int(incident_id),
-                self.selected_evidence_path
-            ),
-            daemon=True
-        ).start()
-
-    def _upload_evidence_request(
-        self,
-        incident_id: int,
-        path: str
-    ) -> None:
-        try:
-            app = App.get_running_app()
-
-            app.api.upload_incident_evidence(
-                incident_id,
-
-                path
-            )
-
-            Clock.schedule_once(
-                lambda _dt:
-                self._evidence_uploaded(),
-                0
-            )
-
+            App.get_running_app().api.resolve_incident(incident_id, validity, review)
+            Clock.schedule_once(lambda _dt: self._updated("Case resolved and officer review saved."), 0)
         except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error):
-                self._request_failed(message),
-                0
-            )
+            Clock.schedule_once(lambda _dt, m=str(error): self._request_failed(m), 0)
 
-    def _evidence_uploaded(self) -> None:
-        self.selected_evidence_path = ""
-
-        self.status_message = (
-            "Proof of solved case "
-            "uploaded successfully."
-        )
-
-    def _request_failed(
-        self,
-        message: str
-    ) -> None:
+    def _updated(self, message) -> None:
         self.loading = False
         self.status_message = message
+        self.selected_incident = None
+        self.ids.officer_review.text = ""
+        self.refresh_incidents()
+
+    def _request_failed(self, message) -> None:
+        self.loading = False
+        self.status_message = message
+
 
 class OfficerNotificationsScreen(Screen):
     notifications_text = StringProperty("Loading notifications...")
@@ -2110,36 +2462,23 @@ class OfficerNotificationsScreen(Screen):
             for item in items:
                 read_text = "Read" if item.get("read") else "Unread"
                 lines.append(
-                    f"NOTIFICATION #{item.get('notificationId')} - {read_text}\n"
+                    f"{str(item.get('notificationType') or 'Notification').replace('_', ' ').title()} - {read_text}\n"
                     f"{item.get('message')}\n"
                     f"{str(item.get('createdAt', '')).replace('T', ' ')[:16]}"
                 )
+                notification_id = item.get("notificationId")
+                if notification_id is not None and not item.get("read"):
+                    try:
+                        App.get_running_app().api.mark_officer_notification_read(
+                            int(notification_id)
+                        )
+                    except Exception:
+                        pass
             text = "\n\n--------------------\n\n".join(lines)
             Clock.schedule_once(
                 lambda _dt: self._loaded(text or "No notifications found."), 0
 
             )
-        except Exception as error:
-            Clock.schedule_once(
-                lambda _dt, message=str(error): self._failed(message), 0
-            )
-
-    def mark_read(self) -> None:
-        value = self.ids.officer_notification_id.text.strip()
-        if not value.isdigit():
-            self.status_message = "Enter a valid notification number."
-            return
-        threading.Thread(
-            target=self._mark_read_request,
-            args=(int(value),), daemon=True
-        ).start()
-
-    def _mark_read_request(self, notification_id: int) -> None:
-        try:
-            App.get_running_app().api.mark_officer_notification_read(
-                notification_id
-            )
-            Clock.schedule_once(lambda _dt: self.refresh_notifications(), 0)
         except Exception as error:
             Clock.schedule_once(
                 lambda _dt, message=str(error): self._failed(message), 0
@@ -2172,6 +2511,12 @@ class CampusSecurityApp(App):
             "personal_emergency_contacts.json"
         )
         self.contact_store = JsonStore(contacts_file)
+
+        # Officer emergency watcher. It checks for newly assigned SOS cases while
+        # the app process is running and raises a loud/vibrating phone alert.
+        self._officer_emergency_watch = None
+        self._known_emergency_ids = set()
+        self._emergency_poll_busy = False
 
         return Builder.load_file(
             "campus_security.kv"
@@ -2327,6 +2672,7 @@ class CampusSecurityApp(App):
 
             self.root.transition.direction = "left"
             self.root.current = "officer_dashboard"
+            self.start_officer_emergency_watch()
             return
 
         if role_name in {"student", "staff"}:
@@ -2358,6 +2704,91 @@ class CampusSecurityApp(App):
         )
 
         self.root.current = "login"
+
+    def start_officer_emergency_watch(self) -> None:
+        if self._officer_emergency_watch is not None:
+            return
+        # Prime immediately, then check frequently enough for an emergency app.
+        self._poll_officer_emergencies(0)
+        self._officer_emergency_watch = Clock.schedule_interval(
+            self._poll_officer_emergencies, 5
+        )
+
+    def stop_officer_emergency_watch(self) -> None:
+        if self._officer_emergency_watch is not None:
+            self._officer_emergency_watch.cancel()
+            self._officer_emergency_watch = None
+        self._known_emergency_ids.clear()
+        self._emergency_poll_busy = False
+
+    def _poll_officer_emergencies(self, _dt) -> None:
+        if self._emergency_poll_busy or not self.api.session_token:
+            return
+        role_name = self.extract_role_name(self.current_user)
+        if role_name not in {"security officer", "security_officer", "security"}:
+            return
+        self._emergency_poll_busy = True
+        threading.Thread(target=self._fetch_officer_emergencies_for_alert, daemon=True).start()
+
+    def _fetch_officer_emergencies_for_alert(self) -> None:
+        try:
+            alerts = self.api.get_available_emergencies()
+            current_ids = {
+                int(item.get("emergencyId"))
+                for item in alerts
+                if str(item.get("emergencyId", "")).isdigit()
+            }
+            new_ids = current_ids - self._known_emergency_ids
+            first_check = not self._known_emergency_ids
+            self._known_emergency_ids = current_ids
+            Clock.schedule_once(
+                lambda _dt, count=len(current_ids): self._update_emergency_badge(count), 0
+            )
+            # On first login, vibrate for active assignments too so an officer cannot
+            # silently miss an SOS that arrived before the dashboard opened. No popup
+            # is shown, so multiple emergencies never block access to the app.
+            if new_ids or (first_check and current_ids):
+                newest = max(new_ids or current_ids)
+                Clock.schedule_once(
+                    lambda _dt, eid=newest: self.raise_urgent_emergency_alert(eid), 0
+                )
+        except Exception:
+            pass
+        finally:
+            self._emergency_poll_busy = False
+
+    def _update_emergency_badge(self, count: int) -> None:
+        try:
+            dashboard = self.root.get_screen("officer_dashboard")
+            dashboard.active_emergency_count = (
+                f"Assigned Emergencies ({count})" if count else "Assigned Emergencies"
+            )
+        except Exception:
+            pass
+
+    def raise_urgent_emergency_alert(self, emergency_id: int) -> None:
+        # Non-blocking SOS alert: vibrate the officer's Android phone, but never
+        # open a popup. This keeps the app usable when several emergencies arrive.
+        if platform == "android":
+            try:
+                activity = PythonActivity.mActivity
+                vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE)
+                if vibrator is not None:
+                    # Distinct emergency vibration pattern: vibrate/pause/vibrate.
+                    vibrator.vibrate(3000)
+                    Clock.schedule_once(
+                        lambda _dt, v=vibrator: v.vibrate(2000), 3.6
+                    )
+            except Exception as error:
+                print("URGENT SOS VIBRATION ERROR:", repr(error))
+
+        try:
+            dashboard = self.root.get_screen("officer_dashboard")
+            dashboard.status_message = (
+                f"New emergency #{emergency_id} assigned. Open Assigned Emergencies."
+            )
+        except Exception:
+            pass
 
     @staticmethod
     def extract_role_name(
@@ -2408,6 +2839,7 @@ class CampusSecurityApp(App):
         )
 
     def _finish_logout(self, _dt) -> None:
+        self.stop_officer_emergency_watch()
         self.current_user = {}
         self.api.session_token = ""
 
@@ -2450,4 +2882,3 @@ class CampusSecurityApp(App):
 
 if __name__ == "__main__":
     CampusSecurityApp().run()
-

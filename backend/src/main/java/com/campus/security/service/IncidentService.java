@@ -1,238 +1,167 @@
 package com.campus.security.service;
 
-import com.campus.security.model.IncidentEvidence;
 import com.campus.security.model.IncidentReport;
 import com.campus.security.model.Location;
+import com.campus.security.model.SecurityOfficer;
 import com.campus.security.model.User;
-import com.campus.security.repository.IncidentEvidenceRepository;
 import com.campus.security.repository.IncidentReportRepository;
 import com.campus.security.repository.LocationRepository;
-import org.springframework.web.multipart.MultipartFile;
+import com.campus.security.repository.SecurityOfficerRepository;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class IncidentService {
-
     private final IncidentReportRepository incidentRepository;
-    private final IncidentEvidenceRepository evidenceRepository;
     private final LocationRepository locationRepository;
+    private final SecurityOfficerRepository officerRepository;
+    private final NotificationService notificationService;
 
-    // Evidence is stored outside the Java source tree.
-    private final Path uploadDirectory =
-            Paths.get("uploads", "incidents");
-
-    public IncidentService(
-            IncidentReportRepository incidentRepository,
-            IncidentEvidenceRepository evidenceRepository,
-            LocationRepository locationRepository) {
-
+    public IncidentService(IncidentReportRepository incidentRepository,
+                           LocationRepository locationRepository,
+                           SecurityOfficerRepository officerRepository,
+                           NotificationService notificationService) {
         this.incidentRepository = incidentRepository;
-        this.evidenceRepository = evidenceRepository;
         this.locationRepository = locationRepository;
-    }
-
-    public IncidentReport createIncident(
-            User user,
-            Integer locationId,
-            String incidentType,
-            String description,
-            IncidentReport.Severity severity) {
-
-        if (incidentType == null || incidentType.isBlank()) {
-            throw new RuntimeException("Incident type is required.");
-        }
-
-        if (description == null || description.isBlank()) {
-            throw new RuntimeException("Incident description is required.");
-        }
-
-        if (severity == null) {
-            severity = IncidentReport.Severity.MEDIUM;
-        }
-
-        Location location = locationRepository
-                .findById(locationId)
-                .orElseThrow(() ->
-                        new RuntimeException("Location not found."));
-
-        IncidentReport incident = new IncidentReport();
-
-        // The reporting user comes from the authenticated session.
-        incident.setUser(user);
-        incident.setLocation(location);
-        incident.setIncidentType(incidentType.trim());
-        incident.setDescription(description.trim());
-        incident.setSeverity(severity);
-        incident.setIncidentStatus(
-                IncidentReport.IncidentStatus.REPORTED);
-        incident.setReportedAt(LocalDateTime.now());
-
-        return incidentRepository.save(incident);
-    }
-
-    public List<IncidentReport> getUserIncidents(User user) {
-        return incidentRepository.findByUser(user);
-    }
-
-    public List<IncidentReport> getAllIncidents() {
-        return incidentRepository.findAllByOrderByReportedAtDesc();
-    }
-
-    public List<IncidentReport> getIncidentsByStatus(
-            IncidentReport.IncidentStatus status) {
-
-        return incidentRepository.findByIncidentStatus(status);
-    }
-
-    public IncidentReport updateStatus(
-            Integer incidentId,
-            IncidentReport.IncidentStatus status) {
-
-        if (status == null) {
-            throw new RuntimeException("Incident status is required.");
-        }
-
-        IncidentReport incident = getIncident(incidentId);
-
-        // Resolution must go through /resolve so that the
-        // mandatory image-evidence rule is always checked.
-        if (status == IncidentReport.IncidentStatus.RESOLVED) {
-            return resolveIncident(incidentId);
-        }
-
-        incident.setIncidentStatus(status);
-        return incidentRepository.save(incident);
-    }
-
-
-    public IncidentEvidence addEvidence(
-            Integer incidentId,
-            User uploadedBy,
-            MultipartFile file) {
-
-        IncidentReport incident = getIncident(incidentId);
-
-        if (file == null || file.isEmpty()) {
-            throw new RuntimeException("Evidence file is required.");
-        }
-
-        String originalName = file.getOriginalFilename();
-
-        if (originalName == null || originalName.isBlank()) {
-            throw new RuntimeException("Evidence file name is invalid.");
-        }
-
-        // Prevent path traversal by using only the final file name.
-        String safeOriginalName =
-                Paths.get(originalName).getFileName().toString();
-
-        String contentType = file.getContentType();
-
-        if (contentType == null || contentType.isBlank()) {
-            contentType = "application/octet-stream";
-        }
-
-        // Limit individual evidence files to 10 MB.
-        if (file.getSize() > 10 * 1024 * 1024) {
-            throw new RuntimeException(
-                    "Evidence file must not be larger than 10 MB.");
-        }
-
-        try {
-            Files.createDirectories(uploadDirectory);
-
-            String storedName =
-                    UUID.randomUUID() + "_" + safeOriginalName;
-
-            Path destination =
-                    uploadDirectory.resolve(storedName)
-                            .normalize();
-
-            if (!destination.startsWith(
-                    uploadDirectory.toAbsolutePath().normalize())) {
-                throw new RuntimeException("Invalid evidence file path.");
-            }
-
-            Files.copy(
-                    file.getInputStream(),
-                    destination,
-                    StandardCopyOption.REPLACE_EXISTING);
-
-            IncidentEvidence evidence =
-                    new IncidentEvidence();
-
-            evidence.setIncidentReport(incident);
-            evidence.setFileName(safeOriginalName);
-            evidence.setFilePath(destination.toString());
-            evidence.setFileType(contentType);
-            evidence.setUploadedAt(LocalDateTime.now());
-
-            return evidenceRepository.save(evidence);
-
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Could not save evidence file.");
-        }
-    }
-
-    public List<IncidentEvidence> getIncidentEvidence(
-            Integer incidentId) {
-
-        IncidentReport incident = getIncident(incidentId);
-
-        return evidenceRepository
-                .findByIncidentReport(incident);
+        this.officerRepository = officerRepository;
+        this.notificationService = notificationService;
     }
 
     /**
-     * An incident can only be resolved when an IMAGE has been
-     * uploaded as evidence.
+     * Repairs legacy rows created before officer claiming was introduced.
+     * A case cannot truthfully be UNDER_INVESTIGATION unless an officer has
+     * claimed it, so only unassigned legacy rows are returned to REPORTED.
      */
-    public IncidentReport resolveIncident(
-            Integer incidentId) {
+    @PostConstruct
+    public void normalizeLegacyUnassignedIncidents() {
+        List<IncidentReport> legacy = incidentRepository
+                .findByIncidentStatusAndAssignedOfficerIsNull(
+                        IncidentReport.IncidentStatus.UNDER_INVESTIGATION);
 
-        IncidentReport incident = getIncident(incidentId);
+        if (legacy.isEmpty()) return;
 
-        List<IncidentEvidence> evidence =
-                evidenceRepository.findByIncidentReport(incident);
-
-        boolean hasImage = evidence.stream()
-                .anyMatch(this::isImageEvidence);
-
-        if (!hasImage) {
-            throw new RuntimeException(
-                    "Incident cannot be resolved without picture evidence.");
+        LocalDateTime now = LocalDateTime.now();
+        for (IncidentReport incident : legacy) {
+            incident.setIncidentStatus(IncidentReport.IncidentStatus.REPORTED);
+            incident.setLastUpdatedAt(now);
         }
+        incidentRepository.saveAll(legacy);
+        System.out.println("Normalized " + legacy.size()
+                + " legacy unassigned incident(s) from UNDER_INVESTIGATION to REPORTED.");
+    }
 
-        incident.setIncidentStatus(
-                IncidentReport.IncidentStatus.RESOLVED);
+    public List<IncidentReport> getUnresolvedIncidents() {
+        return incidentRepository.findByIncidentStatusNotInOrderByReportedAtDesc(
+                List.of(IncidentReport.IncidentStatus.RESOLVED, IncidentReport.IncidentStatus.CLOSED));
+    }
 
-        incident.setResolvedAt(LocalDateTime.now());
+    public List<IncidentReport> getOfficerCases(User user) {
+        SecurityOfficer officer = officerFor(user);
+        return getUnresolvedIncidents().stream()
+                .filter(i -> i.getAssignedOfficer() == null ||
+                        i.getAssignedOfficer().getOfficerId().equals(officer.getOfficerId()))
+                .filter(i -> i.getLocation() == null || i.getLocation().getCampus() == null ||
+                        officer.getCampus() == null ||
+                        i.getLocation().getCampus().getCampusId().equals(officer.getCampus().getCampusId()))
+                .toList();
+    }
 
+    public IncidentReport createIncident(User user, Integer locationId, String incidentType,
+                                         String description, IncidentReport.Severity severity) {
+        if (incidentType == null || incidentType.isBlank()) throw new RuntimeException("Incident type is required.");
+        if (description == null || description.isBlank()) throw new RuntimeException("Incident description is required.");
+        if (locationId == null) throw new RuntimeException("Incident location is required.");
+        if (severity == null) severity = IncidentReport.Severity.MEDIUM;
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found."));
+        IncidentReport incident = new IncidentReport();
+        String type = incidentType.trim();
+        incident.setTitle(type);
+        incident.setUser(user);
+        incident.setLocation(location);
+        incident.setIncidentType(type);
+        incident.setDescription(description.trim());
+        incident.setSeverity(severity);
+        incident.setIncidentStatus(IncidentReport.IncidentStatus.REPORTED);
+        incident.setReportedAt(LocalDateTime.now());
         return incidentRepository.save(incident);
     }
 
-    private boolean isImageEvidence(IncidentEvidence evidence) {
-        String fileType = evidence.getFileType();
+    public List<IncidentReport> getUserIncidents(User user) { return incidentRepository.findByUser(user); }
+    public List<IncidentReport> getAllIncidents() { return incidentRepository.findAllByOrderByReportedAtDesc(); }
+    public List<IncidentReport> getIncidentsByStatus(IncidentReport.IncidentStatus status) { return incidentRepository.findByIncidentStatus(status); }
 
-        return fileType != null
-                && fileType.toLowerCase()
-                .startsWith("image/");
+    public IncidentReport updateStatus(Integer incidentId, IncidentReport.IncidentStatus status, User currentUser) {
+        if (status == null) throw new RuntimeException("Incident status is required.");
+        if (status == IncidentReport.IncidentStatus.RESOLVED)
+            throw new RuntimeException("Use Resolve Case and complete the officer review before resolving an incident.");
+
+        IncidentReport incident = getIncident(incidentId);
+        SecurityOfficer officer = officerFor(currentUser);
+
+        if (status == IncidentReport.IncidentStatus.UNDER_INVESTIGATION) {
+            if (incident.getAssignedOfficer() != null &&
+                    !incident.getAssignedOfficer().getOfficerId().equals(officer.getOfficerId())) {
+                throw new RuntimeException("This case is already assigned to another security officer.");
+            }
+            if (incident.getAssignedOfficer() == null) {
+                incident.setAssignedOfficer(officer);
+                incident.setAssignedAt(LocalDateTime.now());
+            }
+        } else if (incident.getAssignedOfficer() != null &&
+                !incident.getAssignedOfficer().getOfficerId().equals(officer.getOfficerId())) {
+            throw new RuntimeException("Only the assigned security officer can update this case.");
+        }
+
+        incident.setIncidentStatus(status);
+        incident.setLastUpdatedAt(LocalDateTime.now());
+        IncidentReport saved = incidentRepository.save(incident);
+        notifyReporter(saved, "INCIDENT_STATUS_CHANGED",
+                "Your " + saved.getIncidentType() + " report is now " + friendly(status) + ".");
+        return saved;
     }
 
-    private IncidentReport getIncident(Integer incidentId) {
-        return incidentRepository
-                .findById(incidentId)
-                .orElseThrow(() ->
-                        new RuntimeException("Incident not found."));
+    public IncidentReport resolveIncident(Integer incidentId, User currentUser,
+                                           IncidentReport.ResolutionValidity validity,
+                                           String review) {
+        if (validity == null) throw new RuntimeException("Select whether the report was genuine or false.");
+        if (review == null || review.trim().length() < 10)
+            throw new RuntimeException("Write an officer review of at least 10 characters before resolving the case.");
+
+        IncidentReport incident = getIncident(incidentId);
+        SecurityOfficer officer = officerFor(currentUser);
+        if (incident.getAssignedOfficer() == null)
+            throw new RuntimeException("Take the case by marking it UNDER INVESTIGATION before resolving it.");
+        if (!incident.getAssignedOfficer().getOfficerId().equals(officer.getOfficerId()))
+            throw new RuntimeException("Only the assigned security officer can resolve this case.");
+
+        incident.setResolutionValidity(validity);
+        incident.setOfficerReview(review.trim());
+        incident.setIncidentStatus(IncidentReport.IncidentStatus.RESOLVED);
+        incident.setResolvedAt(LocalDateTime.now());
+        incident.setLastUpdatedAt(LocalDateTime.now());
+        IncidentReport saved = incidentRepository.save(incident);
+        notifyReporter(saved, "INCIDENT_RESOLVED",
+                "Your " + saved.getIncidentType() + " report has been resolved by Campus Security.");
+        return saved;
+    }
+
+    private SecurityOfficer officerFor(User user) {
+        return officerRepository.findByEmployeeNumber(user.getStudentStaffNumber())
+                .orElseThrow(() -> new RuntimeException("No security officer profile is linked to this account."));
+    }
+
+    private void notifyReporter(IncidentReport incident, String type, String message) {
+        if (incident.getUser() != null) notificationService.notifyUser(incident.getUser(), type, message);
+    }
+
+    private String friendly(IncidentReport.IncidentStatus status) {
+        return status.name().replace('_', ' ').toLowerCase();
+    }
+
+    private IncidentReport getIncident(Integer id) {
+        return incidentRepository.findById(id).orElseThrow(() -> new RuntimeException("Incident report not found."));
     }
 }

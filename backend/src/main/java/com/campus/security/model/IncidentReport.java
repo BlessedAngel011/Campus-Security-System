@@ -12,6 +12,9 @@ public class IncidentReport {
     @Column(name = "incident_id")
     private Integer incidentId;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -40,16 +43,23 @@ public class IncidentReport {
     @Column(name = "severity")
     private Severity severity = Severity.MEDIUM;
 
-
     @Enumerated(EnumType.STRING)
     @Column(name = "incident_status")
-    private IncidentStatus incidentStatus = IncidentStatus.REPORTED;
+    private IncidentStatus incidentStatus =
+            IncidentStatus.REPORTED;
 
     @Column(name = "reported_at")
     private LocalDateTime reportedAt;
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resolution_validity")
+    private ResolutionValidity resolutionValidity;
+
+    @Column(name = "officer_review", length = 2000)
+    private String officerReview;
 
     public IncidentReport() {
     }
@@ -60,6 +70,14 @@ public class IncidentReport {
 
     public void setIncidentId(Integer incidentId) {
         this.incidentId = incidentId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public User getUser() {
@@ -76,6 +94,30 @@ public class IncidentReport {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public SecurityOfficer getAssignedOfficer() {
+        return assignedOfficer;
+    }
+
+    public void setAssignedOfficer(SecurityOfficer assignedOfficer) {
+        this.assignedOfficer = assignedOfficer;
+    }
+
+    public LocalDateTime getAssignedAt() {
+        return assignedAt;
+    }
+
+    public void setAssignedAt(LocalDateTime assignedAt) {
+        this.assignedAt = assignedAt;
+    }
+
+    public LocalDateTime getLastUpdatedAt() {
+        return lastUpdatedAt;
+    }
+
+    public void setLastUpdatedAt(LocalDateTime lastUpdatedAt) {
+        this.lastUpdatedAt = lastUpdatedAt;
     }
 
     public String getIncidentType() {
@@ -102,9 +144,6 @@ public class IncidentReport {
         this.severity = severity;
     }
 
-
-
-
     public IncidentStatus getIncidentStatus() {
         return incidentStatus;
     }
@@ -129,28 +168,14 @@ public class IncidentReport {
         this.resolvedAt = resolvedAt;
     }
 
-    public SecurityOfficer getAssignedOfficer() {
-        return assignedOfficer;
-    }
+    public ResolutionValidity getResolutionValidity() { return resolutionValidity; }
+    public void setResolutionValidity(ResolutionValidity resolutionValidity) { this.resolutionValidity = resolutionValidity; }
+    public String getOfficerReview() { return officerReview; }
+    public void setOfficerReview(String officerReview) { this.officerReview = officerReview; }
 
-    public void setAssignedOfficer(SecurityOfficer assignedOfficer) {
-        this.assignedOfficer = assignedOfficer;
-    }
-
-    public LocalDateTime getAssignedAt() {
-        return assignedAt;
-    }
-
-    public void setAssignedAt(LocalDateTime assignedAt) {
-        this.assignedAt = assignedAt;
-    }
-
-    public LocalDateTime getLastUpdatedAt() {
-        return lastUpdatedAt;
-    }
-
-    public void setLastUpdatedAt(LocalDateTime lastUpdatedAt) {
-        this.lastUpdatedAt = lastUpdatedAt;
+    public enum ResolutionValidity {
+        GENUINE,
+        FALSE_REPORT
     }
 
     public enum Severity {

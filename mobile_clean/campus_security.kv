@@ -288,6 +288,17 @@
                     disabled: root.loading
                     on_release: root.submit_login()
 
+                Button:
+                    text: "Forgot Password?"
+                    size_hint_y: None
+                    height: dp(42)
+                    background_normal: ""
+                    background_color: 0,0,0,0
+                    color: 0.025, 0.176, 0.388, 1
+                    on_release:
+                        app.root.transition.direction = "left"
+                        app.root.current = "forgot_password"
+
                 OutlineButton:
                     text: "Register a User"
                     disabled: root.loading
@@ -301,6 +312,128 @@
                 size_hint_y: None
                 height: dp(24)
 
+
+<VerifyEmailScreen>:
+    name: "verify_email"
+    canvas.before:
+        Color:
+            rgba: 0.94,0.96,0.98,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(24)
+        spacing: dp(14)
+        Widget:
+            size_hint_y: .15
+        Label:
+            text: "Verify Your Account"
+            font_size: "26sp"
+            bold: True
+            color: 0.025,0.176,0.388,1
+            size_hint_y: None
+            height: dp(50)
+        Label:
+            text: "Enter the 6-digit OTP sent to your personal Gmail."
+            color: 0.12,0.18,0.26,1
+            text_size: self.width,None
+            size_hint_y: None
+            height: dp(55)
+        FormInput:
+            id: verify_code
+            hint_text: "6-digit OTP"
+            input_filter: "int"
+        Label:
+            text: root.status_message
+            color: 0.65,0.1,0.12,1
+            text_size: self.width,None
+            size_hint_y: None
+            height: dp(55)
+        PrimaryButton:
+            text: "Verify Email"
+            on_release: root.verify()
+        OutlineButton:
+            text: "Resend OTP"
+            on_release: root.resend()
+        Button:
+            text: "Back to Sign In"
+            background_normal: ""
+            background_color: 0,0,0,0
+            color: 0.025,0.176,0.388,1
+            on_release: app.root.current = "login"
+        Widget:
+            size_hint_y: .25
+
+<ForgotPasswordScreen>:
+    name: "forgot_password"
+    canvas.before:
+        Color:
+            rgba: 0.94,0.96,0.98,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    AppScrollView:
+        do_scroll_x: False
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            padding: dp(24)
+            spacing: dp(12)
+            Widget:
+                size_hint_y: None
+                height: dp(50)
+            Label:
+                text: "Reset Password"
+                font_size: "26sp"
+                bold: True
+                color: 0.025,0.176,0.388,1
+                size_hint_y: None
+                height: dp(55)
+            Label:
+                text: "Registered personal Gmail"
+                color: 0.12,0.18,0.26,1
+                size_hint_y: None
+                height: dp(24)
+            FormInput:
+                id: reset_email
+                hint_text: "name@gmail.com"
+            PrimaryButton:
+                text: "Send Reset OTP"
+                on_release: root.send_code()
+            Label:
+                text: "OTP code"
+                color: 0.12,0.18,0.26,1
+                size_hint_y: None
+                height: dp(24)
+            FormInput:
+                id: reset_code
+                hint_text: "6-digit OTP"
+                input_filter: "int"
+            FormInput:
+                id: reset_password
+                hint_text: "New password"
+                password: True
+            FormInput:
+                id: reset_confirm
+                hint_text: "Confirm new password"
+                password: True
+            Label:
+                text: root.status_message
+                color: 0.65,0.1,0.12,1
+                text_size: self.width,None
+                size_hint_y: None
+                height: dp(70)
+            PrimaryButton:
+                text: "Reset Password"
+                on_release: root.reset()
+            OutlineButton:
+                text: "Back to Sign In"
+                on_release: app.root.current = "login"
+            Widget:
+                size_hint_y: None
+                height: dp(30)
 
 <RegisterScreen>:
     name: "register"
@@ -438,6 +571,30 @@
                     id: register_phone
                     hint_text: "Enter phone number"
                     input_filter: "int"
+
+                Label:
+                    text: "UFH email"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_email
+                    hint_text: "Student: number@ufh.ac.za | Staff: official UFH email"
+
+                Label:
+                    text: "Personal Gmail (OTP & password recovery)"
+                    size_hint_y: None
+                    height: dp(22)
+                    color: 0.17, 0.24, 0.34, 1
+                    halign: "left"
+                    text_size: self.size
+
+                FormInput:
+                    id: register_personal_email
+                    hint_text: "yourname@gmail.com"
 
                 Label:
                     text: "Campus"
@@ -602,7 +759,7 @@
 
                 EmergencyButton:
                     text: root.sos_button_text
-                    disabled: root.sos_loading
+                    disabled: root.sos_loading or root.sos_suspended
                     on_release: root.emergency_button_pressed()
 
                 Label:
@@ -745,12 +902,8 @@
                     text_size: self.size
 
                 DashboardCard:
-                    text: "Set Available and Share GPS"
+                    text: "Go On Duty and Share GPS"
                     on_release: root.set_availability("AVAILABLE")
-
-                DashboardCard:
-                    text: "Set Busy"
-                    on_release: root.set_availability("BUSY")
 
                 DashboardCard:
                     text: "Go Off Duty"
@@ -778,9 +931,8 @@
                     text_size: self.size
 
                 DashboardCard:
-                    text: "Available Emergency Work"
-                    on_release: root.open_alerts()
-
+                    text: root.active_emergency_count
+                    on_release: root.open_feature("Assigned Emergencies")
 
                 DashboardCard:
                     text: "Incident Reports"
@@ -908,349 +1060,290 @@
 
 <OfficerAlertsScreen>:
     name: "officer_alerts"
-
-    canvas.before:
-        Color:
-            rgba: 0.94, 0.96, 0.98, 1
-
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
     BoxLayout:
         orientation: "vertical"
-
+        canvas.before:
+            Color:
+                rgba: 0.94, 0.96, 0.98, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
         BoxLayout:
             size_hint_y: None
             height: dp(68)
             padding: dp(12), dp(8)
-
             canvas.before:
                 Color:
                     rgba: 0.025, 0.176, 0.388, 1
-
                 Rectangle:
                     pos: self.pos
                     size: self.size
-
             Button:
                 text: "<"
                 size_hint_x: None
                 width: dp(48)
-                background_normal: ""
-                background_down: ""
-                background_color: 0, 0, 0, 0
-                color: 1, 1, 1, 1
+                background_color: 0,0,0,0
                 font_size: "25sp"
-
                 on_release:
                     app.root.transition.direction = "right"
                     app.root.current = "officer_dashboard"
-
             Label:
-                text: "Available Emergency Work"
+                text: "Assigned Emergencies"
                 bold: True
                 font_size: "19sp"
-                color: 1, 1, 1, 1
-
             Button:
                 text: "Refresh"
                 size_hint_x: None
                 width: dp(78)
                 background_normal: ""
-                background_down: ""
-                background_color: 0.12, 0.34, 0.60, 1
-                color: 1, 1, 1, 1
+                background_color: 0.12,0.34,0.60,1
                 on_release: root.refresh_alerts()
-
         AppScrollView:
             do_scroll_x: False
-            do_scroll_y: True
-            scroll_type: ["bars", "content"]
-            bar_width: dp(7)
-
             BoxLayout:
                 orientation: "vertical"
                 size_hint_y: None
                 height: self.minimum_height
                 padding: dp(18)
                 spacing: dp(12)
-
                 Label:
-                    text: "Active Emergency Cases"
+                    text: "My Active SOS Assignments"
                     size_hint_y: None
-                    height: dp(42)
-                    color: 0.025, 0.176, 0.388, 1
+                    height: dp(40)
                     bold: True
                     font_size: "20sp"
+                    color: 0.025,0.176,0.388,1
                     halign: "left"
-                    valign: "middle"
                     text_size: self.size
-
                 Label:
                     text: root.alerts_text
                     size_hint_y: None
-                    height: self.texture_size[1] + dp(30)
+                    height: self.texture_size[1] + dp(8)
                     text_size: self.width, None
                     halign: "left"
-                    valign: "top"
-                    color: 0.08, 0.16, 0.25, 1
-
+                    color: 0.2,0.28,0.38,1
+                BoxLayout:
+                    id: emergency_case_list
+                    orientation: "vertical"
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: dp(12)
+                Label:
+                    id: selected_emergency
+                    text: "Select an emergency above to view the person's details."
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(32)
+                    text_size: self.width - dp(24), None
+                    padding: dp(12), dp(12)
+                    halign: "left"
+                    valign: "middle"
+                    color: 0.08,0.16,0.25,1
                     canvas.before:
                         Color:
-                            rgba: 1, 1, 1, 1
-
+                            rgba: 1,1,1,1
                         RoundedRectangle:
                             pos: self.pos
                             size: self.size
                             radius: [dp(12)]
-
-                Label:
-                    text: "Select the emergency case"
-                    size_hint_y: None
-                    height: dp(28)
-                    color: 0.12, 0.19, 0.29, 1
-                    bold: True
-                    halign: "left"
-                    text_size: self.size
-
-                Spinner:
-                    id: available_alert
-                    text: "Select emergency case"
-                    values: root.case_values
-                    size_hint_y: None
-                    height: dp(54)
-                    background_normal: ""
-                    background_color: 1, 1, 1, 1
-                    color: 0.025, 0.176, 0.388, 1
-
-                Label:
-                    text: "Select the action"
-                    size_hint_y: None
-                    height: dp(28)
-                    color: 0.12, 0.19, 0.29, 1
-                    bold: True
-                    halign: "left"
-                    text_size: self.size
-
-                Spinner:
-                    id: alert_status
-                    text: "ACKNOWLEDGED"
-                    values: ["ACKNOWLEDGED", "RESPONDING", "RESOLVED"]
-                    size_hint_y: None
-                    height: dp(54)
-                    background_normal: ""
-                    background_color: 1, 1, 1, 1
-                    color: 0.025, 0.176, 0.388, 1
-
                 PrimaryButton:
-                    text: "Update Emergency Status"
+                    text: "Accept Emergency"
                     disabled: root.loading
-                    on_release: root.update_status()
-
+                    on_release: root.accept_emergency()
+                PrimaryButton:
+                    text: "I Am Responding"
+                    disabled: root.loading
+                    on_release: root.start_responding()
                 OutlineButton:
-                    text: "Open User Location in Maps"
+                    text: "View Latest Location in Maps"
                     on_release: root.open_map()
-
+                Label:
+                    text: "Close Emergency"
+                    size_hint_y: None
+                    height: dp(36)
+                    bold: True
+                    font_size: "18sp"
+                    color: 0.025,0.176,0.388,1
+                    halign: "left"
+                    text_size: self.size
+                Label:
+                    text: "Choose whether the SOS was genuine or false, then write the officer review."
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(8)
+                    text_size: self.width, None
+                    halign: "left"
+                    color: 0.25,0.32,0.42,1
+                Spinner:
+                    id: emergency_validity
+                    text: "Select emergency validity"
+                    values: ["GENUINE_EMERGENCY", "FALSE_EMERGENCY"]
+                    size_hint_y: None
+                    height: dp(58)
+                    background_normal: ""
+                    background_color: 1,1,1,1
+                    color: 0.025,0.176,0.388,1
+                TextInput:
+                    id: emergency_review
+                    hint_text: "Officer review: what happened and how the emergency was concluded..."
+                    multiline: True
+                    size_hint_y: None
+                    height: dp(125)
+                    padding: dp(12)
+                PrimaryButton:
+                    text: "Close Emergency & Save Review"
+                    disabled: root.loading
+                    on_release: root.resolve_emergency()
                 Label:
                     text: root.status_message
                     size_hint_y: None
-                    height: dp(55) if self.text else 0
+                    height: self.texture_size[1] + dp(18) if self.text else 0
                     text_size: self.width, None
                     halign: "center"
-                    valign: "middle"
-                    color: (0.1, 0.5, 0.25, 1) if "updated" in self.text.lower() else (0.75, 0.08, 0.14, 1)
-
+                    color: (0.1,0.5,0.25,1) if ("selected" in self.text.lower() or "updated" in self.text.lower() or "closed" in self.text.lower()) else (0.75,0.08,0.14,1)
                 Widget:
                     size_hint_y: None
-                    height: dp(20)
-
+                    height: dp(24)
 
 <OfficerIncidentsScreen>:
     name: "officer_incidents"
-
-    canvas.before:
-        Color:
-            rgba: 0.94, 0.96, 0.98, 1
-
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
     BoxLayout:
         orientation: "vertical"
-
+        canvas.before:
+            Color:
+                rgba: 0.94, 0.96, 0.98, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
         BoxLayout:
             size_hint_y: None
             height: dp(68)
             padding: dp(12), dp(8)
-
             canvas.before:
                 Color:
                     rgba: 0.025, 0.176, 0.388, 1
-
                 Rectangle:
                     pos: self.pos
                     size: self.size
-
             Button:
                 text: "<"
                 size_hint_x: None
                 width: dp(48)
-                background_normal: ""
-                background_down: ""
-                background_color: 0, 0, 0, 0
-                color: 1, 1, 1, 1
+                background_color: 0,0,0,0
                 font_size: "25sp"
-
                 on_release:
                     app.root.transition.direction = "right"
                     app.root.current = "officer_dashboard"
-
             Label:
-                text: "Available Incident Cases"
+                text: "Incident Case Management"
                 bold: True
                 font_size: "19sp"
-                color: 1, 1, 1, 1
-
             Button:
                 text: "Refresh"
                 size_hint_x: None
                 width: dp(78)
                 background_normal: ""
-                background_down: ""
                 background_color: 0.12, 0.34, 0.60, 1
-                color: 1, 1, 1, 1
                 on_release: root.refresh_incidents()
-
         AppScrollView:
             do_scroll_x: False
-            do_scroll_y: True
-            scroll_type: ["bars", "content"]
-            bar_width: dp(8)
-            scroll_wheel_distance: dp(60)
-            GridLayout:
-                cols: 1
+            BoxLayout:
+                orientation: "vertical"
                 size_hint_y: None
                 height: self.minimum_height
-                padding: dp(20)
+                padding: dp(18)
                 spacing: dp(12)
-    
+                Label:
+                    text: "Unresolved Cases"
+                    size_hint_y: None
+                    height: dp(38)
+                    color: 0.025, 0.176, 0.388, 1
+                    bold: True
+                    font_size: "20sp"
+                    halign: "left"
+                    text_size: self.size
+                Label:
+                    text: root.incidents_text
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(8)
+                    color: 0.2,0.28,0.38,1
+                    text_size: self.width, None
+                    halign: "left"
                 BoxLayout:
+                    id: incident_case_list
                     orientation: "vertical"
                     size_hint_y: None
                     height: self.minimum_height
-                    padding: dp(18)
-                    spacing: dp(12)
-    
-                    Label:
-                        text: "Incident Reports Requiring Attention"
-                        size_hint_y: None
-                        height: dp(42)
-                        color: 0.025, 0.176, 0.388, 1
-                        bold: True
-                        font_size: "20sp"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-    
-                    Label:
-                        text: root.incidents_text
-                        size_hint_y: None
-                        height: self.texture_size[1] + dp(30)
-                        text_size: self.width, None
-                        halign: "left"
-                        valign: "top"
-                        color: 0.08, 0.16, 0.25, 1
-    
-                        canvas.before:
-                            Color:
-                                rgba: 1, 1, 1, 1
-    
-                            RoundedRectangle:
-                                pos: self.pos
-                                size: self.size
-                                radius: [dp(12)]
-    
-                    Label:
-                        text: "Select the incident case"
-                        size_hint_y: None
-                        height: dp(28)
-                        color: 0.12, 0.19, 0.29, 1
-                        bold: True
-                        halign: "left"
-                        text_size: self.size
-    
-                    Spinner:
-                        id: available_incident
-                        text: "Select available incident case"
-                        values: root.incident_values
-                        size_hint_y: None
-                        height: dp(54)
-                        background_normal: ""
-                        background_color: 1, 1, 1, 1
-                        color: 0.025, 0.176, 0.388, 1
-    
-                    Label:
-                        text: "Change case status"
-                        size_hint_y: None
-                        height: dp(28)
-                        color: 0.12, 0.19, 0.29, 1
-                        bold: True
-                        halign: "left"
-                        text_size: self.size
-    
-                    Spinner:
-                        id: officer_incident_status
-                        text: "UNDER_INVESTIGATION"
-                        values: ["REPORTED","UNDER_INVESTIGATION", "RESOLVED","CLOSED"]
-                        size_hint_y: None
-                        height: dp(54)
-                        background_normal: ""
-                        background_color: 1, 1, 1, 1
-                        color: 0.025, 0.176, 0.388, 1
-    
-                    PrimaryButton:
-                        text: "Update Incident Status"
-                        disabled: root.loading
-                        on_release: root.update_incident()
-    
-                    Label:
-                        text: "Proof of a solved case"
-                        size_hint_y: None
-                        height: dp(35)
-                        color: 0.025, 0.176, 0.388, 1
-                        bold: True
-                        font_size: "17sp"
-                        halign: "left"
-                        text_size: self.size
-    
-                    Label:
-                        text: "Mark the selected case as RESOLVED before uploading a photo or document showing that the case was solved."
-                        size_hint_y: None
-                        height: self.texture_size[1] + dp(12)
-                        text_size: self.width, None
-                        color: 0.25, 0.32, 0.42, 1
-                        halign: "left"
-                        valign: "top"
-    
-                    PrimaryButton:
-                        text: "Show Proof of Solved Case"
-                        on_release: root.choose_evidence()
-    
-                    Label:
-                        text: root.status_message
-                        size_hint_y: None
-                        height: dp(60) if self.text else 0
-                        text_size: self.width, None
-                        halign: "center"
-                        valign: "middle"
-                        color: ( 0.1, 0.5, 0.25, 1) if ( "updated" in self.text.lower()or "successfully" in self.text.lower()) else (0.75, 0.08, 0.14, 1)
-    
-                    Widget:
-                        size_hint_y: None
-                        height: dp(20)
-    
+                    spacing: dp(8)
+                Label:
+                    id: selected_case
+                    text: "Select a case above to view and manage it."
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(28)
+                    text_size: self.width, None
+                    halign: "left"
+                    valign: "middle"
+                    color: 0.08,0.16,0.25,1
+                    canvas.before:
+                        Color:
+                            rgba: 1,1,1,1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(12)]
+                Label:
+                    text: "Case status"
+                    size_hint_y: None
+                    height: dp(28)
+                    bold: True
+                    color: 0.12,0.19,0.29,1
+                    halign: "left"
+                    text_size: self.size
+                Spinner:
+                    id: officer_incident_status
+                    text: "UNDER_INVESTIGATION"
+                    values: ["REPORTED", "UNDER_INVESTIGATION", "RESOLVED"]
+                    size_hint_y: None
+                    height: dp(54)
+                    background_normal: ""
+                    background_color: 1,1,1,1
+                    color: 0.025,0.176,0.388,1
+                PrimaryButton:
+                    text: "Save Case Status"
+                    disabled: root.loading
+                    on_release: root.update_incident()
+                Label:
+                    text: "Case classification (required when status is RESOLVED)"
+                    size_hint_y: None
+                    height: dp(32)
+                    bold: True
+                    color: 0.12,0.19,0.29,1
+                    halign: "left"
+                    text_size: self.size
+                Spinner:
+                    id: case_validity
+                    text: "Select case validity"
+                    values: ["GENUINE", "FALSE_REPORT"]
+                    size_hint_y: None
+                    height: dp(54)
+                    background_normal: ""
+                    background_color: 1,1,1,1
+                    color: 0.025,0.176,0.388,1
+                TextInput:
+                    id: officer_review
+                    hint_text: "Officer review: what was found and how the case was concluded..."
+                    multiline: True
+                    size_hint_y: None
+                    height: dp(120)
+                    padding: dp(12)
+                Label:
+                    text: root.status_message
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(18) if self.text else 0
+                    text_size: self.width, None
+                    halign: "center"
+                    color: (0.1,0.5,0.25,1) if ("updated" in self.text.lower() or "resolved" in self.text.lower() or "selected" in self.text.lower()) else (0.75,0.08,0.14,1)
+                Widget:
+                    size_hint_y: None
+                    height: dp(24)
 
 <OfficerNotificationsScreen>:
     name: "officer_notifications"
@@ -1310,22 +1403,6 @@
                 size_hint_y: None
                 height: dp(38) if self.text else 0
                 color: 0.75, 0.08, 0.14, 1
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(52)
-                spacing: dp(8)
-
-                FormInput:
-                    id: officer_notification_id
-                    hint_text: "Notification number"
-                    input_filter: "int"
-
-                PrimaryButton:
-                    text: "Mark as Read"
-                    size_hint_x: 0.45
-                    on_release: root.mark_read()
-
 
 <ReportIncidentScreen>:
     name: "report_incident"
@@ -1699,6 +1776,8 @@
 ScreenManager:
     LoginScreen:
     RegisterScreen:
+    VerifyEmailScreen:
+    ForgotPasswordScreen:
     UserDashboardScreen:
     OfficerDashboardScreen:
     EmergencyScreen:
